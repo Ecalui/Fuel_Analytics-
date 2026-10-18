@@ -667,6 +667,56 @@
         .toast-warning { background: #d97706; }
         .toast-info { background: #2563eb; }
 
+
+        /* ===== NOVO LANÇAMENTO EM 3 PASSOS ===== */
+        .reg-steps { display:flex; align-items:center; gap:10px; margin:0 0 20px; }
+        .reg-dot { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font:700 13px 'Outfit',sans-serif; background:var(--border); color:var(--text-muted); flex:none; transition:all .25s; }
+        .reg-dot.ativo { background:var(--accent); color:#fff; }
+        .reg-dot.feito { background:var(--success); color:#fff; }
+        .reg-lbl { font-size:13px; font-weight:700; color:var(--text-muted); }
+        .reg-lbl.ativo, .reg-lbl.feito { color:var(--text-primary); }
+        .reg-line { flex:1; height:3px; border-radius:2px; background:var(--border); min-width:12px; transition:background .25s; }
+        .reg-line.feito { background:var(--success); }
+        .reg-grid { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:22px; align-items:start; margin-bottom:22px; }
+        .reg-sum { display:flex; align-items:center; gap:12px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:12px; }
+        .reg-sum .tick { width:28px; height:28px; border-radius:50%; background:var(--success); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; flex:none; }
+        .reg-sum small { display:block; font-size:12px; color:var(--text-muted); }
+        .reg-sum b { font-size:14px; }
+        .reg-sum a { margin-left:auto; color:var(--accent); font-weight:700; font-size:13px; cursor:pointer; }
+        .reg-panel { background:var(--bg-card); border:2px solid var(--accent); border-radius:var(--radius); padding:22px; display:none; }
+        .reg-panel.ativo { display:block; animation:tabEnter .3s ease; }
+        .reg-panel h3 { font-family:'Outfit',sans-serif; font-size:19px; margin-bottom:16px; }
+        .reg-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+        .reg-acoes { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; flex-wrap:wrap; }
+        .reg-acoes .btn { min-width:150px; height:48px; }
+        .reg-side { position:sticky; top:16px; }
+        .reg-v-num { font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:700; }
+        .reg-meter { display:flex; height:10px; border-radius:5px; overflow:hidden; margin-top:12px; }
+        .reg-meter div:nth-child(1){ background:var(--success); } .reg-meter div:nth-child(2){ background:#f59e0b; } .reg-meter div:nth-child(3){ background:var(--danger); }
+        .reg-marker { position:relative; height:14px; } .reg-marker i { position:absolute; top:2px; width:3px; height:12px; background:var(--text-primary); transition:left .3s; }
+        .reg-chk { display:flex; gap:10px; align-items:flex-start; font-size:14px; padding:6px 0; }
+        .reg-chk i { margin-top:3px; width:16px; text-align:center; }
+        .reg-chk.ok i { color:var(--success); } .reg-chk.bad i { color:var(--danger); } .reg-chk.wait i { color:var(--text-muted); }
+        .reg-msg { border-radius:10px; padding:12px 14px; font-size:14px; font-weight:700; margin-top:10px; }
+        .reg-msg.ok { background:var(--success-light); color:var(--success); }
+        .reg-msg.warn { background:var(--warning-light); color:var(--warning); }
+        .reg-msg.bad { background:var(--danger-light); color:var(--danger); }
+        .reg-msg.wait { background:var(--bg-card-alt); color:var(--text-muted); font-weight:600; }
+        .reg-tipo { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .reg-tipo div { border:1px solid var(--border); border-radius:10px; padding:13px; font-weight:600; font-size:14px; cursor:pointer; color:var(--text-muted); }
+        .reg-tipo div.sel-ok { border:2px solid var(--success); background:var(--success-light); color:var(--success); font-weight:700; }
+        .reg-tipo div.sel-parc { border:2px solid var(--warning); background:var(--warning-light); color:var(--warning); font-weight:700; }
+        .reg-done { text-align:center; }
+        .reg-done .big { width:64px; height:64px; border-radius:50%; background:var(--success); color:#fff; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 12px; }
+        .reg-done.alerta .big { background:var(--warning); }
+        .menu-acoes { position:fixed; z-index:9000; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.18); padding:6px; min-width:210px; }
+        .menu-acoes div { padding:10px 12px; font-size:13px; font-weight:600; border-radius:6px; cursor:pointer; }
+        .menu-acoes div:hover { background:var(--bg-card-alt); }
+        .menu-acoes div.perigo { color:var(--danger); }
+        .btn-just { background:var(--accent-light); color:var(--accent); border:1px solid var(--accent); border-radius:8px; padding:6px 12px; font:700 12px 'Outfit',sans-serif; cursor:pointer; }
+        .btn-mais { background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--border); border-radius:8px; width:34px; height:32px; cursor:pointer; font-weight:700; }
+        @media (max-width:900px) { .reg-grid { grid-template-columns:1fr; } .reg-side { position:static; } .reg-lbl { display:none; } .reg-acoes { flex-direction:column-reverse; } .reg-acoes .btn { width:100%; } }
+
         /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998;
@@ -1021,6 +1071,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="nav-section">Principal</div>
         <a class="nav-link active" id="nav-dash" onclick="switchTab('dash', this)"><i class="fas fa-gauge-high"></i>Painel Geral</a>
         <a class="nav-link" id="nav-reg" onclick="switchTab('reg', this)"><i class="fas fa-gas-pump"></i>Novo Lançamento</a>
+        <a class="nav-link" id="nav-hist" onclick="switchTab('hist', this)"><i class="fas fa-clock-rotate-left"></i>Histórico</a>
         <a class="nav-link" id="nav-analise" onclick="switchTab('analise', this)"><i class="fas fa-chart-area"></i>Análise de Consumo</a>
 
         <div class="nav-section">Auditoria</div>
@@ -1130,79 +1181,128 @@ document.addEventListener('DOMContentLoaded', function(){
         </div>
     </div>
 
-    <!-- ==================== NOVO LANÇAMENTO ==================== -->
+    <!-- ==================== NOVO LANÇAMENTO (3 passos) ==================== -->
     <div id="tab-reg" class="tab-content">
-        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Lançamentos</div><h1 class="page-title">Novo Lançamento</h1><p class="page-desc">Registe o abastecimento de combustível</p></div><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Combustível</div></div>
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Lançamentos</div><h1 class="page-title">Novo Lançamento</h1><p class="page-desc">Registe o abastecimento em 3 passos rápidos</p></div><div class="page-period-pill"><i class="fas fa-gas-pump"></i><span id="reg-hoje-contador">Combustível</span></div></div>
 
-        <div class="card">
-            <div class="card-title"><i class="fas fa-gas-pump"></i>Dados do Abastecimento</div>
-            <div class="form-grid" style="margin-top:16px">
-                <div>
-                    <label>Data</label>
-                    <input type="date" id="f-data" onchange="calcPreco()">
-                </div>
-                <div>
-                    <label>Hora do Abastecimento</label>
-                    <input type="time" id="f-hora" placeholder="Ex: 08:30">
-                </div>
-                <div>
-                    <label>Viatura</label>
-                    <input list="frota" id="f-placa" placeholder="Ex: LD-74-63-IC" onchange="extrairMarca(); preencherUltimoKM();">
-                    <div class="input-help" id="placa-help"></div>
-                    <div class="ultimo-km-info" id="ultimo-km-banner">
-                        <i class="fas fa-clock-rotate-left"></i>
-                        <span>Último registo: <b id="ultimo-km-val">--</b> km &nbsp;|&nbsp; <span id="ultimo-km-data" style="opacity:0.7"></span></span>
-                    </div>
-                </div>
-                <div>
-                    <label>Marca</label>
-                    <input type="text" id="f-marca" placeholder="Digite ou seleccione a marca" onchange="validarMarca()" style="text-transform: uppercase;">
-                    <div class="input-help" id="marca-help"></div>
-                </div>
-                <div>
-                    <label>Motorista</label>
-                    <input list="equipa" id="f-moto" placeholder="Nome do motorista" onchange="this.value=normalizarMotorista(this.value);validarMotorista()">
-                    <div class="input-help" id="moto-help"></div>
-                </div>
-                <div>
-                    <label>Destino</label>
-                    <input type="text" id="f-destino" list="rotas" placeholder="Ex: Chibia, Namibe..." onchange="this.value=normalizarDestino(this.value)">
-                    <div class="input-help">Ajuda a cruzar consumo com rota</div>
-                </div>
-                <div>
-                    <label>Km Atual</label>
-                    <input type="number" id="f-km" placeholder="0" onchange="validarKm()">
-                    <div class="input-help" id="km-help"></div>
-                </div>
-                <div>
-                    <label>Litros</label>
-                    <input type="number" id="f-litros" placeholder="0" oninput="calcPreco()" onchange="validarLitros()">
-                    <div class="input-help" id="litros-help"></div>
-                </div>
-                <div>
-                    <label>Total AOA</label>
-                    <input type="number" id="f-valor" readonly style="background:var(--bg-card-alt);cursor:default">
-                    <div class="input-help" id="preco-vigente" style="color:var(--text-muted)"></div>
-                </div>
-                <div style="align-self:center">
-                    <label>Tipo de Abastecimento</label>
-                    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);cursor:pointer;" onclick="toggleAbastecimentoCompleto()" id="tipo-abast-box">
-                        <input type="checkbox" id="f-completo" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--success);">
-                        <div>
-                            <div id="tipo-abast-label" style="font-size:14px;font-weight:700;color:var(--success);">✅ Tanque Cheio</div>
-                            <div id="tipo-abast-sub" style="font-size:11px;color:var(--text-muted);">Consumo será calculado</div>
-                        </div>
-                    </div>
-                    <div class="input-help" id="completo-help" style="color:var(--warning)"></div>
-                </div>
-                <div style="align-self:end">
-                    <button class="btn btn-primary" onclick="salvar()" style="width:100%;height:48px" id="btnSalvar">
-                        <i class="fas fa-save"></i>Salvar Registo
-                    </button>
-                </div>
-            </div>
+        <div class="reg-steps" id="reg-steps">
+            <div class="reg-dot ativo" id="reg-dot-1">1</div><span class="reg-lbl ativo" id="reg-lbl-1">Viatura e motorista</span>
+            <div class="reg-line" id="reg-line-1"></div>
+            <div class="reg-dot" id="reg-dot-2">2</div><span class="reg-lbl" id="reg-lbl-2">Percurso</span>
+            <div class="reg-line" id="reg-line-2"></div>
+            <div class="reg-dot" id="reg-dot-3">3</div><span class="reg-lbl" id="reg-lbl-3">Abastecimento</span>
         </div>
 
+        <div class="reg-grid">
+            <div>
+                <div class="reg-sum" id="reg-sum-1" style="display:none"><div class="tick"><i class="fas fa-check"></i></div><div><small>Viatura e motorista</small><b id="reg-sum-1-txt"></b></div><a onclick="regIrPasso(1)">Alterar</a></div>
+                <div class="reg-sum" id="reg-sum-2" style="display:none"><div class="tick"><i class="fas fa-check"></i></div><div><small>Percurso</small><b id="reg-sum-2-txt"></b></div><a onclick="regIrPasso(2)">Alterar</a></div>
+
+                <div class="reg-panel ativo" id="reg-p1">
+                    <h3>1 · Viatura e motorista</h3>
+                    <div class="reg-fields">
+                        <div>
+                            <label>Viatura</label>
+                            <input list="frota" id="f-placa" placeholder="Ex: LD-74-63-IC" onchange="extrairMarca(); preencherUltimoKM();">
+                            <div class="input-help" id="placa-help"></div>
+                            <div class="ultimo-km-info" id="ultimo-km-banner">
+                                <i class="fas fa-clock-rotate-left"></i>
+                                <span>Último registo: <b id="ultimo-km-val">--</b> km &nbsp;|&nbsp; <span id="ultimo-km-data" style="opacity:0.7"></span></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label>Marca</label>
+                            <input type="text" id="f-marca" placeholder="Digite ou seleccione a marca" onchange="validarMarca()" style="text-transform: uppercase;">
+                            <div class="input-help" id="marca-help"></div>
+                        </div>
+                        <div style="grid-column:1/-1">
+                            <label>Motorista</label>
+                            <input list="equipa" id="f-moto" placeholder="Nome do motorista" onchange="this.value=normalizarMotorista(this.value);validarMotorista()">
+                            <div class="input-help" id="moto-help"></div>
+                        </div>
+                    </div>
+                    <div class="reg-acoes"><button class="btn btn-primary" onclick="regContinuar(1)">Continuar <i class="fas fa-arrow-right"></i></button></div>
+                </div>
+
+                <div class="reg-panel" id="reg-p2">
+                    <h3>2 · Percurso</h3>
+                    <div class="reg-fields">
+                        <div><label>Data</label><input type="date" id="f-data" onchange="calcPreco()"></div>
+                        <div><label>Hora do Abastecimento</label><input type="time" id="f-hora"></div>
+                        <div style="grid-column:1/-1">
+                            <label>Destino</label>
+                            <input type="text" id="f-destino" list="rotas" placeholder="Ex: Chibia, Namibe..." onchange="this.value=normalizarDestino(this.value)">
+                            <div class="input-help">Ajuda a cruzar consumo com rota</div>
+                        </div>
+                        <div style="grid-column:1/-1">
+                            <label>Km Atual</label>
+                            <input type="number" id="f-km" inputmode="numeric" placeholder="0" onchange="validarKm()">
+                            <div class="input-help" id="km-help"></div>
+                        </div>
+                    </div>
+                    <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(1)">Voltar</button><button class="btn btn-primary" onclick="regContinuar(2)">Continuar <i class="fas fa-arrow-right"></i></button></div>
+                </div>
+
+                <div class="reg-panel" id="reg-p3">
+                    <h3>3 · Abastecimento</h3>
+                    <div class="reg-fields">
+                        <div>
+                            <label>Litros</label>
+                            <input type="number" id="f-litros" inputmode="decimal" step="any" placeholder="0" oninput="calcPreco()" onchange="validarLitros()">
+                            <div class="input-help" id="litros-help"></div>
+                        </div>
+                        <div>
+                            <label>Total AOA</label>
+                            <input type="number" id="f-valor" readonly style="background:var(--bg-card-alt);cursor:default">
+                            <div class="input-help" id="preco-vigente" style="color:var(--text-muted)"></div>
+                        </div>
+                        <div style="grid-column:1/-1">
+                            <label>Encheu o tanque até ao topo?</label>
+                            <div class="reg-tipo" id="tipo-abast-box">
+                                <div id="reg-tipo-cheio" class="sel-ok" onclick="regSetTipo(true)">Sim, tanque cheio <span style="font-weight:500">· o consumo será calculado</span></div>
+                                <div id="reg-tipo-parc" onclick="regSetTipo(false)">Não, parcial</div>
+                            </div>
+                            <input type="checkbox" id="f-completo" checked style="display:none">
+                            <span id="tipo-abast-label" style="display:none"></span><span id="tipo-abast-sub" style="display:none"></span>
+                            <div class="input-help" id="completo-help" style="color:var(--warning)"></div>
+                        </div>
+                    </div>
+                    <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(2)">Voltar</button><button class="btn btn-primary" onclick="salvar()" id="btnSalvar"><i class="fas fa-save"></i> Guardar Registo</button></div>
+                </div>
+
+                <div class="card reg-done" id="reg-done" style="display:none"></div>
+            </div>
+
+            <aside class="reg-side">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:14px"><i class="fas fa-shield-halved"></i>Verificação em tempo real</div>
+                    <div class="sm" style="font-size:13px;color:var(--text-muted)">Consumo previsto</div>
+                    <div class="reg-v-num" id="reg-v-num" style="color:var(--text-muted)">--</div>
+                    <div class="reg-meter" id="reg-meter" style="display:none"><div></div><div></div><div></div></div>
+                    <div class="reg-marker" id="reg-marker" style="display:none"><i id="reg-marker-i" style="left:0"></i></div>
+                    <div id="reg-meter-leg" style="display:none;justify-content:space-between;font-size:12px;color:var(--text-muted)"><span>0</span><span id="reg-meter-meta"></span><span id="reg-meter-max"></span></div>
+                    <div id="reg-v-checks" style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px"></div>
+                    <div class="reg-msg wait" id="reg-v-msg">Preencha os campos para ver a verificação.</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:10px" id="reg-v-user"></div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-calendar-day"></i><span id="reg-ult-titulo">Últimos registos de hoje</span></div>
+                <a style="color:var(--accent);font-weight:700;font-size:13px;cursor:pointer" onclick="switchTab('hist', document.getElementById('nav-hist'))">Ver histórico completo →</a>
+            </div>
+            <div class="table-wrap"><div class="table-scroll"><table>
+                <thead><tr><th>Data</th><th>Hora</th><th>Viatura</th><th>Motorista</th><th>Km</th><th>L/100km</th><th>Status</th></tr></thead>
+                <tbody id="corpoUltimos"></tbody>
+            </table></div></div>
+        </div>
+    </div>
+
+    <!-- ==================== HISTÓRICO ==================== -->
+    <div id="tab-hist" class="tab-content">
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Lançamentos</div><h1 class="page-title">Histórico de Registos</h1><p class="page-desc">Consulte, justifique e corrija lançamentos</p></div><div class="page-period-pill"><i class="fas fa-clock-rotate-left"></i>Histórico</div></div>
         <div class="card">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-clock-rotate-left"></i>Histórico de Registos</div>
@@ -2753,7 +2853,7 @@ function aplicarPermissoes() {
     // Acoes de editar/apagar - so admin
     var acoesHeader = document.getElementById('acoes-header');
     if (acoesHeader) acoesHeader.style.display = isAdmin ? 'table-cell' : 'none';
-    document.querySelectorAll('.action-btn').forEach(function(b) { b.style.display = isAdmin ? 'inline-block' : 'none'; });
+    document.querySelectorAll('.action-btn, .btn-just, .btn-mais').forEach(function(b) { b.style.display = isAdmin ? 'inline-block' : 'none'; });
 
     // Botao IA - admin, relatorista e chefia
     var btnIA = document.getElementById('ia-btn');
@@ -2764,14 +2864,14 @@ function aplicarPermissoes() {
 
     // Controlo de abas visiveis para chefia
     if (isChefia) {
-        var abasPermitidas = ['nav-dash', 'nav-reg', 'nav-analise', 'nav-relatorios'];
-        var todasAbas = ['nav-dash','nav-reg','nav-analise','nav-invest','nav-relatorios','nav-ia','nav-ceo'];
+        var abasPermitidas = ['nav-dash', 'nav-reg', 'nav-hist', 'nav-analise', 'nav-relatorios'];
+        var todasAbas = ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ia','nav-ceo'];
         todasAbas.forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = abasPermitidas.indexOf(id) >= 0 ? 'flex' : 'none';
         });
     } else {
-        ['nav-dash','nav-reg','nav-analise','nav-invest','nav-relatorios','nav-ia','nav-ceo'].forEach(function(id) {
+        ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ia','nav-ceo'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = 'flex';
         });
@@ -4025,6 +4125,7 @@ function salvar() {
     var isAdmin = usuarioAtual?.perfil === 'admin' || usuarioAtual?.perfil === 'owner';
     var isChefia = usuarioAtual?.perfil === 'chefia';
     if (!isAdmin && !isChefia) { showToast('Sem permissão para registar', 'error'); return; }
+    if (!document.getElementById('f-data').value) { showToast('Indique a data do abastecimento', 'warning'); if (typeof regIrPasso === 'function') regIrPasso(2); return; }
     if (!validarPlaca() || !validarMarca() || !validarMotorista() || !validarKm() || !validarLitros()) return;
     var r = {
         id: gerarUUID(),
@@ -4058,8 +4159,9 @@ function processarSalvar(r) {
     document.getElementById('f-data').valueAsDate = new Date();
     // Reset tipo abastecimento para "Tanque Cheio" por defeito
     var cb = document.getElementById('f-completo');
-    if (cb) { cb.checked = true; toggleAbastecimentoCompleto(); }
+    if (cb) { cb.checked = true; }
     showToast('Registo salvo com sucesso!', 'success');
+    if (typeof regPosGravar === 'function') regPosGravar(r);
 }
 
 // ===== ATUALIZAR TUDO =====
@@ -4068,6 +4170,7 @@ function atualizarTabelas() {
     atualizarDash(); atualizarGeral(); atualizarInvest();
     atualizarDashCharts(); popularSelectsAnalise(); atualizarAnalise();
     popularSelectMarcaRelatorio();
+    if (typeof atualizarUltimosHoje === 'function') atualizarUltimosHoje();
 }
 
 // ===== DASHBOARD STATS =====
@@ -4341,15 +4444,8 @@ function atualizarGeral() {
         if (_ehAdminAtual()) {
             var dbIndex = db.indexOf(a);
             var podeJustificar = !a.justificado && (a.status==='ROUBO'||a.status==='CRITICO'||a.status==='ALTO'||a.status==='PEDREIRA-ROUBO'||a.status==='PEDREIRA-CRITICO');
-            var justBtn = podeJustificar
-                ? '<button class="action-btn" style="background:var(--accent-2-light);color:var(--accent-2)" onclick="abrirModalJust('+dbIndex+')" title="Justificar"><i class="fas fa-file-circle-check"></i></button>'
-                : '';
-            var remJustBtn = a.justificado
-                ? '<button class="action-btn" style="background:var(--warning-light);color:var(--warning)" onclick="removerJustificacao('+dbIndex+')" title="Remover Justificação"><i class="fas fa-rotate-left"></i></button>'
-                : '';
-            acoes = justBtn + remJustBtn +
-                '<button class="action-btn edit" onclick="abrirModalEdicao('+dbIndex+')" title="Editar"><i class="fas fa-edit"></i></button>' +
-                '<button class="action-btn delete" onclick="abrirModalExclusao('+dbIndex+')" title="Excluir"><i class="fas fa-trash"></i></button>';
+            acoes = (podeJustificar ? '<button class="btn-just" onclick="abrirModalJust('+dbIndex+')">Justificar</button> ' : '') +
+                '<button class="btn-mais" aria-label="Mais acções" onclick="abrirMenuAcoes(event,'+dbIndex+')">⋯</button>';
         }
 
         var custoCtx = a.justificado && a.custoContextualizado > 0
@@ -6683,9 +6779,8 @@ function preencherUltimoKM() {
     // Sugestão do último condutor — só preenche se o campo estiver vazio
     if (ultimo.moto && !motoInput.value.trim()) {
         motoInput.value = ultimo.moto;
-        document.getElementById('moto-help').textContent = 'Último condutor desta viatura — altere se necessário';
+        document.getElementById('moto-help').textContent = 'Último condutor desta viatura — confirme ou altere';
         motoInput.style.borderColor = 'var(--accent-2)';
-        setTimeout(function(){ motoInput.style.borderColor = ''; document.getElementById('moto-help').textContent = ''; }, 4000);
     }
 
     // Sugestão da última marca — só preenche se o campo estiver vazio
@@ -7072,6 +7167,237 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
         }).catch(function(e) { console.warn('[SW] registo falhou:', e); });
     });
 }
+
+// ============================================================
+// NOVO LANÇAMENTO EM 3 PASSOS + VERIFICAÇÃO EM TEMPO REAL
+// ============================================================
+var _regPasso = 1;
+function _hojeLocal() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function _agoraHM() { var d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function _fmtDM(iso) { var p = (iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] : (iso || ''); }
+function _fmtDMA(iso) { var p = (iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : (iso || ''); }
+function _regVal(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+function regIrPasso(n) {
+    _regPasso = n;
+    [1, 2, 3].forEach(function (i) {
+        document.getElementById('reg-p' + i).classList.toggle('ativo', i === n);
+        var dot = document.getElementById('reg-dot-' + i), lbl = document.getElementById('reg-lbl-' + i);
+        var feito = i < n, ativo = i === n;
+        dot.className = 'reg-dot' + (feito ? ' feito' : '') + (ativo ? ' ativo' : '');
+        dot.innerHTML = feito ? '<i class="fas fa-check"></i>' : String(i);
+        lbl.className = 'reg-lbl' + (feito ? ' feito' : '') + (ativo ? ' ativo' : '');
+    });
+    [1, 2].forEach(function (i) { document.getElementById('reg-line-' + i).classList.toggle('feito', i < n); });
+    document.getElementById('reg-sum-1').style.display = (n > 1 && n < 4) ? 'flex' : 'none';
+    document.getElementById('reg-sum-2').style.display = (n > 2 && n < 4) ? 'flex' : 'none';
+    if (n !== 4) document.getElementById('reg-done').style.display = 'none';
+    if (n === 2) {
+        if (!_regVal('f-data')) document.getElementById('f-data').value = _hojeLocal();
+        if (!_regVal('f-hora')) document.getElementById('f-hora').value = _agoraHM();
+        if (typeof calcPreco === 'function') calcPreco();
+    }
+    regAtualizarVerificacao();
+    var foco = { 1: 'f-placa', 2: 'f-km', 3: 'f-litros' }[n];
+    if (foco) { var el = document.getElementById(foco); if (el) setTimeout(function () { try { el.focus(); } catch (e) {} }, 60); }
+}
+
+function regContinuar(n) {
+    if (n === 1) {
+        if (!validarPlaca() || !validarMarca() || !validarMotorista()) return;
+        var placa = _regVal('f-placa').toUpperCase().trim();
+        var naFrota = Array.prototype.some.call(document.querySelectorAll('#frota option'), function (o) { return o.value.toUpperCase() === placa; });
+        var jaTem = db.some(function (d) { return d.placa === placa; });
+        if (!naFrota && !jaTem) {
+            document.getElementById('placa-help').textContent = 'Esta viatura não está na frota: será criada como nova. Confirme a matrícula.';
+            if (!window._regAvisoFrota || window._regAvisoFrota !== placa) { window._regAvisoFrota = placa; return; }
+        }
+        document.getElementById('reg-sum-1-txt').textContent = placa + ' · ' + normalizarMarca(_regVal('f-marca')) + ' · ' + normalizarMotorista(_regVal('f-moto'));
+        regIrPasso(2);
+    } else if (n === 2) {
+        if (!_regVal('f-data')) { showToast('Indique a data do abastecimento', 'warning'); return; }
+        if (!validarKm()) return;
+        var c = _regContexto();
+        if (c.erroKm) { document.getElementById('km-help').textContent = c.erroKm; document.getElementById('f-km').classList.add('error'); return; }
+        document.getElementById('reg-sum-2-txt').textContent = _fmtDMA(c.data) + ' · ' + (c.hora || '--:--') + ' · ' + (c.destino || 'sem destino') + ' · ' + c.km.toLocaleString() + ' km';
+        regIrPasso(3);
+    }
+}
+
+function regSetTipo(cheio) {
+    document.getElementById('f-completo').checked = !!cheio;
+    document.getElementById('reg-tipo-cheio').className = cheio ? 'sel-ok' : '';
+    document.getElementById('reg-tipo-parc').className = cheio ? '' : 'sel-parc';
+    document.getElementById('completo-help').textContent = cheio ? '' : 'O consumo será reconciliado no próximo abastecimento completo';
+    regAtualizarVerificacao();
+}
+
+// Lê o formulário e cruza com os registos existentes da viatura (sem gravar nada)
+function _regContexto() {
+    var c = {
+        placa: _regVal('f-placa').toUpperCase().trim(), data: _regVal('f-data'), hora: _regVal('f-hora'),
+        km: Number(_regVal('f-km')) || 0, litros: Number(_regVal('f-litros')) || 0,
+        completo: document.getElementById('f-completo').checked, marca: normalizarMarca(_regVal('f-marca')),
+        destino: normalizarDestino(_regVal('f-destino')), moto: _regVal('f-moto').trim(),
+        prev: null, next: null, regs: [], erroKm: '', avisoKm: '', erroOrdem: false, dist: 0, l100: null, cls: null
+    };
+    if (!c.placa || !c.data) return c;
+    var probe = { ts: new Date(c.data).getTime(), hora: c.hora };
+    c.regs = db.filter(function (d) { return d.placa === c.placa; }).sort(function (a, b) { return _cmpCrono(a, b); });
+    c.regs.forEach(function (r) { if (_cmpCrono(r, probe) < 0) c.prev = r; else if (!c.next && _cmpCrono(r, probe) > 0) c.next = r; });
+    if (c.regs.length && c.data < c.regs[0].data) c.erroOrdem = true;
+    if (c.km > 0 && c.prev && c.km <= c.prev.km) c.erroKm = 'Km deve ser superior a ' + c.prev.km.toLocaleString() + ' (registo de ' + _fmtDM(c.prev.data) + ')';
+    if (c.km > 0 && c.next && c.km >= c.next.km) c.avisoKm = 'Há um registo posterior (' + _fmtDM(c.next.data) + ') com ' + c.next.km.toLocaleString() + ' km';
+    if (c.prev && c.km > c.prev.km) c.dist = c.km - c.prev.km;
+    if (c.completo && c.dist > 0 && c.litros > 0) {
+        c.l100 = (c.litros * 100) / c.dist;
+        c.cls = classificarConsumo(c.l100.toFixed(2), c.marca, c.destino);
+    }
+    return c;
+}
+
+function regAtualizarVerificacao() {
+    var box = document.getElementById('reg-v-checks');
+    if (!box || typeof db === 'undefined') return;
+    var c = _regContexto();
+    var itens = [];
+    // 1) Km
+    if (!c.placa || !c.km) itens.push(['wait', 'Km: a aguardar dados']);
+    else if (c.erroKm) itens.push(['bad', c.erroKm]);
+    else if (c.avisoKm) itens.push(['bad', c.avisoKm]);
+    else if (!c.prev) itens.push(['ok', 'Primeiro registo desta viatura']);
+    else itens.push(['ok', 'Km coerente: +' + c.dist.toLocaleString() + ' km desde ' + _fmtDM(c.prev.data)]);
+    // 2) Preço
+    if (c.data) itens.push(['ok', 'Preço oficial da data aplicado (' + precoNaData(c.data) + ' Kz/L)']); else itens.push(['wait', 'Preço: a aguardar a data']);
+    // 3) Ordem
+    if (!c.placa || !c.data) itens.push(['wait', 'Ordem cronológica: a aguardar dados']);
+    else if (c.erroOrdem) itens.push(['bad', 'Data anterior ao primeiro registo desta viatura']);
+    else itens.push(['ok', 'Ordem cronológica respeitada']);
+    // 4) Motorista
+    itens.push(c.moto ? ['ok', 'Motorista associado ao registo'] : ['wait', 'Motorista: a aguardar']);
+    var ic = { ok: 'fa-circle-check', bad: 'fa-circle-xmark', wait: 'fa-circle' };
+    box.innerHTML = itens.map(function (i) { return '<div class="reg-chk ' + i[0] + '"><i class="fas ' + ic[i[0]] + '"></i><span>' + i[1] + '</span></div>'; }).join('');
+    var temErro = itens.some(function (i) { return i[0] === 'bad'; });
+    var tudoOk = itens.every(function (i) { return i[0] === 'ok'; });
+
+    // Consumo + medidor
+    var num = document.getElementById('reg-v-num'), meter = document.getElementById('reg-meter'), mk = document.getElementById('reg-marker'), leg = document.getElementById('reg-meter-leg');
+    var msg = document.getElementById('reg-v-msg'), cor = 'var(--text-muted)';
+    if (c.l100 !== null && c.cls) {
+        var lim = c.cls.lim, st = c.cls.status, max = Math.max(lim.limRoubo * 1.2, c.l100 * 1.05);
+        if (/OK$/.test(st)) cor = 'var(--success)'; else if (/ALTO$/.test(st)) cor = 'var(--warning)'; else cor = 'var(--danger)';
+        num.style.color = cor;
+        num.innerHTML = c.l100.toFixed(1).replace('.', ',') + ' <span style="font-size:14px">L/100 km</span>';
+        var kids = meter.children;
+        kids[0].style.flex = String(lim.limOK); kids[1].style.flex = String(Math.max(0.1, lim.limCritico - lim.limOK)); kids[2].style.flex = String(Math.max(0.1, max - lim.limCritico));
+        meter.style.display = 'flex'; mk.style.display = 'block'; leg.style.display = 'flex';
+        document.getElementById('reg-marker-i').style.left = Math.min(98, (c.l100 / max) * 100) + '%';
+        document.getElementById('reg-meter-meta').textContent = 'OK até ' + lim.limOK.toFixed(0);
+        document.getElementById('reg-meter-max').textContent = max.toFixed(0);
+    } else {
+        num.style.color = cor; num.textContent = '--';
+        meter.style.display = 'none'; mk.style.display = 'none'; leg.style.display = 'none';
+    }
+    var cls = 'wait', txt = 'Preencha os campos para ver a verificação.';
+    if (temErro) { cls = 'bad'; txt = 'Corrija os pontos assinalados antes de guardar.'; }
+    else if (c.km && c.litros && !c.completo) { cls = 'warn'; txt = 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo.'; }
+    else if (c.l100 !== null && c.cls) {
+        var s = c.cls.status;
+        if (/OK$/.test(s)) { cls = 'ok'; txt = 'Tudo coerente. Registo pronto para auditoria.'; }
+        else if (/ALTO$/.test(s)) { cls = 'warn'; txt = 'Consumo acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
+        else { cls = 'bad'; txt = 'Consumo muito acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
+    } else if (c.km && c.litros && tudoOk && !c.prev) { cls = 'ok'; txt = 'Primeiro registo desta viatura: serve de base para os próximos cálculos.'; }
+    msg.className = 'reg-msg ' + cls; msg.textContent = txt;
+    var quem = (typeof _supaEmail !== 'undefined' && _supaEmail) ? _supaEmail : ((typeof usuarioAtual !== 'undefined' && usuarioAtual && usuarioAtual.nome) || '');
+    var u = document.getElementById('reg-v-user'); if (u) u.textContent = quem ? 'Será registado por ' + quem + ' · ' + _fmtDM(_hojeLocal()) + ', ' + _agoraHM() : '';
+}
+
+// Lista curta, sem botões de acção
+function atualizarUltimosHoje() {
+    var b = document.getElementById('corpoUltimos');
+    if (!b || typeof db === 'undefined') return;
+    try {
+        var hoje = _hojeLocal();
+        var todos = db.slice().sort(function (a, b2) { return _cmpCrono(b2, a); });
+        var deHoje = todos.filter(function (x) { return x.data === hoje; });
+        var lista = (deHoje.length ? deHoje : todos).slice(0, 5);
+        var t = document.getElementById('reg-ult-titulo'); if (t) t.textContent = deHoje.length ? 'Últimos registos de hoje' : 'Últimos registos';
+        var ct = document.getElementById('reg-hoje-contador'); if (ct) ct.textContent = 'Hoje: ' + deHoje.length + (deHoje.length === 1 ? ' registo' : ' registos');
+        var html = '';
+        lista.forEach(function (a) {
+            var bc, rc, lb;
+            if (a.justificado) { bc = 'badge-justificado'; rc = 'row-justificado'; lb = 'JUSTIFICADO'; }
+            else if (a.editado) { bc = 'badge-editado'; rc = 'row-editado'; lb = 'EDITADO'; }
+            else { bc = getBadgeClass(a); rc = getRowClass(a); lb = a.status; }
+            html += '<tr class="' + rc + '"><td>' + _fmtDM(a.data) + '</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;">' + (a.hora || '--') + '</td><td><b>' + a.placa + '</b></td><td>' + a.moto + '</td><td style="font-family:JetBrains Mono,monospace">' + a.km.toLocaleString() + '</td><td style="font-family:JetBrains Mono,monospace">' + (a.l100 || '--') + '</td><td><span class="badge ' + bc + '">' + lb + '</span></td></tr>';
+        });
+        b.innerHTML = html || '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><p>Ainda sem registos.</p></div></td></tr>';
+    } catch (e) { console.warn('[ultimos]', e); }
+}
+
+// Ecrã de confirmação depois de gravar
+function regPosGravar(r) {
+    ['placa-help', 'marca-help', 'moto-help', 'km-help', 'litros-help', 'completo-help'].forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = ''; });
+    ['f-placa', 'f-km', 'f-litros', 'f-moto'].forEach(function (id) { var el = document.getElementById(id); if (el) { el.classList.remove('error'); el.style.borderColor = ''; } });
+    var ban = document.getElementById('ultimo-km-banner'); if (ban) ban.classList.remove('visible');
+    var kmIn = document.getElementById('f-km'); if (kmIn) kmIn.removeAttribute('min');
+    regSetTipo(true);
+    window._regAvisoFrota = null;
+    var x = db.find(function (d) { return d.id === r.id; }) || r;
+    var st = x.status || '', parcial = (st === 'PARCIAL'), primeiro = (st === 'PRIMEIRO');
+    var ok = /OK$/.test(st) || parcial || primeiro;
+    var alerta = !ok;
+    var d = document.getElementById('reg-done');
+    var consumo = x.l100 ? Number(x.l100).toFixed(1).replace('.', ',') + ' L/100 km' : '--';
+    var sub = parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
+    var chk = function (t) { return '<div class="reg-chk ok" style="justify-content:center"><i class="fas fa-circle-check"></i><span>' + t + '</span></div>'; };
+    var nHoje = db.filter(function (z) { return z.data === _hojeLocal(); }).length;
+    var quem = (typeof _supaEmail !== 'undefined' && _supaEmail) ? _supaEmail : ((usuarioAtual && usuarioAtual.nome) || '');
+    var btnAnular = (typeof _ehAdminAtual === 'function' && _ehAdminAtual()) ? '<button class="btn btn-ghost" onclick="abrirModalExclusao(db.findIndex(function(z){return z.id===\'' + x.id + '\';}))">Anular este registo</button>' : '';
+    d.className = 'card reg-done' + (alerta ? ' alerta' : '');
+    d.innerHTML = '<div class="big"><i class="fas ' + (alerta ? 'fa-flag' : 'fa-check') + '"></i></div>' +
+        '<h3 style="font-family:Outfit,sans-serif;font-size:24px;margin-bottom:4px">Registo guardado</h3>' +
+        '<div style="font-size:13px;color:var(--text-muted)">' + x.placa + ' · ' + x.km.toLocaleString() + ' km · ' + x.litros + ' L · ' + x.valor.toLocaleString() + ' AOA</div>' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0"><span class="badge ' + getBadgeClass(x) + '" style="font-size:14px;padding:6px 14px">' + (st || 'OK') + '</span><div style="text-align:left"><b style="font-family:JetBrains Mono,monospace">' + consumo + '</b><div style="font-size:12px;color:var(--text-muted)">' + sub + '</div></div></div>' +
+        '<div style="border-top:1px solid var(--border);padding-top:10px;max-width:380px;margin:0 auto"><div style="font-weight:700;margin-bottom:4px">Registo pronto para auditoria</div>' +
+        chk('Km coerente com o registo anterior') + chk('Preço oficial da data aplicado') + chk('Ordem cronológica respeitada') + chk('Registado por ' + quem + ' · ' + _agoraHM()) + '</div>' +
+        '<div class="reg-msg ' + (alerta ? 'warn' : 'ok') + '" style="margin:14px auto;max-width:420px">' + (alerta ? 'Registo guardado e sinalizado para revisão.' : 'Dados limpos tornam a auditoria fiável. Obrigado pelo rigor — já são ' + nHoje + ' hoje.') + '</div>' +
+        '<div class="reg-acoes" style="justify-content:center"><button class="btn btn-primary" onclick="regNovo()">Novo lançamento</button>' + btnAnular + '</div>';
+    regIrPasso(4);
+    d.style.display = 'block';
+}
+function regNovo() { regIrPasso(1); }
+
+// Menu "⋯" do histórico (flutuante, não é cortado pela tabela)
+function fecharMenuAcoes() { var m = document.getElementById('menuAcoes'); if (m) m.remove(); }
+function abrirMenuAcoes(ev, idx) {
+    ev.stopPropagation(); fecharMenuAcoes();
+    var a = db[idx]; if (!a) return;
+    var btn = ev.currentTarget;
+    var m = document.createElement('div'); m.id = 'menuAcoes'; m.className = 'menu-acoes';
+    var h = '<div onclick="fecharMenuAcoes();abrirModalEdicao(' + idx + ')">Editar registo</div>';
+    if (a.justificado) h += '<div onclick="fecharMenuAcoes();removerJustificacao(' + idx + ')">Remover justificação</div>';
+    h += '<div class="perigo" onclick="fecharMenuAcoes();abrirModalExclusao(' + idx + ')">Apagar registo</div>';
+    m.innerHTML = h; document.body.appendChild(m);
+    var r = btn.getBoundingClientRect(), w = m.offsetWidth, hh = m.offsetHeight;
+    var left = Math.min(window.innerWidth - w - 8, Math.max(8, r.right - w));
+    var top = r.bottom + 4; if (top + hh > window.innerHeight - 8) top = Math.max(8, r.top - hh - 4);
+    m.style.left = left + 'px'; m.style.top = top + 'px';
+}
+document.addEventListener('click', fecharMenuAcoes);
+window.addEventListener('scroll', fecharMenuAcoes, true);
+
+(function regInit() {
+    ['f-data', 'f-hora', 'f-placa', 'f-marca', 'f-moto', 'f-destino', 'f-km', 'f-litros'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { el.addEventListener('input', regAtualizarVerificacao); el.addEventListener('change', regAtualizarVerificacao); }
+    });
+    var m = document.getElementById('f-moto');
+    if (m) m.addEventListener('input', function () { this.style.borderColor = ''; var h = document.getElementById('moto-help'); if (h) h.textContent = ''; });
+    var d = document.getElementById('f-data'); if (d && !d.value) d.value = _hojeLocal();
+    try { regAtualizarVerificacao(); atualizarUltimosHoje(); } catch (e) {}
+})();
+
 </script>
 </body>
 </html>
