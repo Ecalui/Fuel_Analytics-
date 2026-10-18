@@ -2657,19 +2657,10 @@ var _AVISO_MS   =  8 * 60 * 1000;   // aviso aos 8 minutos
 var _ecraBloqueado = false;
 
 function resetarTimeout() {
+    // Bloqueio por inactividade DESACTIVADO (decisão: sem risco organizacional que o justifique por agora).
+    // Para reactivar: repor o agendamento de bloquearEcra('inactividade') com _TIMEOUT_MS e o aviso com _AVISO_MS.
     clearTimeout(_timeoutSessao);
     clearTimeout(_timeoutAviso);
-    if (!usuarioAtual || _ecraBloqueado) return;
-
-    // Aviso 2 minutos antes
-    _timeoutAviso = setTimeout(function() {
-        showToast('⏰ Sessão vai bloquear em 2 minutos por inactividade. Mova o rato para continuar.', 'warning', 8000);
-    }, _AVISO_MS);
-
-    // Bloqueio de ecrã (sem logout — dados ficam em memória)
-    _timeoutSessao = setTimeout(function() {
-        bloquearEcra('inactividade');
-    }, _TIMEOUT_MS);
 }
 
 function bloquearEcra(motivo) {
@@ -6040,7 +6031,7 @@ async function _supaRenovarSessaoReal() {
         return false;
     }
     // o servidor recusou o refresh: pede a password outra vez
-    if (typeof bloquearEcra === 'function' && usuarioAtual) bloquearEcra('sessao');
+    if (usuarioAtual && typeof _supaVoltarAoPortao === 'function') _supaVoltarAoPortao('A sessão expirou. Inicie sessão novamente.');
     return false;
 }
 
@@ -6054,6 +6045,7 @@ async function _supaConfirmarSenha(senha) {
 }
 
 function _supaVoltarAoPortao(msg) {
+    _fuelBootFeito = false;
     try { _fuelSplash(false); _fuelOverlay(null); } catch(e) {}
     _supaLimparSessao();
     usuarioAtual = null;
