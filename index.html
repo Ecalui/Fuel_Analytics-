@@ -2889,7 +2889,7 @@ function validarKmUnico(placa, km, data) {
     return true;
 }
 function validarOrdem(placa, data) {
-    var registos = db.filter(function(d) { return d.placa === placa; }).sort(function(a,b){ return a.ts - b.ts; });
+    var registos = db.filter(function(d) { return d.placa === placa; }).sort(function(a,b){ return _cmpCrono(a, b); });
     if (registos.length > 0 && data < registos[0].data) { showToast('Não pode registar data anterior ao primeiro registo!', 'error'); return false; }
     return true;
 }
@@ -3623,7 +3623,7 @@ function popularSelectViaturas() {
 function carregarRegistosViatura() {
     var placa = document.getElementById('gestao-viatura-select').value;
     if (!placa) { document.getElementById('gestao-viatura-painel').style.display = 'none'; return; }
-    registosViaturaFiltrados = db.filter(function(r) { return r.placa === placa; }).sort(function(a,b){ return a.ts - b.ts; });
+    registosViaturaFiltrados = db.filter(function(r) { return r.placa === placa; }).sort(function(a,b){ return _cmpCrono(a, b); });
     registosSelecionados = [];
     document.getElementById('gestao-viatura-painel').style.display = 'block';
     document.getElementById('gestao-filtro-inicio').value = '';
@@ -3647,7 +3647,7 @@ function filtrarRegistosViatura() {
         if (cm && r.l100 && Number(r.l100) < Number(cm)) return false;
         if (cm && !r.l100) return false;
         return true;
-    }).sort(function(a,b){ return a.ts - b.ts; });
+    }).sort(function(a,b){ return _cmpCrono(a, b); });
     registosSelecionados = [];
     atualizarTabelaRegistos();
 }
@@ -3809,7 +3809,7 @@ function manterApenasSelecionados() {
 
 function exportarRegistosViaturaCSV() {
     var placa = document.getElementById('gestao-viatura-select').value;
-    var registos = db.filter(function(r) { return r.placa === placa; }).sort(function(a,b){ return a.ts - b.ts; });
+    var registos = db.filter(function(r) { return r.placa === placa; }).sort(function(a,b){ return _cmpCrono(a, b); });
     if (registos.length === 0) { showToast('Sem registos', 'warning'); return; }
     var csv = 'Data,KM,Litros,Consumo,Status,Prejuízo\n';
     registos.forEach(function(r) { csv += r.data + ',' + r.km + ',' + r.litros + ',' + (r.l100 || 'N/A') + ',' + r.status + ',' + (r.perdaAOA || 0) + '\n'; });
@@ -3898,10 +3898,15 @@ function confirmarExclusao() {
 }
 
 // ===== RECALCULAR =====
+// ===== ORDEM CRONOLÓGICA: data e, no mesmo dia, hora =====
+// (ts só guarda a data; sem isto dois abastecimentos no mesmo dia ficavam pela ordem em que foram lançados)
+function _horaMin(r) { var m = /^(\d{1,2}):(\d{2})/.exec((r && r.hora) || ''); return m ? (+m[1]) * 60 + (+m[2]) : -1; }
+function _cmpCrono(a, b) { return (a.ts - b.ts) || (_horaMin(a) - _horaMin(b)); }
+
 function recalcularViaturaCompleta(placa) {
     var rv = [];
     for (var i = 0; i < db.length; i++) { if (db[i].placa === placa) rv.push({ index: i, r: JSON.parse(JSON.stringify(db[i])) }); }
-    rv.sort(function(a,b){ return a.r.ts - b.r.ts; });
+    rv.sort(function(a,b){ return _cmpCrono(a.r, b.r); });
 
     // === RECONCILIAÇÃO DE ABASTECIMENTOS PARCIAIS ===
     // Lógica: quando um registo é PARCIAL, acumula litros+dist no seguinte COMPLETO
@@ -4136,7 +4141,7 @@ function atualizarDash() {
         var prejuizoTotal = registosMoto.filter(function(r){ return r.status==='ROUBO'||r.status==='CRITICO'; }).reduce(function(s,r){ return s+(r.perdaAOA||0);},0);
 
         // Calcular tendência — comparar últimas 3 vs anteriores
-        var todos = _dbD.filter(function(r){ return r.moto === nome && Number(r.l100) > 0; }).sort(function(a,b){ return a.ts - b.ts; });
+        var todos = _dbD.filter(function(r){ return r.moto === nome && Number(r.l100) > 0; }).sort(function(a,b){ return _cmpCrono(a, b); });
         var tendencia = 'estavel', tendenciaIcon = 'fas fa-minus', tendenciaTexto = 'Estável';
         if (todos.length >= 4) {
             var metade = Math.floor(todos.length / 2);
@@ -4181,7 +4186,7 @@ function getChartColors() {
 function atualizarDashCharts() {
     var colors = getChartColors();
     var dbFilt = getDashDb();
-    var rc = dbFilt.filter(function(r) { return Number(r.l100) > 0; }).sort(function(a,b){ return a.ts-b.ts; });
+    var rc = dbFilt.filter(function(r) { return Number(r.l100) > 0; }).sort(function(a,b){ return _cmpCrono(a, b); });
 
     // --- Agregação dinâmica: dia / semana / mês conforme volume ---
     var diasUnicos = {};
@@ -4313,7 +4318,7 @@ var _geralPorPagina = 50;
 function atualizarGeral() {
     var b = document.getElementById('corpoGeral');
     var f = (document.getElementById('busca-geral').value || '').toLowerCase();
-    var sorted = db.slice().sort(function(a,b){ return b.ts-a.ts; });
+    var sorted = db.slice().sort(function(a,b){ return _cmpCrono(b, a); });
     var filtrados = f ? sorted.filter(function(a){ return a.placa.toLowerCase().indexOf(f)!==-1 || a.moto.toLowerCase().indexOf(f)!==-1 || (a.criado_por_email||'').toLowerCase().indexOf(f)!==-1; }) : sorted;
     var total = filtrados.length;
     var totalPaginas = Math.max(1, Math.ceil(total / _geralPorPagina));
@@ -4389,7 +4394,7 @@ function exportarListaAbastecimentos() {
     if (!usuarioAtual || (!_ehAdminAtual() && usuarioAtual.perfil !== 'relatorista')) { showToast('Sem permissão para realizar esta acção', 'error'); return; }
     if (db.length === 0) { showToast('Sem dados', 'warning'); return; }
     var csv = 'Data,Hora,Placa,Marca,Motorista,Destino,KM,Litros,Valor AOA,Consumo,Status,Lançado por\n';
-    db.slice().sort(function(a,b){return b.ts-a.ts;}).forEach(function(i) {
+    db.slice().sort(function(a,b){return _cmpCrono(b, a);}).forEach(function(i) {
         csv += i.data+','+(i.hora||'')+','+i.placa+','+(i.marca||'')+','+i.moto+','+(i.destino||'')+','+i.km+','+i.litros+','+i.valor+','+(i.l100||'N/A')+','+i.status+','+(i.criado_por_email||'')+'\n';
     });
     var blob = new Blob([csv],{type:'text/csv'});
@@ -4403,7 +4408,7 @@ function calcularInvestData() {
     // Nota: investData NÃO usa cache porque o período pode mudar independentemente
     var pt = 0, ptCtx = 0;
     var dbInv = getInvDb(); // usa o filtro autónomo da investigação
-    var dados = dbInv.filter(function(a){ return isDesvioReal(a); }).sort(function(a,b){return b.ts-a.ts;});
+    var dados = dbInv.filter(function(a){ return isDesvioReal(a); }).sort(function(a,b){return _cmpCrono(b, a);});
     var dadosCtx = dbInv.filter(function(a){ return a.justificado && a.custoContextualizado > 0; });
     dados.forEach(function(a){ pt += (a.perdaAOA||0); });
     dadosCtx.forEach(function(a){ ptCtx += (a.custoContextualizado||0); });
@@ -4522,7 +4527,7 @@ function atualizarAnalise() {
     var filtered = db.filter(function(r) {
         var match = analiseFiltroTipo==='veiculo'?r.placa===selected:analiseFiltroTipo==='motorista'?r.moto===selected:r.marca===selected;
         return match && (!inicio||r.data>=inicio) && (!fim||r.data<=fim);
-    }).sort(function(a,b){return a.ts-b.ts;});
+    }).sort(function(a,b){return _cmpCrono(a, b);});
     var fc = aplicarFiltroConsumo(filtered);
     // Apenas registos com consumo real calculado (excluir PRIMEIRO e l100 inválido)
     var fcValidos = fc.filter(function(r){ return r.status !== 'PRIMEIRO' && Number(r.l100) > 0; });
@@ -4610,7 +4615,7 @@ function getDadosFiltrados() {
         if (fT==='alertas') return isDesvioReal(item);
         if (fT==='bons') return Number(item.l100)>0&&Number(item.l100)<55;
         return true;
-    }).sort(function(a,b){return a.ts-b.ts;});
+    }).sort(function(a,b){return _cmpCrono(a, b);});
 }
 
 function getTipoRelatorioNome(tipo) {
@@ -4862,7 +4867,7 @@ function gerarRelatorioComAssinaturas() {
         y=painelMetricas(doc,y);
         var motoMap={};
         dados.filter(function(r){return Number(r.l100)>0;}).forEach(function(r){if(!motoMap[r.moto])motoMap[r.moto]={soma:0,n:0,anom:0,prej:0,regs:[]};motoMap[r.moto].soma+=Number(r.l100);motoMap[r.moto].n++;motoMap[r.moto].regs.push({ts:r.ts,l:Number(r.l100)});if((r.status==='ROUBO'||r.status==='CRITICO')&&!r.justificado){motoMap[r.moto].anom++;motoMap[r.moto].prej+=(r.perdaAOA||0);}});
-        var ranking=Object.entries(motoMap).map(function(e){var med=(e[1].soma/e[1].n).toFixed(1);var taxa=((e[1].anom/e[1].n)*100).toFixed(0)+'%';var ro=e[1].regs.sort(function(a,b){return a.ts-b.ts;});var tend='--';if(ro.length>=4){var h=Math.floor(ro.length/2);var m1=ro.slice(0,h).reduce(function(s,x){return s+x.l;},0)/h;var m2=ro.slice(-3).reduce(function(s,x){return s+x.l;},0)/3;if(m2>m1*1.05)tend='A piorar ↑';else if(m2<m1*0.95)tend='A melhorar ↓';else tend='Estável →';}return[e[0],med+' L/100',taxa,tend,e[1].n+' viagens',e[1].prej.toLocaleString()+' AOA'];}).sort(function(a,b){return parseFloat(b[1])-parseFloat(a[1]);});
+        var ranking=Object.entries(motoMap).map(function(e){var med=(e[1].soma/e[1].n).toFixed(1);var taxa=((e[1].anom/e[1].n)*100).toFixed(0)+'%';var ro=e[1].regs.sort(function(a,b){return _cmpCrono(a, b);});var tend='--';if(ro.length>=4){var h=Math.floor(ro.length/2);var m1=ro.slice(0,h).reduce(function(s,x){return s+x.l;},0)/h;var m2=ro.slice(-3).reduce(function(s,x){return s+x.l;},0)/3;if(m2>m1*1.05)tend='A piorar ↑';else if(m2<m1*0.95)tend='A melhorar ↓';else tend='Estável →';}return[e[0],med+' L/100',taxa,tend,e[1].n+' viagens',e[1].prej.toLocaleString()+' AOA'];}).sort(function(a,b){return parseFloat(b[1])-parseFloat(a[1]);});
         y=separador(doc,y,'RANKING COMPLETO DE MOTORISTAS');
         doc.autoTable({startY:y,margin:{left:14,right:14},head:[['#','Motorista','Consumo Médio','Taxa Desvio','Tendência','Viagens','Prejuízo']],body:ranking.map(function(r,i){return[i+1].concat(r);}),headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
         y=doc.lastAutoTable.finalY+10; assinatura(doc,y);
@@ -4926,7 +4931,7 @@ function gerarRelatorioComAssinaturas() {
         y=painelMetricas(doc,y);
         var motoMap={};
         dados.filter(function(r){return Number(r.l100)>0&&r.status!=='PRIMEIRO';}).forEach(function(r){if(!motoMap[r.moto])motoMap[r.moto]={soma:0,n:0,anom:0,prej:0,regs:[]};motoMap[r.moto].soma+=Number(r.l100);motoMap[r.moto].n++;motoMap[r.moto].regs.push({ts:r.ts||0,l:Number(r.l100)});if((r.status==='ROUBO'||r.status==='CRITICO')&&!r.justificado){motoMap[r.moto].anom++;motoMap[r.moto].prej+=(r.perdaAOA||0);}});
-        var ranking=Object.entries(motoMap).filter(function(e){return e[1].n>=2;}).map(function(e){var med=e[1].soma/e[1].n;var freq=(e[1].anom/e[1].n)*100;var ro=e[1].regs.sort(function(a,b){return a.ts-b.ts;});var tendScore=0,tendLabel='Estável →';if(ro.length>=4){var h=Math.floor(ro.length/2);var m1=ro.slice(0,h).reduce(function(s,x){return s+x.l;},0)/h;var m2=ro.slice(-3).reduce(function(s,x){return s+x.l;},0)/3;if(m2>m1*1.05){tendScore=1;tendLabel='A piorar ↑';}else if(m2<m1*0.95){tendScore=-1;tendLabel='A melhorar ↓';}}var sM=Math.min(100,Math.max(0,((med-META)/META)*100));var sF=Math.min(100,freq*1.5);var sT=tendScore>0?15:tendScore<0?-10:0;var score=Math.max(0,Math.min(100,Math.round(sM*0.5+sF*0.35+sT)));return{nome:e[0],med:med.toFixed(1),freq:freq.toFixed(0),tend:tendLabel,score:score,prej:e[1].prej,n:e[1].n,anom:e[1].anom};}).sort(function(a,b){return b.score-a.score;});
+        var ranking=Object.entries(motoMap).filter(function(e){return e[1].n>=2;}).map(function(e){var med=e[1].soma/e[1].n;var freq=(e[1].anom/e[1].n)*100;var ro=e[1].regs.sort(function(a,b){return _cmpCrono(a, b);});var tendScore=0,tendLabel='Estável →';if(ro.length>=4){var h=Math.floor(ro.length/2);var m1=ro.slice(0,h).reduce(function(s,x){return s+x.l;},0)/h;var m2=ro.slice(-3).reduce(function(s,x){return s+x.l;},0)/3;if(m2>m1*1.05){tendScore=1;tendLabel='A piorar ↑';}else if(m2<m1*0.95){tendScore=-1;tendLabel='A melhorar ↓';}}var sM=Math.min(100,Math.max(0,((med-META)/META)*100));var sF=Math.min(100,freq*1.5);var sT=tendScore>0?15:tendScore<0?-10:0;var score=Math.max(0,Math.min(100,Math.round(sM*0.5+sF*0.35+sT)));return{nome:e[0],med:med.toFixed(1),freq:freq.toFixed(0),tend:tendLabel,score:score,prej:e[1].prej,n:e[1].n,anom:e[1].anom};}).sort(function(a,b){return b.score-a.score;});
         y=separador(doc,y,'METODOLOGIA');
         y=paragrafo(doc,y,'Score de risco calculado cruzando: consumo médio vs meta (peso 50%), frequência de desvios confirmados (peso 35%), e tendência recente (peso 15%). Score acima de 60 = risco elevado. Entre 30 e 60 = atenção. Abaixo de 30 = normal.');
         y=separador(doc,y,'RANKING COMPLETO');
@@ -4946,7 +4951,7 @@ function gerarRelatorioComAssinaturas() {
         entries.forEach(function(entry,idx){
             if(idx>0){doc.addPage();y=20;}
             var nome=entry[0],regs=entry[1];
-            var todosRegs=dados.filter(function(r){return r.moto===nome&&Number(r.l100)>0;}).sort(function(a,b){return a.ts-b.ts;});
+            var todosRegs=dados.filter(function(r){return r.moto===nome&&Number(r.l100)>0;}).sort(function(a,b){return _cmpCrono(a, b);});
             var med=(todosRegs.reduce(function(s,r){return s+Number(r.l100);},0)/todosRegs.length).toFixed(1);
             var prej=regs.reduce(function(s,r){return s+(r.perdaAOA||0);},0);
             var justif=dados.filter(function(r){return r.moto===nome&&r.justificado;}).length;
@@ -5181,7 +5186,7 @@ function iaConstruirContexto(pergunta) {
         }).join('\n');
 
     // Últimos 50 registos (mais relevantes para perguntas recentes)
-    var recentes = db.slice().sort(function(a,b){return b.ts-a.ts;}).slice(0,50);
+    var recentes = db.slice().sort(function(a,b){return _cmpCrono(b, a);}).slice(0,50);
     var listaRecentes = recentes.map(function(r){
         return r.data + ' ' + (r.hora||'') + ' | ' + r.placa + ' | ' + (r.moto||'') + ' | ' + (r.destino||'') + ' | ' + (r.litros||0) + 'L | ' + (r.valor||0).toLocaleString() + ' AOA | L/100: ' + (r.l100||'--') + ' | Status: ' + (r.status||'OK');
     }).join('\n');
@@ -5659,7 +5664,7 @@ function _invPadroes(){
     validos.forEach(function(r){if(!vtT[r.placa])vtT[r.placa]=[];vtT[r.placa].push({ts:r.ts||0,l:parseFloat(r.l100)});});
     var deg=[];
     Object.entries(vtT).forEach(function(e){
-        var v=e[1].sort(function(a,b){return a.ts-b.ts;});
+        var v=e[1].sort(function(a,b){return _cmpCrono(a, b);});
         if(v.length<4) return;
         var h=Math.floor(v.length/2);
         var m1=v.slice(0,h).reduce(function(s,x){return s+x.l;},0)/h;
@@ -6659,7 +6664,7 @@ function preencherUltimoKM() {
     if (!placa) { banner.classList.remove('visible'); return; }
 
     var registosViatura = db.filter(function(r) { return r.placa === placa; })
-        .sort(function(a,b){ return b.ts - a.ts; });
+        .sort(function(a,b){ return _cmpCrono(b, a); });
 
     if (registosViatura.length === 0) {
         banner.classList.remove('visible');
