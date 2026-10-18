@@ -4171,6 +4171,7 @@ function atualizarTabelas() {
     atualizarDashCharts(); popularSelectsAnalise(); atualizarAnalise();
     popularSelectMarcaRelatorio();
     if (typeof atualizarUltimosHoje === 'function') atualizarUltimosHoje();
+    if (typeof regAtualizarVerificacao === 'function') regAtualizarVerificacao();
 }
 
 // ===== DASHBOARD STATS =====
@@ -6376,7 +6377,7 @@ function _supaRedesenharTudo() {
     try { if (typeof atualizarListasVivas === 'function') atualizarListasVivas(); } catch(e){}
     try {
         var btnMes = document.getElementById('dash-btn-mes');
-        if (typeof setDashPeriod === 'function' && btnMes) setDashPeriod('mes', btnMes);
+        if (typeof setDashPeriod === 'function' && btnMes && !window._fuelRefreshSilencioso) setDashPeriod('mes', btnMes);
     } catch(e){ console.error('[Supabase] Erro ao redesenhar dashboard:', e); }
 }
 
@@ -6681,8 +6682,61 @@ function _fuelTentarFila() {
     if (!usuarioAtual || navigator.onLine === false || _supaSincronizando || _fuelRetomando) return;
     if (_supaContarPendentes() > 0) supaGravarTudo(); else _supaAtualizarIndicador();
 }
-setInterval(_fuelTentarFila, 60000);
+setInterval(_fuelTentarFila, 20000);
+window.addEventListener('focus', function() { _fuelTentarFila(); });
 document.addEventListener('visibilitychange', function() { if (!document.hidden) _fuelTentarFila(); });
+
+
+// ---- Actualização automática com o que outros dispositivos gravaram ----
+// A cada 30 s (e ao voltar ao ecrã) faz 3 pedidos minúsculos: nº de registos, último criado e última edição.
+// Só se a "assinatura" mudou (ou passaram 10 min) é que lê a nuvem toda, em silêncio, sem mexer no período do dashboard.
+// Não corre com o ecrã escondido, sem rede, com alterações por enviar, a sincronizar ou com uma janela (editar/apagar/justificar) aberta.
+var _fuelAssinatura = null, _fuelSondando = false;
+async function _fuelLerAssinatura() {
+    var base = SUPA_URL + '/rest/v1/' + SUPA_TABELA;
+    var rs = await Promise.all([
+        fetch(base + '?select=id&limit=1', { method: 'GET', headers: _supaHeaders({ 'Prefer': 'count=exact' }) }),
+        fetch(base + '?select=criado_em&criado_em=not.is.null&order=criado_em.desc&limit=1', { method: 'GET', headers: _supaHeaders() }),
+        fetch(base + '?select=editado_em&editado_em=not.is.null&order=editado_em.desc&limit=1', { method: 'GET', headers: _supaHeaders() })
+    ]);
+    if (!rs[0].ok) throw new Error('sonda ' + rs[0].status);
+    var cr = rs[0].headers.get('Content-Range') || '';
+    var total = cr.indexOf('/') > -1 ? cr.split('/')[1] : '?';
+    var a = rs[1].ok ? await rs[1].json() : [], b = rs[2].ok ? await rs[2].json() : [];
+    return total + '|' + (a[0] ? a[0].criado_em : '') + '|' + (b[0] ? b[0].editado_em : '');
+}
+function _fuelGuardarAssinatura() { _fuelLerAssinatura().then(function (a) { _fuelAssinatura = a; }).catch(function () {}); }
+function _fuelHaJanelaAberta() {
+    return Array.prototype.some.call(document.querySelectorAll('.modal-overlay'), function (m) { return window.getComputedStyle(m).display !== 'none'; });
+}
+async function _fuelSondar() {
+    if (_fuelSondando || document.hidden || !usuarioAtual || navigator.onLine === false) return;
+    if (_supaSincronizando || _fuelRetomando || _supaContarPendentes() > 0 || _fuelHaJanelaAberta()) return;
+    _fuelSondando = true;
+    try {
+        await _supaTokenValido();
+        var ass = await _fuelLerAssinatura();
+        var antiga = !_supaUltimaSync || (Date.now() - _supaUltimaSync > 600000);
+        var mudou = (_fuelAssinatura !== null && ass !== _fuelAssinatura);
+        if (_fuelAssinatura === null) { _fuelAssinatura = ass; if (!antiga) return; }
+        else if (!mudou && !antiga) return;
+        if (_supaContarPendentes() > 0 || _fuelHaJanelaAberta()) return;
+        window._fuelRefreshSilencioso = true;
+        await carregarDadosNuvem();
+        _fuelAssinatura = ass;
+        if (mudou && typeof showToast === 'function') showToast('Dados actualizados com alterações de outro dispositivo', 'info', 3000);
+    } catch (e) { /* sem rede / nuvem indisponível: tenta na próxima */ }
+    finally { window._fuelRefreshSilencioso = false; _fuelSondando = false; }
+}
+(function () {
+    var _carregarOrig = carregarDadosNuvem;
+    carregarDadosNuvem = async function () { var r = await _carregarOrig.apply(this, arguments); if (_supaEstado === 'ok') _fuelGuardarAssinatura(); return r; };
+    var _gravarOrig = supaGravarTudo;
+    supaGravarTudo = async function () { var ok = await _gravarOrig.apply(this, arguments); if (ok) _fuelGuardarAssinatura(); return ok; };
+})();
+setInterval(_fuelSondar, 30000);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) _fuelSondar(); });
+window.addEventListener('focus', function () { _fuelSondar(); });
 
 // ============================================================================
 // ===== FIM CAMADA SUPABASE ==================================================
@@ -7350,18 +7404,20 @@ function regPosGravar(r) {
     var d = document.getElementById('reg-done');
     var consumo = x.l100 ? Number(x.l100).toFixed(1).replace('.', ',') + ' L/100 km' : '--';
     var sub = parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
-    var chk = function (t) { return '<div class="reg-chk ok" style="justify-content:center"><i class="fas fa-circle-check"></i><span>' + t + '</span></div>'; };
+    var chk = function (t, c) { c = c || 'ok'; return '<div class="reg-chk ' + c + '" style="justify-content:center"><i class="fas ' + (c === 'ok' ? 'fa-circle-check' : 'fa-circle-xmark') + '"></i><span>' + t + '</span></div>'; };
+    var kmTxt = x.kmCascataErro ? ['Km inconsistente com o registo anterior: reveja no histórico', 'bad'] : (primeiro ? ['Primeiro registo desta viatura: base para os próximos cálculos', 'ok'] : ['Km coerente com o registo anterior', 'ok']);
+    var temPontos = !!x.kmCascataErro;
     var nHoje = db.filter(function (z) { return z.data === _hojeLocal(); }).length;
     var quem = (typeof _supaEmail !== 'undefined' && _supaEmail) ? _supaEmail : ((usuarioAtual && usuarioAtual.nome) || '');
     var btnAnular = (typeof _ehAdminAtual === 'function' && _ehAdminAtual()) ? '<button class="btn btn-ghost" onclick="abrirModalExclusao(db.findIndex(function(z){return z.id===\'' + x.id + '\';}))">Anular este registo</button>' : '';
     d.className = 'card reg-done' + (alerta ? ' alerta' : '');
     d.innerHTML = '<div class="big"><i class="fas ' + (alerta ? 'fa-flag' : 'fa-check') + '"></i></div>' +
         '<h3 style="font-family:Outfit,sans-serif;font-size:24px;margin-bottom:4px">Registo guardado</h3>' +
-        '<div style="font-size:13px;color:var(--text-muted)">' + x.placa + ' · ' + x.km.toLocaleString() + ' km · ' + x.litros + ' L · ' + x.valor.toLocaleString() + ' AOA</div>' +
+        '<div style="font-size:13px;color:var(--text-muted)">' + _fmtDMA(x.data) + ' · ' + x.placa + ' · ' + x.km.toLocaleString() + ' km · ' + x.litros + ' L · ' + x.valor.toLocaleString() + ' AOA</div>' +
         '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0"><span class="badge ' + getBadgeClass(x) + '" style="font-size:14px;padding:6px 14px">' + (st || 'OK') + '</span><div style="text-align:left"><b style="font-family:JetBrains Mono,monospace">' + consumo + '</b><div style="font-size:12px;color:var(--text-muted)">' + sub + '</div></div></div>' +
-        '<div style="border-top:1px solid var(--border);padding-top:10px;max-width:380px;margin:0 auto"><div style="font-weight:700;margin-bottom:4px">Registo pronto para auditoria</div>' +
-        chk('Km coerente com o registo anterior') + chk('Preço oficial da data aplicado') + chk('Ordem cronológica respeitada') + chk('Registado por ' + quem + ' · ' + _agoraHM()) + '</div>' +
-        '<div class="reg-msg ' + (alerta ? 'warn' : 'ok') + '" style="margin:14px auto;max-width:420px">' + (alerta ? 'Registo guardado e sinalizado para revisão.' : 'Dados limpos tornam a auditoria fiável. Obrigado pelo rigor — já são ' + nHoje + ' hoje.') + '</div>' +
+        '<div style="border-top:1px solid var(--border);padding-top:10px;max-width:380px;margin:0 auto"><div style="font-weight:700;margin-bottom:4px">' + (temPontos ? 'Registo com pontos a rever' : 'Registo pronto para auditoria') + '</div>' +
+        chk(kmTxt[0], kmTxt[1]) + chk('Preço oficial da data aplicado') + chk('Ordem cronológica respeitada') + chk('Registado por ' + quem + ' · ' + _agoraHM()) + '</div>' +
+        '<div class="reg-msg ' + (alerta ? 'warn' : 'ok') + '" style="margin:14px auto;max-width:420px">' + (alerta ? 'Registo guardado e sinalizado para revisão.' : (temPontos ? 'Registo guardado. Reveja o km no histórico.' : 'Dados limpos tornam a auditoria fiável. Obrigado pelo rigor' + (nHoje > 0 && x.data === _hojeLocal() ? ' — já são ' + nHoje + (nHoje === 1 ? ' registo' : ' registos') + ' hoje.' : '.'))) + '</div>' +
         '<div class="reg-acoes" style="justify-content:center"><button class="btn btn-primary" onclick="regNovo()">Novo lançamento</button>' + btnAnular + '</div>';
     regIrPasso(4);
     d.style.display = 'block';
@@ -7386,6 +7442,24 @@ function abrirMenuAcoes(ev, idx) {
 }
 document.addEventListener('click', fecharMenuAcoes);
 window.addEventListener('scroll', fecharMenuAcoes, true);
+
+// Enter avança: passa ao campo seguinte; no último campo do passo, avança de passo.
+// No passo 3, Enter só leva o foco ao botão "Guardar" (um segundo Enter grava), para não gravar por engano.
+var _regEnterAlvo = null;
+document.addEventListener('keydown', function (e) { _regEnterAlvo = (e.key === 'Enter') ? e.target : null; });
+document.addEventListener('keyup', function (e) {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    var t = e.target, alvo = _regEnterAlvo; _regEnterAlvo = null;
+    if (!t || t !== alvo || t.tagName !== 'INPUT') return;
+    var painel = t.closest ? t.closest('.reg-panel') : null;
+    if (!painel || !painel.classList.contains('ativo')) return;
+    var campos = Array.prototype.filter.call(painel.querySelectorAll('input:not([type=checkbox]):not([readonly])'), function (el) { return el.offsetParent !== null; });
+    var i = campos.indexOf(t);
+    if (i >= 0 && i < campos.length - 1) { campos[i + 1].focus(); return; }
+    if (painel.id === 'reg-p1') regContinuar(1);
+    else if (painel.id === 'reg-p2') regContinuar(2);
+    else if (painel.id === 'reg-p3') { var b = document.getElementById('btnSalvar'); if (b) b.focus(); }
+});
 
 (function regInit() {
     ['f-data', 'f-hora', 'f-placa', 'f-marca', 'f-moto', 'f-destino', 'f-km', 'f-litros'].forEach(function (id) {
