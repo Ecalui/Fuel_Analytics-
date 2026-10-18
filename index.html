@@ -2508,6 +2508,7 @@ function toggleTheme() {
 
 // ===== TOAST =====
 function showToast(message, type, duration) {
+    if (message === null || message === undefined || message === '') return; // sem mensagem, sem aviso em branco
     duration = duration || 3500; type = type || 'info';
     var c = document.getElementById('toast-container');
     var t = document.createElement('div');
@@ -3894,6 +3895,8 @@ function confirmarExclusao() {
 function _horaMin(r) { var m = /^(\d{1,2}):(\d{2})/.exec((r && r.hora) || ''); return m ? (+m[1]) * 60 + (+m[2]) : -1; }
 function _cmpCrono(a, b) { return (a.ts - b.ts) || (_horaMin(a) - _horaMin(b)); }
 
+// Avisos (toasts) do recálculo: silenciados no carregamento/sincronização, activos quando o utilizador grava ou edita
+var _fuelSilenciarAvisos = false;
 function recalcularViaturaCompleta(placa) {
     var rv = [];
     for (var i = 0; i < db.length; i++) { if (db[i].placa === placa) rv.push({ index: i, r: JSON.parse(JSON.stringify(db[i])) }); }
@@ -4008,6 +4011,10 @@ function recalcularViaturaCompleta(placa) {
     var erros = rv.filter(function(x){ return x.r.kmCascataErro; });
     var avisos = rv.filter(function(x){ return x.r.kmCascataAviso; });
     var parciais = rv.filter(function(x){ return x.r.status === 'PARCIAL'; });
+    if (_fuelSilenciarAvisos) {
+        if (erros.length || avisos.length) console.info('[Recalculo] ' + placa + ': ' + erros.length + ' KM invertido, ' + avisos.length + ' salto suspeito, ' + parciais.length + ' parciais');
+        return;
+    }
     if (erros.length > 0) showToast('⚠️ ' + erros.length + ' registo(s) com KM invertido em ' + placa + ' — verifique o histórico', 'error', 6000);
     else if (avisos.length > 0) showToast('⚠️ ' + avisos.length + ' registo(s) com salto suspeito de KM em ' + placa, 'warning', 5000);
     if (parciais.length > 0) showToast('ℹ️ ' + parciais.length + ' abastecimento(s) parcial(is) em ' + placa + ' — consumo reconciliado no registo seguinte', 'info', 4000);
@@ -6264,7 +6271,9 @@ function _supaRedesenharTudo() {
             var placasUnicas = {};
             db.forEach(function(r){ if (r && r.placa) placasUnicas[r.placa] = true; });
             if (typeof cache !== 'undefined') cache = { dashStats: null, investData: null, lastUpdate: null };
-            Object.keys(placasUnicas).forEach(function(placa){ recalcularViaturaCompleta(placa); });
+            _fuelSilenciarAvisos = true; // carregamento: sem uma chuva de avisos por viatura
+            try { Object.keys(placasUnicas).forEach(function(placa){ recalcularViaturaCompleta(placa); }); }
+            finally { _fuelSilenciarAvisos = false; }
         }
     } catch(e){ console.error('[Supabase] Erro ao recalcular:', e); }
     try { if (typeof atualizarTabelas === 'function') atualizarTabelas(); } catch(e){}
