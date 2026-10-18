@@ -6074,15 +6074,8 @@ function _supaLimparRegisto(r) {
 // LER da nuvem -> devolve array de registos (ou lança erro)
 async function supaLer() {
     await _supaTokenValido();
-    var todos = [];
-    var passo = 1000, offset = 0;
-    while (true) {
-        var url = SUPA_URL + '/rest/v1/' + SUPA_TABELA
-                + '?select=*&order=ts.asc'
-                + '&limit=' + passo + '&offset=' + offset;
-        var resp = await fetch(url, { method: 'GET', headers: _supaHeaders() });
-        if (!resp.ok) throw new Error('Erro a ler nuvem: ' + resp.status + ' ' + await resp.text());
-        var lote = await resp.json();
+    var passo = 1000;
+    function conv(lote) {
         // Converter campos numéricos para número (a nuvem pode devolvê-los como texto)
         lote.forEach(function(r) {
             if (r.ts !== null && r.ts !== undefined) r.ts = Number(r.ts);
@@ -6090,11 +6083,34 @@ async function supaLer() {
             if (r.litros !== null && r.litros !== undefined) r.litros = Number(r.litros);
             if (r.valor !== null && r.valor !== undefined) r.valor = Number(r.valor);
         });
-        todos = todos.concat(lote);
-        if (lote.length < passo) break; // último lote
-        offset += passo;
+        return lote;
     }
-    return todos;
+    async function pagina(off, comTotal) {
+        var url = SUPA_URL + '/rest/v1/' + SUPA_TABELA + '?select=*&order=ts.asc,id.asc&limit=' + passo + '&offset=' + off;
+        var resp = await fetch(url, { method: 'GET', headers: _supaHeaders(comTotal ? { 'Prefer': 'count=exact' } : null) });
+        if (!resp.ok) throw new Error('Erro a ler nuvem: ' + resp.status + ' ' + await resp.text());
+        var total = null, cr = resp.headers.get('Content-Range');           // ex.: "0-999/5956"
+        if (comTotal && cr && cr.indexOf('/') > -1) { var t = parseInt(cr.split('/')[1], 10); if (!isNaN(t)) total = t; }
+        return { lote: conv(await resp.json()), total: total };
+    }
+    var p0 = await pagina(0, true);
+    var todos = p0.lote, off = passo, ultimo = p0.lote.length;
+    if (ultimo === passo && p0.total !== null) {
+        // total conhecido: pede as restantes páginas todas ao mesmo tempo
+        var offs = []; for (var o = passo; o < p0.total; o += passo) offs.push(o);
+        var res = await Promise.all(offs.map(function(o) { return pagina(o, false); }));
+        res.forEach(function(r) { todos = todos.concat(r.lote); });
+        if (offs.length) { off = offs[offs.length - 1] + passo; ultimo = res[res.length - 1].lote.length; }
+    }
+    // sem total (cabeçalho não exposto) ou registos novos entretanto: continua em sequência até ao fim
+    while (ultimo === passo) {
+        var r2 = await pagina(off, false);
+        todos = todos.concat(r2.lote); ultimo = r2.lote.length; off += passo;
+    }
+    // sem duplicados (se alguém gravou a meio da leitura)
+    var vistos = {}, unicos = [];
+    todos.forEach(function(r) { if (r.id == null || !vistos[r.id]) { if (r.id != null) vistos[r.id] = 1; unicos.push(r); } });
+    return unicos;
 }
 
 // ESCREVER na nuvem: SINCRONIZAÇÃO INCREMENTAL POR DIFF (Opção B)
@@ -6276,6 +6292,7 @@ async function carregarDadosNuvem() {
             if (esp.ultimaSync) _supaUltimaSync = esp.ultimaSync;
             _carregarAuxiliaresLocais();
             _supaRedesenharTudo();
+            console.log('[Offline] Espelho no ecrã aos ' + Math.round(performance.now()) + ' ms (' + db.length + ' registos)');
         }
     }
     _supaAtualizarIndicador();
@@ -6285,6 +6302,7 @@ async function carregarDadosNuvem() {
     if (navigator.onLine === false) { _supaAtualizarIndicador(); return; }
 
     try {
+        var _tL = performance.now();
         await _supaTokenValido();
         var espera = 0; while (_supaSincronizando && espera++ < 100) await _fuelEsperar(200);
 
@@ -6297,7 +6315,7 @@ async function carregarDadosNuvem() {
 
         // 3) LER a nuvem (repete se o utilizador gravou algo durante a leitura)
         var daNuvem, v0, tent = 0;
-        do { v0 = _fuelEscritas; daNuvem = await supaLer(); tent++; } while (_fuelEscritas !== v0 && tent < 3);
+        do { v0 = _fuelEscritas; var _tR = performance.now(); daNuvem = await supaLer(); tent++; console.log('[Supabase] Leitura da nuvem: ' + Math.round(performance.now() - _tR) + ' ms'); } while (_fuelEscritas !== v0 && tent < 3);
         if (_fuelEscritas !== v0) {
             // continua a haver edições em curso: não substituir; a fila trata delas e a próxima leitura actualiza
             console.warn('[Offline] Edições durante a leitura; a manter o db local.');
@@ -6319,7 +6337,7 @@ async function carregarDadosNuvem() {
             _supaEstado = 'ok'; _supaAvisouFalha = false;
             _supaRedesenharTudo();
             _espelhoGravar();                  // espelho = nuvem
-            console.log('[Supabase] Carregados ' + db.length + ' registos da nuvem.');
+            console.log('[Supabase] Carregados ' + db.length + ' registos da nuvem aos ' + Math.round(performance.now()) + ' ms.');
         }
         _fuelOverlay(null);
         _supaAtualizarIndicador();
