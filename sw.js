@@ -2,7 +2,7 @@
 // Guarda a "casca" da app (HTML, manifesto, ícones) e as bibliotecas externas para abrir sem rede.
 // NUNCA intercepta o Supabase: dados e autenticação passam sempre direto pela rede (nada disso fica em cache aqui).
 // Para publicar uma versão nova, mudar VERSAO.
-const VERSAO = 'fuel-v20-2';
+const VERSAO = 'fuel-v20-3';
 const CASCA = VERSAO + '-casca';
 const EXTERNOS = VERSAO + '-externos';
 
