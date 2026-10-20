@@ -6448,7 +6448,14 @@ async function carregarDadosNuvem() {
 
         // 2) PENDÊNCIAS primeiro: nunca substituir o db local sem enviar o que ainda não foi
         var jaSincronizouAntes = Object.keys(_supaLerSnapshot()).length > 0;
-        if (temEspelho && jaSincronizouAntes && _supaContarPendentes() > 0) {
+        var _pendIni = _supaContarPendentes();
+        if (temEspelho && jaSincronizouAntes && _pendIni > _FUEL_LIMITE_ENVIO) {
+            console.warn('[Supabase] Envio suspenso no arranque. ' + _fuelDiagnosticoDiferencas());
+            _fuelOverlay(null); _supaAtualizarIndicador();
+            if (typeof showToast === 'function') showToast('Há ' + _pendIni + ' diferenças com a nuvem: envio automático suspenso. Toque no indicador, em baixo à direita, para rever.', 'warning', 8000);
+            return;
+        }
+        if (temEspelho && jaSincronizouAntes && _pendIni > 0) {
             var enviou = await supaGravarTudo();
             if (!enviou) throw new Error('Não foi possível enviar as alterações pendentes');
         }
@@ -6681,9 +6688,18 @@ function _supaAtualizarIndicador() {
         el.id = 'supa-indicador';
         el.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:99999;font-family:system-ui,sans-serif;font-size:12px;padding:6px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;';
         el.title = 'Clique para sincronizar agora';
-        el.onclick = function() { if (usuarioAtual && navigator.onLine !== false) _fuelRetomarSync(); };
+        el.onclick = function() {
+            if (!usuarioAtual || navigator.onLine === false) return;
+            var p = _supaContarPendentes();
+            if (p > _FUEL_LIMITE_ENVIO) {
+                showConfirm('Há ' + p + ' diferenças entre este ecrã e a nuvem. Normalmente não são alterações reais. Para resolver, a app vai descartar essas diferenças e recarregar da nuvem (nada é enviado). Se fez registos offline que ainda não foram enviados, faça antes "Backup JSON". Continuar?', function() { _supaSnapshotDoDb(); _fuelRetomarSync(); });
+                return;
+            }
+            _fuelRetomarSync();
+        };
         document.body.appendChild(el);
     }
+    el.title = 'Clique para sincronizar agora';
     var pend = _supaContarPendentes();
     var hora = _supaUltimaSync ? new Date(_supaUltimaSync).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
     var cor, txt;
@@ -6693,6 +6709,10 @@ function _supaAtualizarIndicador() {
     } else if (_supaEstado === 'erro') {
         cor = ['#fee2e2', '#991b1b'];
         txt = '⚠ Nuvem indisponível' + (pend ? ' · ' + pend + ' por enviar' : ' (dados locais)');
+    } else if (pend > _FUEL_LIMITE_ENVIO) {
+        cor = ['#fee2e2', '#991b1b'];
+        txt = '⚠ ' + pend + ' diferenças com a nuvem — envio automático suspenso (toque para rever)';
+        el.title = _fuelDiagnosticoDiferencas();
     } else if (pend > 0) {
         cor = ['#fef3c7', '#92400e'];
         txt = '⏳ ' + pend + (pend === 1 ? ' alteração por enviar' : ' alterações por enviar');
@@ -6715,11 +6735,29 @@ async function _fuelRetomarSync() {
 }
 window.addEventListener('online', function() { _supaAtualizarIndicador(); _fuelRetomarSync(); });
 window.addEventListener('offline', function() { _supaAtualizarIndicador(); });
+// Travão: numa utilização normal nunca há centenas de alterações pendentes. Se houver, o mais provável é uma diferença
+// de comparação (e não edições reais), e enviar tudo recarimbaria milhares de registos na nuvem. Nesse caso suspende o envio automático.
+var _FUEL_LIMITE_ENVIO = 300;
+function _fuelDiagnosticoDiferencas() {
+    try {
+        var sn = _supaLerSnapshot(), n = 0, ex = null;
+        db.forEach(function (r) { var l = _supaLimparRegisto(r); if (l && sn[l.id] !== JSON.stringify(l)) { n++; if (!ex) ex = l; } });
+        var t = 'Registos: ' + db.length + ' · referência: ' + Object.keys(sn).length + ' · diferentes: ' + n;
+        if (ex) {
+            var o = {}; try { o = JSON.parse(sn[ex.id] || '{}'); } catch (e) {}
+            var dif = Object.keys(ex).filter(function (k) { return JSON.stringify(ex[k]) !== JSON.stringify(o[k]); });
+            t += ' · exemplo (id ' + ex.id + '): ' + dif.map(function (k) { return k + '=' + JSON.stringify(ex[k]) + ' (referência ' + JSON.stringify(o[k]) + ')'; }).join('; ');
+        }
+        return t;
+    } catch (e) { return 'diagnóstico indisponível'; }
+}
 function _fuelTentarFila() {
     if (!usuarioAtual || navigator.onLine === false || _supaSincronizando || _fuelRetomando) return;
-    if (_supaContarPendentes() > 0) supaGravarTudo(); else _supaAtualizarIndicador();
+    var pend = _supaContarPendentes();
+    if (pend > _FUEL_LIMITE_ENVIO) { console.warn('[Supabase] Envio automático suspenso. ' + _fuelDiagnosticoDiferencas()); _supaAtualizarIndicador(); return; }
+    if (pend > 0) supaGravarTudo(); else _supaAtualizarIndicador();
 }
-setInterval(_fuelTentarFila, 20000);
+setInterval(_fuelTentarFila, 60000);
 window.addEventListener('focus', function() { _fuelTentarFila(); });
 document.addEventListener('visibilitychange', function() { if (!document.hidden) _fuelTentarFila(); });
 
