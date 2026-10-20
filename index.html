@@ -4419,9 +4419,19 @@ function _escHtml(s) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
 }
+// A nuvem só guarda o e-mail de quem lançou. Aqui define o nome a mostrar para cada e-mail (em minúsculas).
+// Sem entrada, mostra a parte do e-mail antes do @. Pode mapear o e-mail antigo e o novo para o mesmo nome.
+var NOMES_UTILIZADORES = {
+    'acesso@fuelanalytics.local': 'Eliazardo',
+    'elycalui@gmail.com': 'Eliazardo'
+};
+function _nomeDeEmail(email) {
+    var e = String(email || '');
+    return NOMES_UTILIZADORES[e.toLowerCase()] || e.split('@')[0];
+}
 function _lancadoPor(a) {
     if (!a.criado_por_email) return '<span style="color:var(--text-muted)" title="Registo anterior ao controlo de autoria">—</span>';
-    var nome = a.criado_por_email.split('@')[0];
+    var nome = _nomeDeEmail(a.criado_por_email);
     var dica = 'Lançado por ' + a.criado_por_email + (a.criado_em ? ' em ' + new Date(a.criado_em).toLocaleString('pt-PT') : '');
     if (a.editado_por_email) dica += ' | Última edição: ' + a.editado_por_email + (a.editado_em ? ' em ' + new Date(a.editado_em).toLocaleString('pt-PT') : '');
     return '<span title="' + _escHtml(dica) + '">' + _escHtml(nome) + '</span>';
@@ -4435,7 +4445,7 @@ function atualizarGeral() {
     var b = document.getElementById('corpoGeral');
     var f = (document.getElementById('busca-geral').value || '').toLowerCase();
     var sorted = db.slice().sort(function(a,b){ return _cmpCrono(b, a); });
-    var filtrados = f ? sorted.filter(function(a){ return a.placa.toLowerCase().indexOf(f)!==-1 || a.moto.toLowerCase().indexOf(f)!==-1 || (a.criado_por_email||'').toLowerCase().indexOf(f)!==-1; }) : sorted;
+    var filtrados = f ? sorted.filter(function(a){ return a.placa.toLowerCase().indexOf(f)!==-1 || a.moto.toLowerCase().indexOf(f)!==-1 || (a.criado_por_email||'').toLowerCase().indexOf(f)!==-1 || _nomeDeEmail(a.criado_por_email).toLowerCase().indexOf(f)!==-1; }) : sorted;
     var total = filtrados.length;
     var totalPaginas = Math.max(1, Math.ceil(total / _geralPorPagina));
     if (_geralPagina > totalPaginas) _geralPagina = totalPaginas;
@@ -7376,7 +7386,7 @@ function regAtualizarVerificacao() {
         else { cls = 'bad'; txt = 'Consumo muito acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
     } else if (c.km && c.litros && tudoOk && !c.prev) { cls = 'ok'; txt = 'Primeiro registo desta viatura: serve de base para os próximos cálculos.'; }
     msg.className = 'reg-msg ' + cls; msg.textContent = txt;
-    var quem = (typeof _supaEmail !== 'undefined' && _supaEmail) ? _supaEmail : ((typeof usuarioAtual !== 'undefined' && usuarioAtual && usuarioAtual.nome) || '');
+    var quem = _supaEmail ? _nomeDeEmail(_supaEmail) : ((usuarioAtual && usuarioAtual.nome) || '');
     var u = document.getElementById('reg-v-user'); if (u) u.textContent = quem ? 'Será registado por ' + quem + ' · ' + _fmtDM(_hojeLocal()) + ', ' + _agoraHM() : '';
 }
 
@@ -7422,7 +7432,7 @@ function regPosGravar(r) {
     var kmTxt = x.kmCascataErro ? ['Km inconsistente com o registo anterior: reveja no histórico', 'bad'] : (primeiro ? ['Primeiro registo desta viatura: base para os próximos cálculos', 'ok'] : ['Km coerente com o registo anterior', 'ok']);
     var temPontos = !!x.kmCascataErro;
     var nHoje = db.filter(function (z) { return z.data === _hojeLocal(); }).length;
-    var quem = (typeof _supaEmail !== 'undefined' && _supaEmail) ? _supaEmail : ((usuarioAtual && usuarioAtual.nome) || '');
+    var quem = _supaEmail ? _nomeDeEmail(_supaEmail) : ((usuarioAtual && usuarioAtual.nome) || '');
     var btnAnular = (typeof _ehAdminAtual === 'function' && _ehAdminAtual()) ? '<button class="btn btn-ghost" onclick="abrirModalExclusao(db.findIndex(function(z){return z.id===\'' + x.id + '\';}))">Anular este registo</button>' : '';
     d.className = 'card reg-done' + (alerta ? ' alerta' : '');
     d.innerHTML = '<div class="big"><i class="fas ' + (alerta ? 'fa-flag' : 'fa-check') + '"></i></div>' +
