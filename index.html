@@ -730,6 +730,12 @@
             .reg-dot.estalo { animation:regSnap .38s cubic-bezier(.2,.9,.3,1.4); }
         }
 
+        .reg-just-box { border:1px dashed var(--warning); background:var(--warning-light); border-radius:12px; padding:14px 16px; margin-top:18px; }
+        .reg-just-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+        .reg-just-head b { display:block; font-size:14px; }
+        .reg-just-head span { font-size:12px; color:var(--text-muted); }
+        .reg-just-head .btn { height:38px; min-width:0; padding:0 16px; font-size:13px; }
+
         /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998;
@@ -1279,6 +1285,13 @@ document.addEventListener('DOMContentLoaded', function(){
                             <input type="checkbox" id="f-completo" checked style="display:none">
                             <span id="tipo-abast-label" style="display:none"></span><span id="tipo-abast-sub" style="display:none"></span>
                             <div class="input-help" id="completo-help" style="color:var(--warning)"></div>
+                        </div>
+                    </div>
+                    <div class="reg-just-box" id="reg-just" style="display:none">
+                        <div class="reg-just-head"><div><b>Este consumo vai ser sinalizado</b><span id="reg-just-sub">Se já sabe o motivo, justifique agora e poupe o passo no histórico.</span></div><button type="button" class="btn btn-ghost" id="reg-just-toggle" onclick="regJustAlternar()">Justificar agora</button></div>
+                        <div id="reg-just-corpo" style="display:none;margin-top:12px">
+                            <div class="just-modal-motivos" id="reg-just-motivos"></div>
+                            <textarea id="reg-just-obs" rows="2" placeholder="Observação adicional (opcional)" style="resize:vertical;margin-top:10px"></textarea>
                         </div>
                     </div>
                     <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(2)">Voltar</button><button class="btn btn-primary" onclick="salvar()" id="btnSalvar"><i class="fas fa-save"></i> Guardar Registo</button></div>
@@ -6901,6 +6914,23 @@ function abrirModalJust(index) {
 
 function fecharModalJust() { document.getElementById('justModal').style.display = 'none'; }
 
+// Aplica a justificação a um registo (usada pelo modal do histórico e pelo "Justificar já" do formulário)
+function _aplicarJustificacao(index, motivo, obs) {
+    var r = db[index];
+    if (!r) return false;
+    auditLog.push({ tipo: 'JUSTIFICACAO', data: new Date().toISOString(), usuario: usuarioAtual?.nome, placa: r.placa, motorista: r.moto, dataRegisto: r.data, consumo: r.l100, motivo: motivo, observacao: obs });
+    db[index].justificado = true;
+    db[index].motivoJustificacao = motivo;
+    db[index].obsJustificacao = obs;
+    db[index].dataJustificacao = new Date().toISOString();
+    db[index].justificadoPor = usuarioAtual?.nome;
+    db[index].custoContextualizado = db[index].perdaAOA || 0;
+    db[index].perdaAOA = 0;
+    db[index].perdaL = 0;
+    cache = { dashStats: null, investData: null, lastUpdate: null };
+    return true;
+}
+
 function confirmarJustificacao() {
     if (!_justMotivoSel) { showToast('Seleccione um motivo para a justificação', 'warning'); return; }
     var index = parseInt(document.getElementById('just-index').value);
@@ -6908,17 +6938,7 @@ function confirmarJustificacao() {
     var r = db[index];
     if (!r) return;
 
-    auditLog.push({ tipo: 'JUSTIFICACAO', data: new Date().toISOString(), usuario: usuarioAtual?.nome, placa: r.placa, motorista: r.moto, dataRegisto: r.data, consumo: r.l100, motivo: _justMotivoSel, observacao: obs });
-
-    db[index].justificado = true;
-    db[index].motivoJustificacao = _justMotivoSel;
-    db[index].obsJustificacao = obs;
-    db[index].dataJustificacao = new Date().toISOString();
-    db[index].justificadoPor = usuarioAtual?.nome;
-    db[index].custoContextualizado = db[index].perdaAOA || 0;
-    db[index].perdaAOA = 0;
-    db[index].perdaL = 0;
-
+    _aplicarJustificacao(index, _justMotivoSel, obs);
     cache = { dashStats: null, investData: null, lastUpdate: null };
     fecharModalJust();
     atualizarTabelas();
@@ -7385,6 +7405,10 @@ function regAtualizarVerificacao() {
         else if (/ALTO$/.test(s)) { cls = 'warn'; txt = 'Consumo acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
         else { cls = 'bad'; txt = 'Consumo muito acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
     } else if (c.km && c.litros && tudoOk && !c.prev) { cls = 'ok'; txt = 'Primeiro registo desta viatura: serve de base para os próximos cálculos.'; }
+    var alertaPrev = (c.l100 !== null && c.cls && !/OK$/.test(c.cls.status));
+    var podeJust = !!alertaPrev && typeof _ehAdminAtual === 'function' && _ehAdminAtual();
+    regJustSincronizar(podeJust);
+    if (podeJust && _regJust.motivo) txt = 'Consumo acima da meta (' + c.cls.status + '): será guardado já justificado — ' + _regJust.motivo + '.';
     msg.className = 'reg-msg ' + cls; msg.textContent = txt;
     var quem = _supaEmail ? _nomeDeEmail(_supaEmail) : ((usuarioAtual && usuarioAtual.nome) || '');
     var u = document.getElementById('reg-v-user'); if (u) u.textContent = quem ? 'Será registado por ' + quem + ' · ' + _fmtDM(_hojeLocal()) + ', ' + _agoraHM() : '';
@@ -7425,9 +7449,16 @@ function regPosGravar(r) {
     var st = x.status || '', parcial = (st === 'PARCIAL'), primeiro = (st === 'PRIMEIRO');
     var ok = /OK$/.test(st) || parcial || primeiro;
     var alerta = !ok;
+    var justMot = '';
+    if (alerta && st !== 'ERRO' && _regJust.motivo && typeof _ehAdminAtual === 'function' && _ehAdminAtual()) {
+        var iJ = db.findIndex(function (z) { return z.id === x.id; });
+        var obsEl = document.getElementById('reg-just-obs');
+        if (iJ > -1 && _aplicarJustificacao(iJ, _regJust.motivo, obsEl ? obsEl.value.trim() : '')) { justMot = _regJust.motivo; atualizarTabelas(); salvarDadosLocal(); }
+    }
+    regJustLimpar();
     var d = document.getElementById('reg-done');
     var consumo = x.l100 ? Number(x.l100).toFixed(1).replace('.', ',') + ' L/100 km' : '--';
-    var sub = parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
+    var sub = justMot ? ('Justificado: ' + justMot + ' · custo contextualizado para auditoria') : parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
     var chk = function (t, c) { c = c || 'ok'; return '<div class="reg-chk ' + c + '" style="justify-content:center"><i class="fas ' + (c === 'ok' ? 'fa-circle-check' : 'fa-circle-xmark') + '"></i><span>' + t + '</span></div>'; };
     var kmTxt = x.kmCascataErro ? ['Km inconsistente com o registo anterior: reveja no histórico', 'bad'] : (primeiro ? ['Primeiro registo desta viatura: base para os próximos cálculos', 'ok'] : ['Km coerente com o registo anterior', 'ok']);
     var temPontos = !!x.kmCascataErro;
@@ -7438,10 +7469,10 @@ function regPosGravar(r) {
     d.innerHTML = '<div class="big"><i class="fas ' + (alerta ? 'fa-flag' : 'fa-check') + '"></i></div>' +
         '<h3 style="font-family:Outfit,sans-serif;font-size:24px;margin-bottom:4px">Registo guardado</h3>' +
         '<div style="font-size:13px;color:var(--text-muted)">' + _fmtDMA(x.data) + ' · ' + x.placa + ' · ' + x.km.toLocaleString() + ' km · ' + x.litros + ' L · ' + x.valor.toLocaleString() + ' AOA</div>' +
-        '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0"><span class="badge ' + getBadgeClass(x) + '" style="font-size:14px;padding:6px 14px">' + (st || 'OK') + '</span><div style="text-align:left"><b style="font-family:JetBrains Mono,monospace">' + consumo + '</b><div style="font-size:12px;color:var(--text-muted)">' + sub + '</div></div></div>' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0"><span class="badge ' + (justMot ? 'badge-justificado' : getBadgeClass(x)) + '" style="font-size:14px;padding:6px 14px">' + (justMot ? 'JUSTIFICADO' : (st || 'OK')) + '</span><div style="text-align:left"><b style="font-family:JetBrains Mono,monospace">' + consumo + '</b><div style="font-size:12px;color:var(--text-muted)">' + sub + '</div></div></div>' +
         '<div style="border-top:1px solid var(--border);padding-top:10px;max-width:380px;margin:0 auto"><div style="font-weight:700;margin-bottom:4px">' + (temPontos ? 'Registo com pontos a rever' : 'Registo pronto para auditoria') + '</div>' +
         chk(kmTxt[0], kmTxt[1]) + chk('Preço oficial da data aplicado') + chk('Ordem cronológica respeitada') + chk('Registado por ' + quem + ' · ' + _agoraHM()) + '</div>' +
-        '<div class="reg-msg ' + (alerta ? 'warn' : 'ok') + '" style="margin:14px auto;max-width:420px">' + (alerta ? 'Registo guardado e sinalizado para revisão.' : (temPontos ? 'Registo guardado. Reveja o km no histórico.' : 'Dados limpos tornam a auditoria fiável. Obrigado pelo rigor' + (nHoje > 0 && x.data === _hojeLocal() ? ' — já são ' + nHoje + (nHoje === 1 ? ' registo' : ' registos') + ' hoje.' : '.'))) + '</div>' +
+        '<div class="reg-msg ' + (alerta ? 'warn' : 'ok') + '" style="margin:14px auto;max-width:420px">' + (alerta ? (justMot ? 'Registo guardado e justificado. Fica como custo contextualizado para auditoria.' : 'Registo guardado e sinalizado para revisão.') : (temPontos ? 'Registo guardado. Reveja o km no histórico.' : 'Dados limpos tornam a auditoria fiável. Obrigado pelo rigor' + (nHoje > 0 && x.data === _hojeLocal() ? ' — já são ' + nHoje + (nHoje === 1 ? ' registo' : ' registos') + ' hoje.' : '.'))) + '</div>' +
         '<div class="reg-acoes" style="justify-content:center"><button class="btn btn-primary" onclick="regNovo()">Novo lançamento</button>' + btnAnular + '</div>';
     regIrPasso(4);
     d.style.display = 'block';
@@ -7485,7 +7516,51 @@ function regEstalo(alerta, soSom) {
     } catch (e) {}
 }
 
-function regNovo() { regIrPasso(1); }
+// ---- Justificar já no formulário (só admin/owner; reutiliza os motivos e a regra do modal do histórico) ----
+var _regJust = { aberto: false, motivo: '' };
+function regJustMontarMotivos() {
+    var box = document.getElementById('reg-just-motivos');
+    if (!box || box.children.length) return;
+    document.querySelectorAll('#justModal .just-motivo-btn').forEach(function (b) {
+        var m = (b.getAttribute('onclick') || '').match(/'([^']+)'\)/);
+        if (!m) return;
+        var n = document.createElement('button');
+        n.type = 'button'; n.className = 'just-motivo-btn'; n.innerHTML = b.innerHTML;
+        n.onclick = function () { regJustMotivo(n, m[1]); };
+        box.appendChild(n);
+    });
+}
+function regJustMotivo(btn, motivo) {
+    document.querySelectorAll('#reg-just-motivos .just-motivo-btn').forEach(function (b) { b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    _regJust.motivo = motivo;
+    regJustRotulos();
+    regAtualizarVerificacao();
+}
+function regJustAlternar() {
+    _regJust.aberto = !_regJust.aberto;
+    regJustMontarMotivos();
+    regJustRotulos();
+}
+function regJustRotulos() {
+    var corpo = document.getElementById('reg-just-corpo'), tg = document.getElementById('reg-just-toggle'), sub = document.getElementById('reg-just-sub');
+    if (corpo) corpo.style.display = _regJust.aberto ? 'block' : 'none';
+    if (tg) tg.textContent = _regJust.aberto ? 'Fechar' : (_regJust.motivo ? 'Alterar' : 'Justificar agora');
+    if (sub) sub.textContent = _regJust.motivo ? 'Será guardado já justificado: ' + _regJust.motivo : 'Se já sabe o motivo, justifique agora e poupe o passo no histórico.';
+}
+function regJustLimpar() {
+    _regJust = { aberto: false, motivo: '' };
+    document.querySelectorAll('#reg-just-motivos .just-motivo-btn').forEach(function (b) { b.classList.remove('selected'); });
+    var o = document.getElementById('reg-just-obs'); if (o) o.value = '';
+    regJustRotulos();
+}
+function regJustSincronizar(pode) {
+    var box = document.getElementById('reg-just'); if (!box) return;
+    box.style.display = pode ? 'block' : 'none';
+    if (!pode && (_regJust.motivo || _regJust.aberto)) regJustLimpar();
+}
+
+function regNovo() { regJustLimpar(); regIrPasso(1); }
 
 // Menu "⋯" do histórico (flutuante, não é cortado pela tabela)
 function fecharMenuAcoes() { var m = document.getElementById('menuAcoes'); if (m) m.remove(); }
