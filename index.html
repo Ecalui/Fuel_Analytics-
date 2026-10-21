@@ -161,6 +161,17 @@
             display: flex; align-items: center; gap: 6px; white-space: nowrap; align-self: flex-start; margin-top: 4px;
         }
 
+        .page-header-actions { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+        .dash-cta { padding: 10px 18px; margin-top: 4px; }
+        .dash-vazio { text-align: center; padding: 44px 24px; margin-bottom: 20px; }
+        .dash-vazio-icon { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--accent-soft, rgba(234,88,12,0.12)); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+        .dash-vazio-titulo { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .dash-vazio-texto { font-size: 14px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 22px; line-height: 1.5; }
+        @media (max-width: 768px) {
+            .page-header-actions { width: 100%; flex-direction: column-reverse; }
+            .page-header-actions .dash-cta { width: 100%; justify-content: center; padding: 14px 18px; }
+        }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
@@ -1127,7 +1138,17 @@ document.addEventListener('DOMContentLoaded', function(){
 
     <!-- ==================== DASHBOARD ==================== -->
     <div id="tab-dash" class="tab-content tab-active">
-        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Principal</div><h1 class="page-title">Painel Geral</h1><p class="page-desc">Visão geral do consumo e alertas da frota</p></div><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Dashboard</div></div>
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Principal</div><h1 class="page-title">Painel Geral</h1><p class="page-desc">Visão geral do consumo e alertas da frota</p></div><div class="page-header-actions"><button type="button" class="btn btn-primary dash-cta" id="dash-cta-novo" style="display:none" onclick="irParaNovoLancamento()"><i class="fas fa-plus"></i>Novo Lançamento</button><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Dashboard</div></div></div>
+
+        <!-- ESTADO VAZIO: aparece só quando a base de dados está confirmada sem registos -->
+        <div class="card dash-vazio" id="dash-vazio" style="display:none">
+            <div class="dash-vazio-icon"><i class="fas fa-gas-pump"></i></div>
+            <h2 class="dash-vazio-titulo">Ainda não há registos</h2>
+            <p class="dash-vazio-texto" id="dash-vazio-texto">Registe o primeiro abastecimento para começar a ver o consumo, os desvios e os alertas da frota.</p>
+            <button type="button" class="btn btn-primary btn-lg" id="dash-vazio-btn" style="display:none" onclick="irParaNovoLancamento()"><i class="fas fa-plus"></i>Registar o primeiro abastecimento</button>
+        </div>
+
+        <div id="dash-corpo">
 
         <!-- FILTRO GLOBAL — comanda KPIs, gráficos, tabela e Top 5 -->
         <div class="dash-filter-bar">
@@ -1198,6 +1219,7 @@ document.addEventListener('DOMContentLoaded', function(){
             </div>
             <div class="rank-grid" id="rankMotoristas"></div>
         </div>
+        </div><!-- /dash-corpo -->
     </div>
 
     <!-- ==================== NOVO LANÇAMENTO (3 passos) ==================== -->
@@ -2662,6 +2684,29 @@ function toggleSidebar() {
     document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
+// ===== ATALHO: NOVO LANÇAMENTO (a partir do Painel) =====
+function irParaNovoLancamento() {
+    switchTab('reg', document.getElementById('nav-reg'));
+    var main = document.querySelector('.main');
+    if (main) main.scrollTop = 0;
+}
+
+// Estado vazio do Painel: só quando a nuvem foi lida com sucesso e não há registos
+function atualizarEstadoVazioDash() {
+    var vazio = document.getElementById('dash-vazio');
+    var corpo = document.getElementById('dash-corpo');
+    if (!vazio || !corpo) return;
+    var semRegistos = Array.isArray(db) && db.length === 0 && typeof _supaEstado !== 'undefined' && _supaEstado === 'ok';
+    vazio.style.display = semRegistos ? 'block' : 'none';
+    corpo.style.display = semRegistos ? 'none' : '';
+    var p = usuarioAtual ? usuarioAtual.perfil : '';
+    var podeRegistar = (p === 'owner' || p === 'admin' || p === 'chefia');
+    var btn = document.getElementById('dash-vazio-btn');
+    if (btn) btn.style.display = podeRegistar ? 'inline-flex' : 'none';
+    var txt = document.getElementById('dash-vazio-texto');
+    if (txt && !podeRegistar) txt.textContent = 'Ainda não foram feitos registos de abastecimento. Os gráficos e alertas aparecem assim que houver dados.';
+}
+
 // ===== TAB SWITCH =====
 function switchTab(tabId, el) {
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('tab-active'); });
@@ -2881,6 +2926,10 @@ function aplicarPermissoes() {
     var acoesHeader = document.getElementById('acoes-header');
     if (acoesHeader) acoesHeader.style.display = isAdmin ? 'table-cell' : 'none';
     document.querySelectorAll('.action-btn, .btn-just, .btn-mais').forEach(function(b) { b.style.display = isAdmin ? 'inline-block' : 'none'; });
+
+    // Botao "Novo Lançamento" no Painel - só quem pode registar
+    var ctaNovo = document.getElementById('dash-cta-novo');
+    if (ctaNovo) ctaNovo.style.display = (isAdmin || isChefia) ? 'inline-flex' : 'none';
 
     // Botao IA - admin, relatorista e chefia
     var btnIA = document.getElementById('ia-btn');
@@ -4219,6 +4268,7 @@ function calcularStats() {
 }
 
 function atualizarDash() {
+    atualizarEstadoVazioDash();
     var stats = calcularStats();
     document.getElementById('statGasto').innerHTML = stats.gasto.toLocaleString() + ' <small style="font-size:14px">AOA</small>';
     var roubosPedreira = db.filter(function(r){ return r.status === 'PEDREIRA-ROUBO'; }).length;
@@ -7277,6 +7327,8 @@ async function iniciarAppAutenticada() {
         // Inicializar período padrão do dashboard (Este Mês)
         setDashPeriod('mes', document.getElementById('dash-btn-mes'));
         popularMesesInvestigacao();
+        // Chefia só regista: abre diretamente em Novo Lançamento (o Painel fica a um toque no menu)
+        if (role === 'chefia') switchTab('reg', document.getElementById('nav-reg'));
 
         document.getElementById('data-ass-responsavel').textContent = 'Data: ' + new Date().toLocaleDateString('pt-PT');
         if (acessoAnterior) {
