@@ -406,6 +406,52 @@
             #tab-reg tbody td[colspan] { grid-column: 1 / -1; grid-row: auto; }
         }
 
+        /* ===== LATERAL, CABEÇALHO MÓVEL E CABEÇALHO DE PÁGINA: linguagem de linhas finas (só visual) ===== */
+        .sidebar { background: var(--bg-page); color: var(--text-primary); border-right: 1px solid var(--border); padding: 24px 20px 12px; height: 100vh; height: 100dvh; }
+        .sidebar .sidebar-brand { gap: 0; margin-bottom: 2px; }
+        .sidebar-brand-icon { display: none; }
+        .sidebar .sidebar-brand h2 { font-size: 19px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.02em; }
+        .sidebar .sidebar-sub { font-size: 12px; color: var(--text-secondary); padding-left: 0; margin-bottom: 18px; }
+        .sidebar .sidebar-nav { scrollbar-color: var(--text-muted) transparent; }
+        .sidebar .sidebar-nav::-webkit-scrollbar-thumb, .sidebar .sidebar-nav::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        .sidebar .nav-section { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin: 18px 0 4px; padding: 10px 0 0; border-top: 1px solid var(--text-primary); }
+        .sidebar .sidebar-nav > .nav-section:first-child { margin-top: 0; }
+        /* perfil chefia: a secção "Gestão" fica vazia (o único link é escondido pelo JS), por isso some também */
+        .sidebar .nav-section:has(+ #nav-ceo[style*="display: none"]) { display: none; }
+        .sidebar .nav-link { border-radius: 0; border: 0; border-left: 2px solid transparent; padding: 0 0 0 12px; min-height: 44px; gap: 0; font-size: 14px; font-weight: 500; color: var(--text-secondary); background: none; box-shadow: none; transition: none; }
+        .sidebar .nav-link i { display: none; }
+        .sidebar .nav-link:hover { background: none; color: var(--text-primary); }
+        .sidebar .nav-link.active { background: none; box-shadow: none; border-left-color: var(--text-primary); color: var(--text-primary); font-weight: 600; }
+
+        /* rodapé compacto: utilizador, depois 2 colunas de ações e "Sair" em linha própria */
+        .sidebar .sidebar-footer { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; gap: 0 12px; border-top: 1px solid var(--text-primary); margin-top: 8px; padding-top: 10px; }
+        .sidebar #user-info { grid-column: 1 / -1; padding: 0 0 8px; font-size: 13px; line-height: 1.4; color: var(--text-primary); }
+        .sidebar #user-info i { display: none; }
+        .sidebar #user-info small { font-size: 12px; color: var(--text-secondary); }
+        .sidebar .sidebar-btn { background: none; border: 0; border-top: 1px solid var(--border); border-radius: 0; box-shadow: none; transition: none; min-height: 44px; padding: 0; gap: 0; font: 500 13px 'Outfit', sans-serif; color: var(--text-primary); }
+        .sidebar .sidebar-btn:hover { background: none; color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
+        .sidebar .sidebar-btn i { display: none; }
+        .sidebar .sidebar-btn:nth-of-type(1) { order: 1; }
+        .sidebar .sidebar-btn:nth-of-type(4) { order: 2; }
+        .sidebar .sidebar-btn:nth-of-type(2) { order: 3; }
+        .sidebar .sidebar-btn:nth-of-type(3) { order: 4; }
+        .sidebar .sidebar-btn:nth-of-type(5) { order: 5; grid-column: 1 / -1; border-top-color: var(--text-primary); font-weight: 600; }
+
+        /* cabeçalho móvel */
+        .mobile-header { background: var(--bg-page); color: var(--text-primary); border-bottom: 1px solid var(--border); gap: 4px; padding: 0 12px 0 4px; }
+        .mobile-header .sidebar-brand-icon { display: none; }
+        .mobile-header h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); }
+        .hamburger { color: var(--text-primary); width: 48px; height: 48px; padding: 0; display: flex; align-items: center; justify-content: center; }
+        .sidebar-overlay { backdrop-filter: none; background: rgba(0,0,0,0.45); }
+        @media (max-width: 768px) {
+            .sidebar { border-right-color: var(--text-primary); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+        }
+
+        /* cabeçalho de página (todas as abas): texto simples, sem pastilha decorativa */
+        .main .page-eyebrow { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        .main .page-period-pill { background: none; border: 0; border-radius: 0; padding: 0; margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+        .main .page-period-pill i { display: none; }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
