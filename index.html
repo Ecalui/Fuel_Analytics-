@@ -172,6 +172,240 @@
             .page-header-actions .dash-cta { width: 100%; justify-content: center; padding: 14px 18px; }
         }
 
+        /* ===== PAINEL: linguagem de linhas finas (só visual) ===== */
+        #tab-dash .page-period-pill { display: none; }
+        #tab-dash .dash-filter-bar { background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; padding: 0 0 14px; margin-bottom: 24px; }
+        #tab-dash .dash-period-btn { border-radius: 0; background: transparent; }
+        #tab-dash .dash-period-btn.active { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg-card); }
+        #tab-dash .stats-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--border); border-top: 2px solid var(--text-primary); border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+        #tab-dash .stat-card { background: var(--bg-page); border: 0; border-radius: 0; box-shadow: none; padding: 16px 20px 18px; }
+        #tab-dash .stat-card:first-child { padding-left: 0; }
+        #tab-dash .stat-card:hover { transform: none; box-shadow: none; }
+        #tab-dash .stat-icon-pill { display: none; }
+        #tab-dash .stat-label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 8px; }
+        #tab-dash .stat-val { font-size: 30px; font-weight: 500; letter-spacing: -0.03em; color: var(--text-primary); }
+        #tab-dash .stat-card.red .stat-val { color: var(--danger); }
+        #tab-dash .stat-val small { font-size: 13px; }
+        #tab-dash .stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+        #tab-dash .kpi-badge { background: none; padding: 0; border-radius: 0; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        #tab-dash .kpi-badge.danger { color: var(--danger); }
+        #tab-dash .card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin-bottom: 36px; }
+        #tab-dash .card.dash-vazio { border-top-width: 2px; padding: 44px 24px; }
+        #tab-dash .card-title { font-size: 15px; font-weight: 600; }
+        #tab-dash .card-title i { display: none; }
+        #tab-dash .charts-row { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 0 40px; margin-bottom: 0; align-items: stretch; }
+        #tab-dash .charts-row > .card { display: flex; flex-direction: column; }
+        #tab-dash .charts-row .chart-container { height: 300px; }
+        /* Secções ocultas do Painel (voltam a aparecer ao remover a classe dash-oculto) */
+        #tab-dash .card.dash-oculto { display: none !important; }
+        #tab-dash .status-dist { padding-top: 16px; flex: 1; display: flex; flex-direction: column; }
+        #tab-dash .status-dist-bar { display: flex; gap: 2px; height: 14px; margin-bottom: 14px; }
+        #tab-dash .status-dist-seg { min-width: 3px; height: 100%; }
+        #tab-dash .status-dist-row { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-height: 40px; padding: 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-primary); }
+        #tab-dash .status-dist-row:last-child { border-bottom: 0; }
+        #tab-dash .status-dist-sw { width: 10px; height: 10px; flex: 0 0 10px; }
+        #tab-dash .status-dist-nome { flex: 1; min-width: 0; }
+        #tab-dash .status-dist-pct { font-size: 12px; color: var(--text-secondary); min-width: 48px; text-align: right; }
+        #tab-dash .status-dist-n { font-family: 'JetBrains Mono', monospace; font-weight: 500; min-width: 44px; text-align: right; }
+        @media (max-width: 900px) {
+            #tab-dash .charts-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            #tab-dash .stats-grid { grid-template-columns: 1fr 1fr; }
+            #tab-dash .stat-card { padding: 14px 12px 14px 0; }
+            #tab-dash .stat-val { font-size: 24px; }
+            #tab-dash .dash-filter-sep { display: none; }
+        }
+
+        /* ===== NOVO LANÇAMENTO: linguagem de linhas finas (só visual; tudo limitado a #tab-reg) ===== */
+        #tab-reg.tab-active { animation: none; }
+        #tab-reg .page-eyebrow { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #tab-reg .page-period-pill { background: none; border: 0; border-radius: 0; padding: 0; margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 13px; color: var(--text-primary); }
+        #tab-reg .page-period-pill i { display: none; }
+
+        /* passos: quadrados retos, sem animação de cor */
+        #tab-reg .reg-steps { counter-reset: regp; gap: 12px; margin: 0 0 22px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+        #tab-reg .reg-dot { width: 28px; height: 28px; border-radius: 0; background: transparent; border: 1px solid var(--text-muted); color: var(--text-secondary); font: 500 13px 'JetBrains Mono', monospace; transition: none; }
+        #tab-reg .reg-dot.ativo { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg-card); }
+        #tab-reg .reg-dot.feito { background: transparent; border-color: var(--text-primary); color: var(--text-primary); }
+        #tab-reg .reg-dot.feito i { font-size: 12px; }
+        #tab-reg .reg-lbl { font-size: 13px; font-weight: 500; color: var(--text-secondary); counter-increment: regp; }
+        #tab-reg .reg-lbl.ativo { color: var(--text-primary); font-weight: 600; }
+        #tab-reg .reg-lbl.feito { color: var(--text-secondary); }
+        #tab-reg .reg-line { height: 1px; border-radius: 0; background: var(--border); transition: none; }
+        #tab-reg .reg-line.feito { background: var(--text-primary); }
+        #tab-reg .reg-som { border-radius: 0; border-color: var(--text-muted); width: 32px; height: 32px; }
+        #tab-reg .reg-som:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+        /* blocos: linha em vez de cartão */
+        #tab-reg .reg-sum { background: none; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 10px 0; margin: 0; min-height: 48px; }
+        #tab-reg .reg-sum .tick { display: none; }
+        #tab-reg .reg-sum small { font-size: 12px; color: var(--text-secondary); }
+        #tab-reg .reg-sum b { font-size: 14px; font-weight: 500; }
+        #tab-reg .reg-sum a { color: var(--text-primary); font-weight: 500; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; padding: 12px 0 12px 12px; }
+        #tab-reg .reg-panel { background: none; border: 0; border-top: 2px solid var(--text-primary); border-radius: 0; padding: 14px 0 0; }
+        #tab-reg .reg-panel.ativo { animation: none; }
+        #tab-reg .reg-panel h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+        #tab-reg .reg-fields { gap: 18px 16px; }
+
+        /* campos */
+        #tab-reg label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 6px; }
+        #tab-reg input, #tab-reg select, #tab-reg textarea { border-radius: 0; border: 1px solid var(--text-muted); min-height: 48px; padding: 10px 12px; }
+        #tab-reg input:focus, #tab-reg select:focus, #tab-reg textarea:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: -1px; }
+        #tab-reg input[type="number"], #tab-reg input[type="date"], #tab-reg input[type="time"] { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-reg input[readonly] { background: transparent !important; border-style: dashed; border-color: var(--border); }
+        #tab-reg input.error { border-color: var(--danger); outline-color: var(--danger); }
+        #tab-reg .input-help { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+        #tab-reg .ultimo-km-info { background: none; border: 0; border-left: 1px solid var(--text-primary); border-radius: 0; padding: 2px 0 2px 10px; margin-top: 8px; font-size: 12px; color: var(--text-secondary); }
+        #tab-reg .ultimo-km-info i { display: none; }
+        #tab-reg .ultimo-km-info b { font-weight: 500; color: var(--text-primary); font-size: 13px; }
+
+        /* tanque cheio / parcial: dois botões retos; cor só no parcial (alerta) */
+        #tab-reg .reg-tipo { gap: 8px; }
+        #tab-reg .reg-tipo div { border: 1px solid var(--text-muted); border-radius: 0; min-height: 52px; padding: 12px; font-size: 14px; font-weight: 500; color: var(--text-secondary); display: flex; flex-direction: column; justify-content: center; }
+        #tab-reg .reg-tipo div span { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        #tab-reg .reg-tipo div.sel-ok { background: none; border: 2px solid var(--text-primary); color: var(--text-primary); font-weight: 600; padding: 11px; }
+        #tab-reg .reg-tipo div.sel-parc { background: none; border: 2px solid var(--accent); color: var(--text-primary); font-weight: 600; padding: 11px; }
+
+        /* botões retos; um único primário, em tinta */
+        #tab-reg .btn { border-radius: 0; transition: none; font-weight: 600; }
+        #tab-reg .btn:hover { transform: none; box-shadow: none; }
+        #tab-reg .btn i { display: none; }
+        #tab-reg .btn-primary { background: var(--text-primary); color: var(--bg-card); border: 1px solid var(--text-primary); }
+        #tab-reg .btn-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--text-secondary); }
+        #tab-reg .btn-ghost:hover { background: transparent; border-color: var(--text-primary); }
+        #tab-reg .reg-acoes { margin-top: 24px; gap: 10px; }
+        #tab-reg .reg-acoes .btn { height: 52px; min-width: 140px; justify-content: center; }
+        #tab-reg .reg-acoes .btn-primary { min-width: 200px; }
+
+        /* verificação em tempo real */
+        #tab-reg .reg-side .card { background: none; border: 0; border-top: 2px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin: 0; }
+        #tab-reg .reg-side .card-title { font-size: 15px; font-weight: 600; }
+        #tab-reg .reg-side .card-title i { display: none; }
+        #tab-reg .reg-side .sm { font-size: 12px !important; color: var(--text-secondary) !important; }
+        #tab-reg .reg-v-num { font-weight: 500; letter-spacing: -0.03em; color: var(--text-primary) !important; margin-top: 4px; }
+        #tab-reg .reg-v-num span { font-size: 13px !important; letter-spacing: 0; color: var(--text-secondary); }
+        #tab-reg .reg-meter { height: 12px; border-radius: 0; gap: 2px; margin-top: 12px; }
+        #tab-reg .reg-meter div:nth-child(2) { background: var(--warning); }
+        #tab-reg .reg-marker i { width: 2px; background: var(--text-primary); }
+        #tab-reg #reg-meter-leg { font-family: 'JetBrains Mono', monospace; font-size: 12px !important; }
+        #tab-reg #reg-v-checks { border-top: 1px solid var(--border) !important; padding-top: 4px !important; }
+        #tab-reg .reg-chk { font-size: 14px; padding: 9px 0; border-bottom: 1px solid var(--border); align-items: center; }
+        #tab-reg .reg-chk:last-child { border-bottom: 0; }
+        #tab-reg .reg-chk i { margin-top: 0; font-size: 13px; }
+        #tab-reg .reg-chk.ok i { color: var(--text-secondary); }
+        #tab-reg .reg-chk.bad { color: var(--danger); font-weight: 500; }
+        #tab-reg .reg-chk.wait { color: var(--text-secondary); }
+        #tab-reg .reg-msg { background: none; border: 0; border-left: 2px solid var(--text-muted); border-radius: 0; padding: 4px 0 4px 12px; margin-top: 12px; font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        #tab-reg .reg-msg.ok { background: none; border-left-color: var(--text-primary); color: var(--text-primary); }
+        #tab-reg .reg-msg.warn { background: none; border-left-color: var(--accent); color: var(--text-primary); }
+        #tab-reg .reg-msg.bad { background: none; border-left-color: var(--danger); color: var(--danger); }
+        #tab-reg .reg-msg.wait { background: none; border-left-color: var(--border); color: var(--text-secondary); font-weight: 400; }
+        #tab-reg #reg-v-user { font-size: 12px !important; color: var(--text-secondary) !important; }
+
+        /* justificação (só admin, quando o consumo é alto): alerta em linha */
+        #tab-reg .reg-just-box { background: none; border: 0; border-top: 1px solid var(--accent); border-radius: 0; padding: 12px 0 0; margin-top: 22px; }
+        #tab-reg .reg-just-head b { font-weight: 600; font-size: 14px; }
+        #tab-reg .reg-just-head span { color: var(--text-secondary); font-size: 12px; }
+        #tab-reg .reg-just-head .btn { height: 44px; padding: 0 16px; min-width: 0; }
+        #tab-reg .just-modal-motivos { gap: 6px; }
+        #tab-reg .just-motivo-btn { border-radius: 0; background: transparent; border: 1px solid var(--text-muted); color: var(--text-primary); min-height: 44px; font-size: 13px; font-weight: 500; transition: none; }
+        #tab-reg .just-motivo-btn i { display: none; }
+        #tab-reg .just-motivo-btn:hover { background: transparent; border-color: var(--text-primary); color: var(--text-primary); }
+        #tab-reg .just-motivo-btn.selected { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg-card); }
+
+        /* ecrã de confirmação */
+        #tab-reg .reg-done.card { background: none; border: 0; border-top: 2px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 20px 0 0; margin: 0; }
+        #tab-reg .reg-done .big { width: auto; height: auto; background: none; color: var(--text-primary); font-size: 30px; margin: 0 auto 10px; border-radius: 0; }
+        #tab-reg .reg-done.alerta .big { background: none; color: var(--accent); }
+        #tab-reg .reg-done .big::after { display: none; }
+        #tab-reg .reg-done h3 { font-size: 20px !important; font-weight: 600; }
+        #tab-reg .reg-done .badge { font-size: 13px !important; padding: 0 !important; }
+        #tab-reg .reg-done .reg-chk { border-bottom: 0; padding: 4px 0; }
+
+        /* últimos registos: lista, não cartão */
+        #tab-reg .reg-grid + .card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin: 36px 0 0; }
+        #tab-reg .reg-grid + .card .card-title { font-size: 15px; font-weight: 600; }
+        #tab-reg .reg-grid + .card .card-title i { display: none; }
+        #tab-reg .reg-grid + .card .card-header a { color: var(--text-primary) !important; font-weight: 500 !important; text-decoration: underline; text-underline-offset: 3px; }
+        #tab-reg .table-wrap { border: 0; border-radius: 0; background: none; }
+        #tab-reg th { background: none; font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); border-bottom: 1px solid var(--text-primary); padding: 10px 12px; }
+        #tab-reg td { border-bottom: 1px solid var(--border); padding: 12px; color: var(--text-primary); }
+        #tab-reg tr:hover td { background: none; }
+        #tab-reg th:nth-child(5), #tab-reg th:nth-child(6), #tab-reg td:nth-child(5), #tab-reg td:nth-child(6) { text-align: right; }
+        #tab-reg td:nth-child(5), #tab-reg td:nth-child(6) { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-reg td:nth-child(2) { font-size: 13px !important; }
+        #tab-reg tbody tr[class^="row-"] { background: none !important; }
+        #tab-reg tbody tr[class^="row-"] td { color: var(--text-primary) !important; }
+        #tab-reg tbody tr.row-roubo td:nth-child(6), #tab-reg tbody tr.row-roubo td:nth-child(7) { color: var(--danger) !important; }
+        #tab-reg td a, #tab-reg td [style*="color:var(--info)"] { color: inherit; }
+        #tab-reg .badge { background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0; font-size: 12px; font-weight: 500; color: var(--text-primary); letter-spacing: 0; gap: 7px; }
+        #tab-reg .badge::before { width: 8px; height: 8px; border-radius: 0; opacity: 1; background: var(--text-muted); }
+        #tab-reg .badge-ok::before { background: var(--success); }
+        #tab-reg .badge-alto::before, #tab-reg .badge-pedreira-alto::before { background: var(--warning); }
+        #tab-reg .badge-critico, #tab-reg .badge-roubo, #tab-reg .badge-pedreira-critico, #tab-reg .badge-pedreira-roubo { color: var(--danger); }
+        #tab-reg .badge-critico::before, #tab-reg .badge-roubo::before, #tab-reg .badge-pedreira-critico::before, #tab-reg .badge-pedreira-roubo::before { background: var(--danger); }
+        #tab-reg .badge-parcial, #tab-reg .badge-editado, #tab-reg .badge-justificado, #tab-reg .badge-primeiro, #tab-reg .badge-pedreira-ok { color: var(--text-primary); }
+        #tab-reg .empty-state { padding: 28px 0; }
+        #tab-reg .empty-state i { display: none; }
+
+        @media (max-width: 900px) {
+            #tab-reg .reg-grid { display: flex; flex-direction: column; align-items: stretch; gap: 0; margin-bottom: 0; }
+            #tab-reg .reg-grid > div { display: contents; }
+            #tab-reg .reg-grid > div > * { order: 2; }
+            #tab-reg .reg-side { order: 1; margin-bottom: 18px; }
+            #tab-reg .reg-grid > div > .reg-sum { order: 0; }
+            #tab-reg .reg-grid > div > .reg-panel { order: 3; }
+            #tab-reg .reg-grid > div > .reg-done { order: 3; }
+            /* no passo 1 e no ecrã de confirmação a verificação ainda não diz nada (sem :has, fica sempre visível) */
+            #tab-reg .reg-grid:has(#reg-p1.ativo) .reg-side, #tab-reg .reg-grid:has(#reg-done:not([style*="none"])) .reg-side { display: none; }
+            /* só o passo atual, em texto */
+            #tab-reg .reg-steps { gap: 0; margin-bottom: 16px; padding-bottom: 12px; }
+            #tab-reg .reg-dot, #tab-reg .reg-line { display: none; }
+            /* escondidos sem display:none, para o contador de passos continuar a contar */
+            #tab-reg .reg-lbl:not(.ativo) { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+            #tab-reg .reg-lbl.ativo { display: block; flex: 1; font-size: 14px; }
+            #tab-reg .reg-lbl.ativo::before { content: 'Passo ' counter(regp) ' de 3 · '; font-weight: 400; color: var(--text-secondary); }
+            /* verificação compacta: só os pontos com erro */
+            #tab-reg .reg-side .card-title, #tab-reg #reg-v-user { display: none; }
+            #tab-reg .reg-chk.ok, #tab-reg .reg-chk.wait { display: none; }
+            #tab-reg #reg-v-checks { margin-top: 8px !important; }
+            #tab-reg .reg-v-num { font-size: 28px; }
+            #tab-reg .reg-fields { grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+            #tab-reg .reg-fields > [style*="grid-column"] { grid-column: 1 / -1; }
+            #tab-reg .reg-sum a { padding: 14px 0 14px 12px; }
+            /* passo 2: a verificação só aparece se houver erro a mostrar */
+            #tab-reg .reg-grid:has(#reg-p2.ativo):not(:has(.reg-chk.bad)) .reg-side { display: none; }
+            /* passo 1: um campo por linha (o placeholder da marca não cabe em meia largura) */
+            #tab-reg #reg-p1 .reg-fields > div { grid-column: 1 / -1; }
+        }
+        @media (max-width: 768px) {
+            #tab-reg .page-desc { display: none; }
+            #tab-reg .page-header { margin-bottom: 18px; }
+            #tab-reg .page-title { font-size: 22px; }
+            /* barra de ação sempre visível em baixo */
+            #tab-reg .reg-panel .reg-acoes { position: sticky; bottom: -24px; z-index: 20; /* -24px compensa o padding-bottom de 24px do .main no telemóvel */ flex-direction: row; margin: 20px -16px 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--bg-page); border-top: 1px solid var(--text-primary); }
+            #tab-reg .reg-panel .reg-acoes .btn { width: auto; min-width: 0; height: 52px; }
+            #tab-reg .reg-panel .reg-acoes .btn-ghost { flex: 0 0 auto; padding: 0 20px; }
+            #tab-reg .reg-panel .reg-acoes .btn-primary { flex: 1 1 auto; font-size: 16px; }
+            #tab-reg .reg-done .reg-acoes { flex-direction: column-reverse; }
+            #tab-reg .reg-done .reg-acoes .btn { width: 100%; }
+            /* lista de últimos registos em duas linhas por registo, sem scroll lateral */
+            #tab-reg .table-scroll { max-height: none; overflow: visible; }
+            #tab-reg table, #tab-reg tbody { display: block; }
+            #tab-reg thead { display: none; }
+            #tab-reg tbody tr { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); }
+            #tab-reg tbody td { border: 0; padding: 0; display: block; text-align: left; }
+            #tab-reg tbody td:nth-child(3) { grid-column: 1 / 4; grid-row: 1; font-size: 15px; }
+            #tab-reg tbody td:nth-child(7) { grid-column: 4; grid-row: 1; justify-self: end; }
+            #tab-reg tbody td:nth-child(1) { grid-column: 1; grid-row: 2; font-size: 12px; color: var(--text-secondary) !important; }
+            #tab-reg tbody td:nth-child(2) { grid-column: 2; grid-row: 2; font-size: 12px !important; color: var(--text-secondary) !important; }
+            #tab-reg tbody td:nth-child(4) { grid-column: 3; grid-row: 2; font-size: 12px; color: var(--text-secondary) !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #tab-reg tbody td:nth-child(5) { grid-column: 4; grid-row: 2; justify-self: end; font-size: 13px; text-align: right; }
+            #tab-reg tbody td:nth-child(6) { display: none; }
+            #tab-reg tbody td[colspan] { grid-column: 1 / -1; grid-row: auto; }
+        }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
@@ -1202,17 +1436,16 @@ document.addEventListener('DOMContentLoaded', function(){
                 <div class="chart-container"><canvas id="chartTrend"></canvas></div>
             </div>
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-pie"></i>Distribuição de Status</div>
-                <div class="chart-container"><canvas id="chartStatus"></canvas></div>
+                <div class="card-title"><i class="fas fa-chart-pie"></i>Estado dos abastecimentos</div>
+                <div class="status-dist" id="statusDist"></div>
+            </div>
+            <div class="card dash-oculto">
+                <div class="card-title"><i class="fas fa-chart-bar"></i>Top 10 Motoristas por Consumo Médio</div>
+                <div class="chart-container"><canvas id="chartDrivers"></canvas></div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-title"><i class="fas fa-chart-bar"></i>Top 10 Motoristas por Consumo Médio</div>
-            <div class="chart-container" style="height:420px"><canvas id="chartDrivers"></canvas></div>
-        </div>
-
-        <div class="card">
+        <div class="card dash-oculto">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-triangle-exclamation"></i>Top 10 — Alertas Críticos por Motorista</div>
                 <span id="rank-count" style="font-size:12px;color:var(--text-muted);"></span>
@@ -1263,7 +1496,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             <div class="input-help" id="moto-help"></div>
                         </div>
                     </div>
-                    <div class="reg-acoes"><button class="btn btn-primary" onclick="regContinuar(1)">Continuar <i class="fas fa-arrow-right"></i></button></div>
+                    <div class="reg-acoes"><button class="btn btn-primary" onclick="regContinuar(1)">Continuar</button></div>
                 </div>
 
                 <div class="reg-panel" id="reg-p2">
@@ -1282,7 +1515,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             <div class="input-help" id="km-help"></div>
                         </div>
                     </div>
-                    <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(1)">Voltar</button><button class="btn btn-primary" onclick="regContinuar(2)">Continuar <i class="fas fa-arrow-right"></i></button></div>
+                    <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(1)">Voltar</button><button class="btn btn-primary" onclick="regContinuar(2)">Continuar</button></div>
                 </div>
 
                 <div class="reg-panel" id="reg-p3">
@@ -1316,7 +1549,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             <textarea id="reg-just-obs" rows="2" placeholder="Observação adicional (opcional)" style="resize:vertical;margin-top:10px"></textarea>
                         </div>
                     </div>
-                    <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(2)">Voltar</button><button class="btn btn-primary" onclick="salvar()" id="btnSalvar"><i class="fas fa-save"></i> Guardar Registo</button></div>
+                    <div class="reg-acoes"><button class="btn btn-ghost" onclick="regIrPasso(2)">Voltar</button><button class="btn btn-primary" onclick="salvar()" id="btnSalvar">Guardar Registo</button></div>
                 </div>
 
                 <div class="card reg-done" id="reg-done" style="display:none"></div>
@@ -4426,14 +4659,30 @@ function atualizarDashCharts() {
     var pontosVisiveis = tl.length <= 30;
 
     if (chartTrendInstance) chartTrendInstance.destroy();
+    var ink = document.documentElement.classList.contains('dark') ? '#f1f5f9' : '#0f172a';
+    var picoCor = '#ea580c';
+    var picoIdx = -1, picoVal = -Infinity;
+    tv.forEach(function(v, i){ if (Number(v) > picoVal) { picoVal = Number(v); picoIdx = i; } });
     chartTrendInstance = new Chart(document.getElementById('chartTrend'), {
         type:'line', data:{ labels:tlDisplay, datasets:[
-            {label:'Consumo Médio (por '+modoLabel+')',data:tv,borderColor:'#ea580c',backgroundColor:'rgba(234,88,12,0.1)',fill:true,tension:0.4,pointRadius:pontosVisiveis?3:0,pointBackgroundColor:'#ea580c',borderWidth:2},
-            {label:'Tendência 7d',data:mm,borderColor:'#3b82f6',borderWidth:2,borderDash:[5,5],pointRadius:0,fill:false},
-            {label:'Meta ('+META+')',data:ml,borderColor:'#059669',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false},
-            {label:'Limiar AOA ('+LIMIAR_AOA+')',data:tl.map(function(){return LIMIAR_AOA;}),borderColor:'#d97706',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false}
+            {label:'Consumo médio (por '+modoLabel+')',data:tv,borderColor:ink,backgroundColor:'transparent',fill:false,tension:0.2,borderWidth:2,
+                pointRadius:function(c){ return c.dataIndex===picoIdx ? 5 : (pontosVisiveis ? 2 : 0); },
+                pointBackgroundColor:function(c){ return c.dataIndex===picoIdx ? picoCor : ink; },pointBorderWidth:0},
+            {label:'Tendência 7d',data:mm,borderColor:colors.text,borderWidth:1.5,borderDash:[2,4],pointRadius:0,fill:false},
+            {label:'Meta ('+META+')',data:ml,borderColor:ink,borderDash:[6,4],borderWidth:1,pointRadius:0,fill:false},
+            {label:'Limiar AOA ('+LIMIAR_AOA+')',data:tl.map(function(){return LIMIAR_AOA;}),borderColor:'#d97706',borderDash:[2,3],borderWidth:1,pointRadius:0,fill:false}
         ]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:colors.text,font:{family:'Outfit',size:12}}},tooltip:{mode:'index',intersect:false,callbacks:{title:function(items){ return tl[items[0].dataIndex] + (modo!=='dia'?' ('+modoLabel+')':''); }}}},scales:{x:{ticks:{color:colors.text,font:{size:10},maxRotation:45,maxTicksLimit:18},grid:{color:colors.grid}},y:{ticks:{color:colors.text,font:{family:'JetBrains Mono',size:11}},grid:{color:colors.grid}}}}
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{color:colors.text,font:{family:'Karla',size:11},boxWidth:18,boxHeight:2}},tooltip:{mode:'index',intersect:false,callbacks:{title:function(items){ return tl[items[0].dataIndex] + (modo!=='dia'?' ('+modoLabel+')':''); }}}},scales:{x:{ticks:{color:colors.text,font:{size:10},maxRotation:45,maxTicksLimit:18},grid:{display:false}},y:{ticks:{color:colors.text,font:{family:'JetBrains Mono',size:11}},grid:{color:colors.grid},border:{display:false}}}},
+        plugins:[{id:'picoLabel',afterDatasetsDraw:function(chart){
+            if (picoIdx < 0) return;
+            var el = chart.getDatasetMeta(0).data[picoIdx]; if (!el) return;
+            var c = chart.ctx; c.save();
+            c.font = '700 11px JetBrains Mono, monospace'; c.fillStyle = picoCor; c.textBaseline = 'middle';
+            var txt = 'pico ' + tlDisplay[picoIdx] + ' · ' + picoVal.toFixed(1).replace('.', ',');
+            var w = c.measureText(txt).width;
+            var x = el.x + 10; if (x + w > chart.chartArea.right) x = el.x - 10 - w;
+            c.fillText(txt, x, el.y - 2); c.restore();
+        }}]
     });
     var sc = {OK:0,ALTO:0,CRITICO:0,ROUBO:0,PRIMEIRO:0,'PEDREIRA-OK':0,'PEDREIRA-ALTO':0,'PEDREIRA-CRITICO':0,'PEDREIRA-ROUBO':0};
     dbFilt.forEach(function(r){ if(r.status && sc[r.status]!==undefined) sc[r.status]++; });
@@ -4444,11 +4693,26 @@ function atualizarDashCharts() {
         'PEDREIRA-OK':'#78716c','PEDREIRA-ALTO':'#b45309','PEDREIRA-CRITICO':'#6d28d9','PEDREIRA-ROUBO':'#4c1d95'
     };
     Object.keys(sc).forEach(function(k){ if(sc[k]>0){ labelsFiltrados.push(k); valoresFiltrados.push(sc[k]); coresFiltradas.push(corMap[k]||'#94a3b8'); } });
-    if (chartStatusInstance) chartStatusInstance.destroy();
-    chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
-        type:'doughnut', data:{labels:labelsFiltrados,datasets:[{data:valoresFiltrados,backgroundColor:coresFiltradas,borderWidth:0,hoverOffset:6}]},
-        options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:colors.text,font:{family:'Outfit',size:11},padding:12}},tooltip:{callbacks:{label:function(ctx){return ctx.label+': '+ctx.raw+' ('+(dbFilt.length>0?((ctx.raw/dbFilt.length)*100).toFixed(1):0)+'%)'}}}}}
-    });
+    var nomesEstado = {
+        'OK':'Normal','ALTO':'Alto','CRITICO':'Crítico','ROUBO':'Roubo','PRIMEIRO':'Primeiro registo',
+        'PEDREIRA-OK':'Pedreira · Normal','PEDREIRA-ALTO':'Pedreira · Alto','PEDREIRA-CRITICO':'Pedreira · Crítico','PEDREIRA-ROUBO':'Pedreira · Roubo'
+    };
+    var totalEstados = valoresFiltrados.reduce(function(s, v){ return s + v; }, 0);
+    var boxEstado = document.getElementById('statusDist');
+    if (boxEstado) {
+        if (totalEstados === 0) {
+            boxEstado.innerHTML = '<div style="font-size:13px;color:var(--text-muted)">Sem registos no período.</div>';
+        } else {
+            var barra = '', linhas = '';
+            labelsFiltrados.forEach(function(k, i) {
+                var n = valoresFiltrados[i], pct = (n / totalEstados * 100);
+                var nome = nomesEstado[k] || k, pctTxt = pct.toFixed(1).replace('.', ',') + '%';
+                barra += '<div class="status-dist-seg" style="flex:' + n + ' 1 0;background:' + coresFiltradas[i] + '" title="' + nome + ': ' + n + ' (' + pctTxt + ')"></div>';
+                linhas += '<div class="status-dist-row"><span class="status-dist-sw" style="background:' + coresFiltradas[i] + '"></span><span class="status-dist-nome">' + nome + '</span><span class="status-dist-pct">' + pctTxt + '</span><span class="status-dist-n">' + n.toLocaleString() + '</span></div>';
+            });
+            boxEstado.innerHTML = '<div class="status-dist-bar" role="img" aria-label="Distribuição dos abastecimentos por estado">' + barra + '</div>' + linhas;
+        }
+    }
     // Ranking com ponderação temporal: últimos 90 dias têm peso 2×
     var agora = Date.now();
     var limite90d = agora - (90 * 24 * 3600 * 1000);
@@ -4469,7 +4733,7 @@ function atualizarDashCharts() {
     }).sort(function(a,b){return b.avg-a.avg;}).slice(0,10);
     if (chartDriversInstance) chartDriversInstance.destroy();
     chartDriversInstance = new Chart(document.getElementById('chartDrivers'), {
-        type:'bar', data:{labels:de.map(function(d){return d.label;}),datasets:[{label:'Média L/100km (pond. 90d)',data:de.map(function(d){return d.avg;}),backgroundColor:de.map(function(d){return d.avg>85?'#18181b':d.avg>65?'#dc2626':d.avg>55?'#d97706':'#059669';}),borderRadius:6,barThickness:22,categoryPercentage:0.85,barPercentage:0.8}]},
+        type:'bar', data:{labels:de.map(function(d){return d.label;}),datasets:[{label:'Média L/100km (pond. 90d)',data:de.map(function(d){return d.avg;}),backgroundColor:de.map(function(d){return d.avg>85?'#18181b':d.avg>65?'#dc2626':d.avg>55?'#d97706':'#059669';}),borderRadius:2,barThickness:16,categoryPercentage:0.85,barPercentage:0.8}]},
         options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return de[ctx.dataIndex].tooltip + ' — ' + ctx.parsed.x + ' L/100km';}}}},scales:{x:{min:0,ticks:{color:colors.text,font:{family:'JetBrains Mono',size:11}},grid:{color:colors.grid}},y:{ticks:{color:colors.text,font:{family:'Karla',size:12}},grid:{display:false}}}}
     });
 }
