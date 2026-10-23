@@ -447,6 +447,13 @@
             .sidebar { border-right-color: var(--text-primary); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
         }
 
+        /* ecrãs baixos (telemóvel em paisagem): a lateral inteira rola como um só bloco, em vez de uma janela minúscula para a navegação */
+        @media (max-height: 520px) {
+            .sidebar { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+            .sidebar .sidebar-nav { flex: none; overflow: visible; }
+            .sidebar .sidebar-footer { margin-top: 12px; }
+        }
+
         /* cabeçalho de página (todas as abas): texto simples, sem pastilha decorativa */
         .main .page-eyebrow { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
         .main .page-period-pill { background: none; border: 0; border-radius: 0; padding: 0; margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
@@ -583,6 +590,105 @@
         @media (max-width: 768px) {
             #justModal .modal-actions, #editModal .modal-actions, #deleteModal .modal-actions { flex-direction: row; }
             #justModal .modal-actions .btn:last-child, #editModal .modal-actions .btn:last-child, #deleteModal .modal-actions .btn:last-child { flex: 1 1 auto; }
+        }
+
+        /* ===== ANÁLISE DE CONSUMO: linguagem de linhas finas (só visual; tudo limitado a #tab-analise) ===== */
+        #tab-analise.tab-active { animation: none; }
+        #tab-analise .page-period-pill { display: none; }
+
+        /* filtros */
+        #tab-analise .filter-bar { background: none; border: 0; border-top: 2px solid var(--text-primary); border-radius: 0; padding: 14px 0 0; margin-bottom: 24px; gap: 14px 12px; align-items: flex-end; }
+        #tab-analise .filter-bar label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #tab-analise .filter-bar input, #tab-analise .filter-bar select { border-radius: 0; border: 1px solid var(--text-muted); min-height: 48px; padding: 10px 12px; }
+        #tab-analise .filter-bar input[type="date"] { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-analise .filter-bar input:focus, #tab-analise .filter-bar select:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: -1px; }
+
+        /* estatísticas: como no Painel (colunas separadas por 1px, números em tinta; vermelho só no pior registo) */
+        #tab-analise .stats-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--border); border-top: 2px solid var(--text-primary); border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+        #tab-analise .stat-card { background: var(--bg-page); border: 0; border-radius: 0; box-shadow: none; padding: 16px 20px 18px; }
+        #tab-analise .stat-card:first-child { padding-left: 0; }
+        #tab-analise .stat-card:hover { transform: none; box-shadow: none; }
+        #tab-analise .stat-icon-pill { display: none; }
+        #tab-analise .stat-label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 8px; }
+        #tab-analise .stat-label span { font-size: 12px !important; font-weight: 400 !important; opacity: 1 !important; }
+        #tab-analise .stat-val { font-size: 30px; font-weight: 500; letter-spacing: -0.03em; color: var(--text-primary); }
+        #tab-analise .stat-card.red .stat-val { color: var(--danger); }
+        #tab-analise .stat-val small { font-size: 13px !important; color: var(--text-secondary); }
+        #tab-analise .stat-sub { font-size: 12px !important; color: var(--text-secondary); margin-top: 8px; opacity: 1 !important; }
+        #tab-analise .kpi-badge { background: none; padding: 0; border-radius: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        #tab-analise .kpi-badge.danger { color: var(--danger); }
+        #tab-analise .kpi-badge.success { color: var(--text-primary); }
+
+        /* blocos: linha em vez de cartão */
+        #tab-analise .card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin: 0 0 32px; }
+        #tab-analise .card-title { font-size: 15px; font-weight: 600; }
+        #tab-analise .card-title i { display: none; }
+        #tab-analise #analise-chart-card .chart-container { margin-top: 12px; }
+        #tab-analise .empty-state { padding: 28px 0; }
+        #tab-analise .empty-state i { display: none; }
+
+        /* tabela */
+        #tab-analise .table-wrap { border: 0; border-radius: 0; background: none; }
+        #tab-analise th { background: var(--bg-page); position: sticky; top: 0; z-index: 2; font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); border-bottom: 1px solid var(--text-primary); padding: 10px 8px; white-space: nowrap; }
+        #tab-analise td { border-bottom: 1px solid var(--border); padding: 11px 8px; font-size: 13px; color: var(--text-primary); }
+        #tab-analise tr:hover td { background: none; }
+        #tab-analise th:nth-child(n+7):nth-child(-n+10), #tab-analise td:nth-child(n+7):nth-child(-n+10) { text-align: right; }
+        #tab-analise td:nth-child(n+7):nth-child(-n+10) { font-family: 'JetBrains Mono', monospace; font-weight: 500 !important; white-space: nowrap; }
+        #tab-analise td:nth-child(2) { font-size: 12px !important; color: var(--text-secondary) !important; }
+        #tab-analise td:nth-child(4), #tab-analise td:nth-child(6) { color: var(--text-secondary) !important; font-size: 12px !important; }
+        #tab-analise td small { color: var(--text-secondary) !important; font-size: 11px !important; font-weight: 400; }
+        #tab-analise tbody tr[class^="row-"] { background: none !important; }
+        #tab-analise tbody tr[class^="row-"] td { color: var(--text-primary) !important; background: none !important; }
+        #tab-analise tbody tr[class^="row-"] td:nth-child(2), #tab-analise tbody tr[class^="row-"] td:nth-child(4), #tab-analise tbody tr[class^="row-"] td:nth-child(6) { color: var(--text-secondary) !important; }
+        #tab-analise tbody tr.row-roubo td:nth-child(10), #tab-analise tbody tr.row-roubo td:nth-child(11) { color: var(--danger) !important; }
+        #tab-analise .badge { background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0; font-size: 12px; font-weight: 500; color: var(--text-primary); letter-spacing: 0; gap: 7px; white-space: nowrap; }
+        #tab-analise .badge::before { width: 8px; height: 8px; border-radius: 0; opacity: 1; background: var(--text-muted); }
+        #tab-analise .badge-ok::before { background: var(--success); }
+        #tab-analise .badge-alto::before, #tab-analise .badge-pedreira-alto::before { background: var(--warning); }
+        #tab-analise .badge-critico, #tab-analise .badge-roubo, #tab-analise .badge-pedreira-critico, #tab-analise .badge-pedreira-roubo { color: var(--danger); }
+        #tab-analise .badge-critico::before, #tab-analise .badge-roubo::before, #tab-analise .badge-pedreira-critico::before, #tab-analise .badge-pedreira-roubo::before { background: var(--danger); }
+
+        /* até 1279px a tabela de 11 colunas não cabe: cada registo passa a um bloco de linhas, sem scroll lateral */
+        @media (max-width: 1279px) {
+            #tab-analise #analise-table-card .table-scroll { max-height: none; overflow: visible; }
+            #tab-analise #analise-table-card table, #tab-analise #analise-table-card tbody { display: block; }
+            #tab-analise #analise-table-card thead { display: none; }
+            #tab-analise #analise-table-card tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); column-gap: 40px; }
+            #tab-analise #analise-table-card tbody tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); min-width: 0; }
+            #tab-analise #analise-table-card tbody tr:only-child { grid-column: 1 / -1; }
+            #tab-analise #analise-table-card tbody td { display: block; border: 0; padding: 0; text-align: left; min-width: 0; }
+            #tab-analise #analise-table-card tbody td:nth-child(3) { grid-area: 1 / 1 / 2 / 3; font-size: 16px; }
+            #tab-analise #analise-table-card tbody td:nth-child(11) { grid-area: 1 / 3 / 2 / 5; justify-self: end; }
+            #tab-analise #analise-table-card tbody td:nth-child(5) { grid-area: 2 / 1 / 3 / 3; font-size: 14px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #tab-analise #analise-table-card tbody td:nth-child(6) { grid-area: 2 / 3 / 3 / 5; justify-self: end; margin-top: 6px; }
+            #tab-analise #analise-table-card tbody td:nth-child(1) { grid-area: 3 / 1; font-size: 12px; color: var(--text-secondary) !important; margin-top: 4px; }
+            #tab-analise #analise-table-card tbody td:nth-child(2) { grid-area: 3 / 2; margin-top: 4px; }
+            #tab-analise #analise-table-card tbody td:nth-child(4) { grid-area: 3 / 3 / 4 / 5; justify-self: end; margin-top: 4px; }
+            #tab-analise #analise-table-card tbody td:nth-child(n+7):nth-child(-n+10) { margin-top: 8px; text-align: left; }
+            #tab-analise #analise-table-card tbody td:nth-child(7) { grid-area: 4 / 1; }
+            #tab-analise #analise-table-card tbody td:nth-child(8) { grid-area: 4 / 2; }
+            #tab-analise #analise-table-card tbody td:nth-child(9) { grid-area: 4 / 3; }
+            #tab-analise #analise-table-card tbody td:nth-child(10) { grid-area: 4 / 4; }
+            #tab-analise #analise-table-card tbody td:nth-child(7)::after { content: ' km'; color: var(--text-secondary); font-size: 12px; }
+            #tab-analise #analise-table-card tbody td:nth-child(8)::after { content: ' dist'; color: var(--text-secondary); font-size: 12px; }
+            #tab-analise #analise-table-card tbody td:nth-child(9)::after { content: ' L'; color: var(--text-secondary); font-size: 12px; }
+            #tab-analise #analise-table-card tbody td:nth-child(10)::after { content: ' L/100'; color: var(--text-secondary); font-size: 12px; }
+            #tab-analise #analise-table-card tbody td[colspan] { grid-area: auto / 1 / auto / -1; margin-top: 0; }
+        }
+        @media (max-width: 768px) {
+            #tab-analise .page-desc { display: none; }
+            #tab-analise #analise-table-card tbody { grid-template-columns: 1fr; }
+            /* filtros em grelha: Filtrar por | Seleção, Início | Fim, Consumo em linha própria */
+            #tab-analise .filter-bar { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: 14px 12px; }
+            #tab-analise .filter-bar .filter-group { min-width: 0 !important; flex: none !important; }
+            #tab-analise .filter-bar .filter-group:nth-child(5) { grid-column: 1 / -1; }
+            #tab-analise .filter-bar input, #tab-analise .filter-bar select { max-width: none; width: 100%; }
+            /* estatísticas em 2x2 */
+            #tab-analise .stats-grid { grid-template-columns: 1fr 1fr; }
+            #tab-analise .stat-card, #tab-analise .stat-card:first-child { padding: 14px 12px 16px; }
+            #tab-analise .stat-card:nth-child(odd) { padding-left: 0; }
+            #tab-analise .stat-val { font-size: 24px; }
+            #tab-analise #analise-chart-card .chart-container { height: 260px !important; }
         }
 
         /* ===== TABS ===== */
@@ -5183,9 +5289,10 @@ function atualizarAnalise() {
     var cl = fc.map(function(r){return r.data;}), cv2 = fc.map(function(r){ var v = Number(r.l100); return (v > 0) ? v : NaN; }), mv = cl.map(function(){return META;});
     var pc = cv2.map(function(v){return v>85?'#18181b':v>65?'#dc2626':v>55?'#d97706':'#059669';});
     var colors = getChartColors();
+    var ink = document.documentElement.classList.contains('dark') ? '#f1f5f9' : '#0f172a';
     if (chartAnaliseInstance) chartAnaliseInstance.destroy();
     chartAnaliseInstance = new Chart(document.getElementById('chartAnalise'), {
-        type:'line', data:{labels:cl,datasets:[{label:'L/100km',data:cv2,borderColor:'#ea580c',backgroundColor:'rgba(234,88,12,0.08)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:pc,borderWidth:2.5,spanGaps:false},{label:'Meta ('+META+')',data:mv,borderColor:'#059669',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false},
+        type:'line', data:{labels:cl,datasets:[{label:'L/100km',data:cv2,borderColor:ink,backgroundColor:'transparent',fill:false,tension:0.2,pointRadius:4,pointBackgroundColor:pc,pointBorderWidth:0,borderWidth:2,spanGaps:false},{label:'Meta ('+META+')',data:mv,borderColor:ink,borderDash:[6,4],borderWidth:1,pointRadius:0,fill:false},
             {label:'Limiar AOA ('+LIMIAR_AOA+')',data:cl.map(function(){return LIMIAR_AOA;}),borderColor:'#d97706',borderDash:[3,3],borderWidth:1.5,pointRadius:0,fill:false}]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:colors.text,font:{family:'Outfit',size:12}}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){if(isNaN(ctx.raw))return ctx.dataset.label+': Parcial (aguarda reconciliação)';return ctx.dataset.label+': '+ctx.raw+' L/100km';}}}},scales:{x:{ticks:{color:colors.text,font:{size:10},maxRotation:45},grid:{color:colors.grid}},y:{ticks:{color:colors.text,font:{family:'JetBrains Mono',size:11}},grid:{color:colors.grid}}}}
     });
