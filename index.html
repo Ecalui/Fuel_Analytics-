@@ -691,6 +691,241 @@
             #tab-analise #analise-chart-card .chart-container { height: 260px !important; }
         }
 
+        /* ===== INVESTIGAÇÃO: linguagem de linhas finas (só visual; tudo limitado a #tab-invest) ===== */
+        #tab-invest.tab-active { animation: none; }
+
+        /* resumo: pesquisa + perda total */
+        #tab-invest .inv-resumo { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px 32px; border-top: 2px solid var(--text-primary); padding-top: 14px; margin-bottom: 22px; }
+        #tab-invest .inv-resumo-busca { flex: 1 1 260px; max-width: 380px; }
+        #tab-invest .inv-resumo-busca label, #tab-invest .inv-resumo-label, #tab-invest .inv-top10-filter label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #tab-invest .inv-resumo-busca label { display: block; margin-bottom: 6px; }
+        #tab-invest .inv-resumo-label { margin-bottom: 6px; }
+        #tab-invest .inv-resumo-total { text-align: right; }
+        #tab-invest .invest-total { font-size: 30px; font-weight: 500; letter-spacing: -0.03em; color: var(--text-primary); line-height: 1; }
+        #tab-invest #inv-busca, #tab-invest .inv-top10-filter select, #tab-invest .inv-top10-filter input { min-height: 48px; padding: 10px 12px; border-radius: 0; border: 1px solid var(--text-muted); background: var(--bg-card); color: var(--text-primary); font-size: 14px; }
+        #tab-invest #inv-busca { width: 100%; max-width: none; }
+        #tab-invest #inv-busca:focus, #tab-invest .inv-top10-filter select:focus, #tab-invest .inv-top10-filter input:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: -1px; }
+
+        /* período */
+        #tab-invest .inv-top10-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 8px; background: none; border: 0; border-radius: 0; padding: 0 0 20px; margin: 0; }
+        #tab-invest .inv-top10-filter label { order: 0; margin-right: 6px; white-space: nowrap; }
+        #tab-invest .inv-top10-btn { order: 1; min-height: 48px; padding: 0 16px; border: 1px solid var(--text-muted); border-radius: 0; background: transparent; color: var(--text-primary); font: 500 13px 'Outfit', sans-serif; cursor: pointer; transition: none; white-space: nowrap; }
+        #tab-invest .inv-top10-btn:hover { background: transparent; color: var(--text-primary); border-color: var(--text-primary); }
+        #tab-invest .inv-top10-btn.active { background: transparent; color: var(--text-primary); border-color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--text-primary); font-weight: 700; }
+        #tab-invest .inv-top10-filter select { order: 2; max-width: 200px; }
+        #tab-invest #inv-custom-wrap { order: 3; align-items: center; gap: 8px; }
+        #tab-invest #inv-custom-wrap input { width: 150px; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-invest #inv-custom-wrap span { color: var(--text-secondary); font-size: 13px; }
+        #tab-invest #inv-periodo-label { order: 4; margin-left: auto; font-size: 12px; color: var(--text-secondary); }
+
+        /* sub-abas: texto com barra de 2px na activa */
+        #tab-invest .inv-subtabs { display: flex; flex-wrap: wrap; gap: 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        #tab-invest .inv-subtab-btn { background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 0; margin-bottom: -1px; min-height: 48px; font: 500 14px 'Outfit', sans-serif; color: var(--text-secondary); transition: none; cursor: pointer; }
+        #tab-invest .inv-subtab-btn:hover { background: none; color: var(--text-primary); }
+        #tab-invest .inv-subtab-btn.inv-subtab-active { background: none; color: var(--text-primary); font-weight: 700; border-bottom-color: var(--text-primary); }
+        #tab-invest button:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+
+        /* explicação de cada sub-aba */
+        #tab-invest .inv-info-box { display: block; background: none; border: 0; border-left: 2px solid var(--text-primary); border-radius: 0; padding: 2px 0 2px 14px; margin: 0 0 24px; }
+        #tab-invest .inv-info-text { font-size: 13px; line-height: 1.6; color: var(--text-secondary); max-width: 72ch; }
+        #tab-invest .inv-info-text b { color: var(--text-primary); font-weight: 600; }
+
+        /* blocos: linha em vez de cartão */
+        #tab-invest .card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin: 0 0 32px; overflow: visible; }
+        #tab-invest .card:hover { transform: none; box-shadow: none; }
+        #tab-invest .card-header { margin-bottom: 14px; }
+        #tab-invest .card-title { font-size: 15px; font-weight: 600; }
+        #tab-invest .card-title i, #tab-invest .empty-state i { display: none; }
+        #tab-invest .empty-state { padding: 28px 0 !important; }
+        #tab-invest .table-wrap { border: 0; border-radius: 0; background: none; }
+        #tab-invest .card-header .btn { display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--text-muted); border-radius: 0; color: var(--text-primary); min-width: 44px; min-height: 44px; padding: 0; box-shadow: none; transform: none; }
+        #tab-invest .card-header .btn:hover { background: transparent; border-color: var(--text-primary); box-shadow: none; transform: none; }
+
+        /* detalhe (veículo / motorista / rota) */
+        #tab-invest [id$="-detail"] > .card { border-top: 2px solid var(--text-primary); }
+        #tab-invest .charts-row { grid-template-columns: 1fr 1fr; gap: 32px; }
+        #tab-invest .charts-row .card { border: 0 !important; border-top: 1px solid var(--border) !important; margin: 0 !important; }
+        #tab-invest .stats-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1px; background: var(--border); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 28px !important; }
+        #tab-invest .stat-card { background: var(--bg-page); border: 0; border-radius: 0; box-shadow: none; padding: 14px 18px 16px; }
+        #tab-invest .stat-card:first-child { padding-left: 0; }
+        #tab-invest .stat-card:hover { transform: none; box-shadow: none; }
+        #tab-invest .stat-label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 8px; }
+        #tab-invest .stat-val { font-size: 26px; font-weight: 500; letter-spacing: -0.03em; color: var(--text-primary); }
+        #tab-invest .stat-card.red .stat-val { color: var(--danger); }
+        #tab-invest .stat-val[style*="var(--warning)"] { color: var(--text-primary) !important; }
+        #tab-invest .stat-val small { font-size: 13px !important; color: var(--text-secondary); }
+        #tab-invest .stat-sub { font-size: 12px !important; color: var(--text-secondary); margin-top: 8px; }
+
+        /* rankings: linhas em vez de cartões */
+        #tab-invest .rank-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 40px; row-gap: 0; border-top: 2px solid var(--text-primary); margin-bottom: 32px; }
+        #tab-invest .rank-item { background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; overflow: visible; transition: none; }
+        #tab-invest .rank-item:hover { transform: none; box-shadow: none; }
+        #tab-invest .rank-item:hover .rank-name, #tab-invest .rota-card:hover b { text-decoration: underline; text-underline-offset: 3px; }
+        #tab-invest .rank-item-header { background: none; border: 0; padding: 14px 0 6px; gap: 12px; align-items: baseline; }
+        #tab-invest .rank-position { width: auto; height: auto; min-width: 22px; border-radius: 0; background: none; color: var(--text-muted); font-size: 13px; font-weight: 500; justify-content: flex-start; }
+        #tab-invest .rank-name { font-size: 15px; font-weight: 600; }
+        #tab-invest .rank-badge-status { background: none !important; border: 0; padding: 0; border-radius: 0; color: var(--text-primary); font-size: 12px; font-weight: 500; text-transform: none; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+        #tab-invest .rank-badge-status::before { content: ''; width: 8px; height: 8px; flex: none; background: var(--success); }
+        #tab-invest .rank-badge-roubo { color: var(--danger); }
+        #tab-invest .rank-badge-roubo::before { background: var(--danger); }
+        #tab-invest .rank-badge-critico::before, #tab-invest .rank-badge-alto::before { background: var(--warning); }
+        #tab-invest .rank-item-body { padding: 0 0 4px; }
+        #tab-invest .rank-metric { margin: 0; padding: 9px 0; border-top: 1px solid var(--border); }
+        #tab-invest .rank-metric-label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #tab-invest .rank-metric-val { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+        #tab-invest .rank-metric-val.danger { color: var(--danger); }
+        #tab-invest .rank-item-body span[style*="var(--success)"], #tab-invest .rank-item-body span[style*="var(--warning)"] { color: var(--text-primary) !important; }
+        #tab-invest .score-bar { height: 4px; border-radius: 0; background: var(--border); margin-top: 6px; }
+        #tab-invest .score-fill { border-radius: 0; transition: none; }
+        #tab-invest .rank-item-footer, #tab-invest .rank-item-footer.warning, #tab-invest .rank-item-footer.ok { background: none; border: 0; padding: 10px 0 14px; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        #tab-invest .rank-item-footer i { display: none; }
+
+        /* rotas */
+        #tab-invest .rota-card { background: none; border: 0 !important; border-bottom: 1px solid var(--border) !important; border-radius: 0; padding: 14px 0; transition: none; }
+        #tab-invest .rota-card:hover { transform: none; box-shadow: none; }
+        #tab-invest .rota-card i { display: none; }
+        #tab-invest .rota-card b { font-size: 15px !important; font-weight: 600; }
+        #tab-invest .rota-card-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+        #tab-invest .rota-metric { background: none; border-radius: 0; padding: 0; text-align: left; }
+        #tab-invest .rota-metric-val { font-size: 15px; font-weight: 500; }
+        #tab-invest .rota-metric-val[style*="var(--success)"], #tab-invest .rota-metric-val[style*="var(--warning)"] { color: var(--text-primary) !important; }
+        #tab-invest .rota-metric-label { font-size: 11px; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-top: 3px; }
+
+        /* padrões */
+        #tab-invest .padroes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); column-gap: 40px; row-gap: 28px; margin-bottom: 32px; }
+        #tab-invest .padrao-card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; overflow: visible; transition: none; }
+        #tab-invest .padrao-card:hover { transform: none; box-shadow: none; }
+        #tab-invest .padrao-card::before, #tab-invest .padrao-icon { display: none; }
+        #tab-invest .padrao-titulo { display: flex; align-items: flex-start; gap: 9px; font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        #tab-invest .padrao-titulo::before { content: ''; width: 8px; height: 8px; flex: none; margin-top: 6px; background: var(--text-muted); }
+        #tab-invest .p-danger .padrao-titulo::before { background: var(--danger); }
+        #tab-invest .p-warning .padrao-titulo::before { background: var(--warning); }
+        #tab-invest .p-success .padrao-titulo::before { background: var(--success); }
+        #tab-invest .padrao-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 10px; }
+        #tab-invest .padrao-lista li { border-bottom: 1px solid var(--border); padding: 9px 0; flex-wrap: wrap; font-size: 13px; }
+        #tab-invest .padrao-lista li:last-child { border-bottom: 1px solid var(--border); }
+        #tab-invest .padrao-lista li b { font-weight: 500; }
+        #tab-invest .padrao-badge { background: none !important; color: var(--text-primary) !important; padding: 0; border-radius: 0; font: 500 12px 'JetBrains Mono', monospace; text-transform: none; margin-left: auto; text-align: right; white-space: normal; }
+        #tab-invest .p-danger .padrao-badge { color: var(--danger) !important; }
+
+        /* aviso de custo contextualizado (criado pelo JS) */
+        #tab-invest .custo-ctx-banner { background: none; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 12px 0 0; margin-top: 16px !important; font-size: 13px; color: var(--text-secondary); }
+        #tab-invest .custo-ctx-banner b { color: var(--text-primary); font-weight: 600; }
+        #tab-invest .custo-ctx-banner i { display: none; }
+
+        /* tabelas */
+        #tab-invest th { background: var(--bg-page); position: sticky; top: 0; z-index: 2; font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); border-bottom: 1px solid var(--text-primary); padding: 10px 8px; white-space: nowrap; }
+        #tab-invest td { border-bottom: 1px solid var(--border); padding: 11px 8px; font-size: 13px; color: var(--text-primary); }
+        #tab-invest tr:hover td { background: none; }
+        #tab-invest td b { font-weight: 600; }
+        #tab-invest tbody tr[class^="row-"] { background: none !important; }
+        #tab-invest tbody tr[class^="row-"] td { color: var(--text-primary) !important; background: none !important; }
+        #tab-invest .badge { background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0; font-size: 12px; font-weight: 500; color: var(--text-primary); letter-spacing: 0; gap: 7px; white-space: nowrap; }
+        #tab-invest .badge::before { width: 8px; height: 8px; border-radius: 0; opacity: 1; background: var(--text-muted); }
+        #tab-invest .badge-ok::before { background: var(--success); }
+        #tab-invest .badge-alto::before, #tab-invest .badge-pedreira-alto::before { background: var(--warning); }
+        #tab-invest .badge-critico, #tab-invest .badge-roubo, #tab-invest .badge-pedreira-critico, #tab-invest .badge-pedreira-roubo { color: var(--danger); }
+        #tab-invest .badge-critico::before, #tab-invest .badge-roubo::before, #tab-invest .badge-pedreira-critico::before, #tab-invest .badge-pedreira-roubo::before { background: var(--danger); }
+
+        /* tabela "Todos os desvios" (11 colunas + Ação) */
+        #invtab-todos .card { padding-top: 0; }
+        #invtab-todos th:nth-child(n+7):nth-child(-n+9), #invtab-todos td:nth-child(n+7):nth-child(-n+9) { text-align: right; }
+        #invtab-todos td:nth-child(n+7):nth-child(-n+9) { font-family: 'JetBrains Mono', monospace; font-weight: 500 !important; white-space: nowrap; }
+        #invtab-todos td:nth-child(1), #invtab-todos td:nth-child(3) { white-space: nowrap; }
+        #invtab-todos td:nth-child(2), #invtab-todos td:nth-child(4), #invtab-todos td:nth-child(6) { font-size: 12px !important; color: var(--text-secondary) !important; }
+        #invtab-todos tbody tr[class^="row-"] td:nth-child(2), #invtab-todos tbody tr[class^="row-"] td:nth-child(4), #invtab-todos tbody tr[class^="row-"] td:nth-child(6) { color: var(--text-secondary) !important; }
+        #invtab-todos tbody tr:has(.badge-roubo, .badge-pedreira-roubo) td:nth-child(n+7):nth-child(-n+9) { color: var(--danger) !important; }
+        #invtab-todos td:nth-child(10) span { display: inline-block; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--text-secondary) !important; font-size: 12px !important; font-weight: 500 !important; text-transform: lowercase; }
+        #invtab-todos td:nth-child(10) span::first-letter { text-transform: uppercase; }
+        #invtab-todos td:nth-child(10) span i { display: none; }
+        #tab-invest .action-btn { background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--text-primary); border-radius: 0; font: 600 12px 'Outfit', sans-serif; min-height: 40px; padding: 0 12px; cursor: pointer; box-shadow: none; transform: none; }
+        #tab-invest .action-btn:hover { background: transparent !important; text-decoration: underline; text-underline-offset: 3px; }
+        #tab-invest .action-btn i { display: none; }
+
+        /* tabelas de detalhe (7 colunas) */
+        #tab-invest [id$="-detail"] th:nth-child(n+4):nth-child(-n+6), #tab-invest [id$="-detail"] td:nth-child(n+4):nth-child(-n+6) { text-align: right; }
+        #tab-invest [id$="-detail"] td:nth-child(n+4):nth-child(-n+6) { font-family: 'JetBrains Mono', monospace; font-weight: 500; white-space: nowrap; }
+        #tab-invest [id$="-detail"] td:nth-child(3) { color: var(--text-secondary) !important; font-size: 12px; }
+        #tab-invest [id$="-detail"] td:nth-child(6) { color: var(--text-primary) !important; }
+        #tab-invest [id$="-detail"] tbody tr:has(.badge-roubo, .badge-pedreira-roubo) td:nth-child(5), #tab-invest [id$="-detail"] tbody tr:has(.badge-roubo, .badge-pedreira-roubo) td:nth-child(6) { color: var(--danger) !important; }
+
+        /* entre 1366 e 1599px as 12 colunas só cabem com menos espaço entre colunas */
+        @media (min-width: 1366px) and (max-width: 1599px) {
+            #invtab-todos th, #invtab-todos td { padding-left: 6px; padding-right: 6px; }
+        }
+        /* até 1365px a tabela de 12 colunas não cabe: cada desvio passa a um bloco de linhas, sem scroll lateral */
+        @media (max-width: 1365px) {
+            #invtab-todos .table-scroll { max-height: none; overflow: visible; }
+            #invtab-todos table, #invtab-todos tbody { display: block; }
+            #invtab-todos thead { display: none; }
+            #invtab-todos tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); column-gap: 40px; }
+            #invtab-todos tbody tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); min-width: 0; }
+            #invtab-todos tbody tr:only-child { grid-column: 1 / -1; }
+            #invtab-todos tbody td { display: block; border: 0; padding: 0; text-align: left; min-width: 0; }
+            #invtab-todos tbody td:last-child:not([colspan]) { display: contents; }
+            #invtab-todos tbody td:nth-child(3) { grid-area: 1 / 1 / 2 / 3; font-size: 16px; }
+            #invtab-todos tbody td:nth-child(11) { grid-area: 1 / 3 / 2 / 5; justify-self: end; }
+            #invtab-todos tbody td:nth-child(5) { grid-area: 2 / 1 / 3 / 3; font-size: 14px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #invtab-todos tbody td:nth-child(6) { grid-area: 2 / 3 / 3 / 5; justify-self: end; margin-top: 6px; }
+            #invtab-todos tbody td:nth-child(1) { grid-area: 3 / 1; font-size: 12px; color: var(--text-secondary) !important; margin-top: 4px; }
+            #invtab-todos tbody td:nth-child(2) { grid-area: 3 / 2; margin-top: 4px; }
+            #invtab-todos tbody td:nth-child(4) { grid-area: 3 / 3 / 4 / 5; justify-self: end; margin-top: 4px; }
+            #invtab-todos tbody td:nth-child(n+7):nth-child(-n+9) { margin-top: 8px; text-align: left; }
+            #invtab-todos tbody td:nth-child(7) { grid-area: 4 / 1; }
+            #invtab-todos tbody td:nth-child(8) { grid-area: 4 / 2; }
+            #invtab-todos tbody td:nth-child(9) { grid-area: 4 / 3 / 5 / 5; text-align: right; }
+            #invtab-todos tbody td:nth-child(7)::after { content: ' L/100'; color: var(--text-secondary); font-size: 12px; }
+            #invtab-todos tbody td:nth-child(10) { grid-area: 5 / 1 / 6 / 5; margin-top: 6px; }
+            #invtab-todos tbody td:nth-child(10)::before { content: 'Tipo '; color: var(--text-secondary); font-size: 12px; }
+            #invtab-todos tbody .action-btn { grid-area: 6 / 1 / 7 / 4; justify-self: start; min-height: 44px; margin: 10px 0 0; padding: 0 16px; }
+            #invtab-todos tbody td[colspan] { grid-area: auto / 1 / auto / -1; margin-top: 0; }
+        }
+        @media (max-width: 900px) {
+            #tab-invest .charts-row { grid-template-columns: 1fr; gap: 20px; }
+            /* resumo: perda total primeiro, pesquisa a toda a largura */
+            #tab-invest .inv-resumo { flex-direction: column; align-items: stretch; gap: 16px; }
+            #tab-invest .inv-resumo-total { order: -1; text-align: left; }
+            #tab-invest .inv-resumo-busca { max-width: none; flex: none; }
+        }
+        @media (max-width: 768px) {
+            #tab-invest .page-desc { display: none; }
+            #tab-invest .invest-total { font-size: 26px; }
+            #invtab-todos tbody { grid-template-columns: 1fr; }
+            /* período: grelha de 3 colunas */
+            #tab-invest .inv-top10-filter { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; }
+            #tab-invest .inv-top10-filter label { grid-column: 1 / -1; }
+            #tab-invest .inv-top10-btn { min-height: 44px; padding: 0 6px; white-space: normal; line-height: 1.15; }
+            #tab-invest .inv-top10-filter select { grid-column: 1 / -1; max-width: none; width: 100%; }
+            #tab-invest #inv-custom-wrap { grid-column: 1 / -1; }
+            #tab-invest #inv-custom-wrap[style*="flex"] { display: grid !important; grid-template-columns: 1fr auto 1fr; }
+            #tab-invest #inv-custom-wrap input { width: 100%; min-width: 0; }
+            #tab-invest #inv-periodo-label { grid-column: 1 / -1; margin-left: 0; }
+            #tab-invest .inv-subtabs { gap: 0 14px; }
+            /* detalhe */
+            #tab-invest .stats-grid { grid-template-columns: 1fr 1fr; }
+            #tab-invest .stat-card, #tab-invest .stat-card:first-child { padding: 12px 12px 14px; }
+            #tab-invest .stat-card:nth-child(odd) { padding-left: 0; }
+            #tab-invest .stat-val { font-size: 22px; }
+            #tab-invest .chart-container { height: 240px !important; }
+            #tab-invest [id$="-detail"] .table-scroll { max-height: none; overflow: visible; }
+            #tab-invest [id$="-detail"] table, #tab-invest [id$="-detail"] tbody { display: block; }
+            #tab-invest [id$="-detail"] thead { display: none; }
+            #tab-invest [id$="-detail"] tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); }
+            #tab-invest [id$="-detail"] tbody td { display: block; border: 0; padding: 0; text-align: left; min-width: 0; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(1) { grid-area: 1 / 1 / 2 / 3; font-size: 12px; color: var(--text-secondary) !important; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(7) { grid-area: 1 / 3; justify-self: end; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(2) { grid-area: 2 / 1 / 3 / 3; font-size: 14px; margin-top: 6px; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(3) { grid-area: 2 / 3; justify-self: end; margin-top: 6px; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(4) { grid-area: 3 / 1; margin-top: 8px; text-align: left; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(5) { grid-area: 3 / 2; margin-top: 8px; text-align: left; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(5)::after { content: ' L/100'; color: var(--text-secondary); font-size: 12px; }
+            #tab-invest [id$="-detail"] tbody td:nth-child(6) { grid-area: 3 / 3; margin-top: 8px; text-align: right; }
+        }
+        @media (max-width: 480px) {
+            #tab-invest .inv-subtab-btn { font-size: 13px; }
+            #tab-invest .rota-card-metrics { grid-template-columns: 1fr 1fr; row-gap: 12px; }
+        }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
@@ -1999,78 +2234,76 @@ document.addEventListener('DOMContentLoaded', function(){
 
     <!-- ==================== INVESTIGAÇÃO ==================== -->
     <div id="tab-invest" class="tab-content">
-        <div class="invest-header">
-            <h2><i class="fas fa-user-secret"></i> Auditoria de Desvios de Consumo</h2>
-            <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-                <input type="text" id="inv-busca" placeholder="Filtrar suspeitas..." onkeyup="debounce(atualizarInvest,300)()" style="max-width:350px;background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.12)">
-                <div style="text-align:right">
-                    <small style="opacity:0.6;font-size:12px">Perda Total Estimada</small><br>
-                    <span class="invest-total" id="inv-perda-total">0 AOA</span>
-                </div>
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Auditoria</div><h1 class="page-title">Auditoria de Desvios de Consumo</h1><p class="page-desc">Registos acima do limite, por período, viatura, motorista e rota</p></div></div>
+
+        <div class="inv-resumo">
+            <div class="inv-resumo-busca">
+                <label for="inv-busca">Filtrar suspeitas</label>
+                <input type="text" id="inv-busca" placeholder="Viatura ou motorista" onkeyup="debounce(atualizarInvest,300)()">
+            </div>
+            <div class="inv-resumo-total">
+                <div class="inv-resumo-label">Perda total estimada</div>
+                <span class="invest-total" id="inv-perda-total">0 AOA</span>
             </div>
         </div>
 
         <!-- FILTRO AUTÓNOMO DO TOP 10 INVESTIGAÇÃO -->
         <div class="inv-top10-filter">
-            <label><i class="fas fa-trophy" style="color:#d97706"></i> Período Top 10</label>
+            <label>Período</label>
             <button class="inv-top10-btn active" onclick="setInvPeriod('tudo',this)">Todo o histórico</button>
             <button class="inv-top10-btn" onclick="setInvPeriod('ano',this)">Este Ano</button>
             <button class="inv-top10-btn" onclick="setInvPeriod('semestre',this)">Semestre</button>
             <button class="inv-top10-btn" onclick="setInvPeriod('trimestre',this)">Trimestre</button>
             <button class="inv-top10-btn" onclick="setInvPeriod('mes',this)">Este Mês</button>
-            <div style="width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 4px"></div>
-            <select id="inv-mes-especifico" onchange="setInvPeriod('mes-especifico', null)" style="max-width:180px;">
+            <select id="inv-mes-especifico" onchange="setInvPeriod('mes-especifico', null)">
                 <option value="">— Mês específico —</option>
             </select>
-            <div style="display:none;align-items:center;gap:6px;" id="inv-custom-wrap">
-                <input type="date" id="inv-ini" onchange="aplicarInvPeriodoPersonalizado()" style="width:130px;">
-                <span style="color:rgba(255,255,255,0.4);font-size:12px">→</span>
-                <input type="date" id="inv-fim" onchange="aplicarInvPeriodoPersonalizado()" style="width:130px;">
+            <div style="display:none;" id="inv-custom-wrap">
+                <input type="date" id="inv-ini" onchange="aplicarInvPeriodoPersonalizado()">
+                <span>→</span>
+                <input type="date" id="inv-fim" onchange="aplicarInvPeriodoPersonalizado()">
             </div>
-            <button class="inv-top10-btn" onclick="toggleInvCustom(this)"><i class="fas fa-sliders"></i> Datas</button>
-            <span style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);" id="inv-periodo-label">Todo o histórico</span>
+            <button class="inv-top10-btn" onclick="toggleInvCustom(this)">Datas</button>
+            <span id="inv-periodo-label">Todo o histórico</span>
         </div>
 
-        <div style="display:flex;gap:6px;margin-bottom:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:6px;flex-wrap:wrap;">
-            <button class="inv-subtab-btn inv-subtab-active" onclick="switchInvTab('todos',this)"><i class="fas fa-list-ul"></i> Todos os Desvios</button>
-            <button class="inv-subtab-btn" onclick="switchInvTab('veiculo',this)"><i class="fas fa-car-burst"></i> Veículo</button>
-            <button class="inv-subtab-btn" onclick="switchInvTab('motorista',this)"><i class="fas fa-user-slash"></i> Motorista</button>
-            <button class="inv-subtab-btn" onclick="switchInvTab('rota',this)"><i class="fas fa-route"></i> Rota</button>
-            <button class="inv-subtab-btn" onclick="switchInvTab('padroes',this)"><i class="fas fa-wave-square"></i> Padrões</button>
+        <div class="inv-subtabs">
+            <button class="inv-subtab-btn inv-subtab-active" onclick="switchInvTab('todos',this)">Todos os Desvios</button>
+            <button class="inv-subtab-btn" onclick="switchInvTab('veiculo',this)">Veículo</button>
+            <button class="inv-subtab-btn" onclick="switchInvTab('motorista',this)">Motorista</button>
+            <button class="inv-subtab-btn" onclick="switchInvTab('rota',this)">Rota</button>
+            <button class="inv-subtab-btn" onclick="switchInvTab('padroes',this)">Padrões</button>
         </div>
         <div id="invtab-todos">
-            <div class="card" style="padding:0;overflow:hidden"><div class="table-wrap"><div class="table-scroll">
+            <div class="card"><div class="table-wrap"><div class="table-scroll">
                 <table><thead><tr><th>Data</th><th>Hora</th><th>Viatura</th><th>Marca</th><th>Motorista</th><th>Destino</th><th>L/100km</th><th>Excesso</th><th>Prejuízo</th><th>Tipo</th><th>Status</th><th id="inv-acoes-header">Ação</th></tr></thead>
                 <tbody id="corpoInvestiga"></tbody></table>
             </div></div></div>
         </div>
         <div id="invtab-veiculo" style="display:none">
-            <div class="inv-info-box" style="background:rgba(234,88,12,0.06);border:1px solid rgba(234,88,12,0.15);">
-                <i class="fas fa-circle-info" style="color:var(--accent);font-size:18px;flex-shrink:0;margin-top:2px"></i>
-                <div style="font-size:13px;color:var(--text-secondary);line-height:1.6"><b style="color:var(--text-primary)">Problema no Veículo:</b> quando uma viatura consome acima da média independentemente do motorista, o problema é provavelmente mecânico. Quanto mais motoristas diferentes tiverem alto consumo nessa viatura, maior o score de risco.</div>
+            <div class="inv-info-box">
+                <div class="inv-info-text"><b>Problema no Veículo:</b> quando uma viatura consome acima da média independentemente do motorista, o problema é provavelmente mecânico. Quanto mais motoristas diferentes tiverem alto consumo nessa viatura, maior o score de risco.</div>
             </div>
             <div id="inv-v-ranking" class="rank-grid"></div>
             <div id="inv-v-detail" style="display:none;margin-top:20px"></div>
         </div>
         <div id="invtab-motorista" style="display:none">
-            <div class="inv-info-box" style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.15);">
-                <i class="fas fa-circle-info" style="color:var(--danger);font-size:18px;flex-shrink:0;margin-top:2px"></i>
-                <div style="font-size:13px;color:var(--text-secondary);line-height:1.6"><b style="color:var(--text-primary)">Problema no Motorista:</b> quando o consumo elevado está ligado a uma pessoa em viaturas diferentes, o padrão aponta para comportamento individual. Se o problema viaja com o motorista, é o motorista.</div>
+            <div class="inv-info-box">
+                <div class="inv-info-text"><b>Problema no Motorista:</b> quando o consumo elevado está ligado a uma pessoa em viaturas diferentes, o padrão aponta para comportamento individual. Se o problema viaja com o motorista, é o motorista.</div>
             </div>
             <div id="inv-m-ranking" class="rank-grid"></div>
             <div id="inv-m-detail" style="display:none;margin-top:20px"></div>
         </div>
         <div id="invtab-rota" style="display:none">
-            <div class="inv-info-box" style="background:rgba(13,148,136,0.06);border:1px solid rgba(13,148,136,0.15);">
-                <i class="fas fa-circle-info" style="color:var(--accent-2);font-size:18px;flex-shrink:0;margin-top:2px"></i>
-                <div style="font-size:13px;color:var(--text-secondary);line-height:1.6"><b style="color:var(--text-primary)">Problema na Rota:</b> quando o consumo elevado ocorre sempre num destino específico, independente do motorista ou viatura, pode indicar distância real maior do que registada ou desvio sistemático nessa rota.</div>
+            <div class="inv-info-box">
+                <div class="inv-info-text"><b>Problema na Rota:</b> quando o consumo elevado ocorre sempre num destino específico, independente do motorista ou viatura, pode indicar distância real maior do que registada ou desvio sistemático nessa rota.</div>
             </div>
-            <div id="inv-r-ranking" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-bottom:20px"></div>
+            <div id="inv-r-ranking" class="rank-grid"></div>
             <div id="inv-r-detail" style="display:none;margin-top:20px"></div>
         </div>
         <div id="invtab-padroes" style="display:none">
-            <div id="inv-p-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px;margin-bottom:24px"></div>
-            <div class="card"><div class="card-title"><i class="fas fa-chart-bar"></i> Anomalias por Mês</div>
+            <div id="inv-p-cards" class="padroes-grid"></div>
+            <div class="card"><div class="card-title">Anomalias por Mês</div>
             <div class="chart-container" style="height:260px"><canvas id="chartPadroesBar"></canvas></div></div>
         </div>
     </div>
@@ -6192,15 +6425,15 @@ function _invVeiculoDetail(placa){
         +'</table></div></div></div>';
     el.style.display='block';
     el.scrollIntoView({behavior:'smooth',block:'start'});
-    var cc=_cc();
+    var cc=_cc(); var ink=document.documentElement.classList.contains('dark')?'#f1f5f9':'#0f172a';
     _ciVT=_dChart(_ciVT);
     _ciVT=new Chart(document.getElementById('_cvt'),{type:'line',data:{labels:regs.map(function(r){return r.data;}),datasets:[
-        {label:'L/100km',data:regs.map(function(r){return parseFloat(r.l100);}),borderColor:'#ea580c',backgroundColor:'rgba(234,88,12,0.1)',fill:true,tension:0.4,pointRadius:3,borderWidth:2},
-        {label:'Média Frota',data:regs.map(function(){return parseFloat(mg.toFixed(2));}),borderColor:'#059669',borderDash:[5,5],borderWidth:2,pointRadius:0,fill:false}
+        {label:'L/100km',data:regs.map(function(r){return parseFloat(r.l100);}),borderColor:ink,backgroundColor:'transparent',fill:false,tension:0.2,pointRadius:3,pointBackgroundColor:regs.map(function(r){var v=parseFloat(r.l100);return v>65?'#dc2626':v>55?'#d97706':ink;}),pointBorderWidth:0,borderWidth:2},
+        {label:'Média Frota',data:regs.map(function(){return parseFloat(mg.toFixed(2));}),borderColor:ink,borderDash:[6,4],borderWidth:1,pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cc.text}}},scales:{x:{ticks:{color:cc.text,maxRotation:45,font:{size:10}}},y:{ticks:{color:cc.text}}}}});
     var mn=Object.keys(mots),mm=mn.map(function(m){return (mots[m].s/mots[m].n).toFixed(2);});
     _ciVM=_dChart(_ciVM);
-    _ciVM=new Chart(document.getElementById('_cvm'),{type:'bar',data:{labels:mn,datasets:[{label:'L/100km',data:mm,backgroundColor:mm.map(function(v){return v>65?'rgba(220,38,38,0.75)':v>55?'rgba(217,119,6,0.75)':'rgba(5,150,105,0.75)';}),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cc.text}},y:{ticks:{color:cc.text}}}}});
+    _ciVM=new Chart(document.getElementById('_cvm'),{type:'bar',data:{labels:mn,datasets:[{label:'L/100km',data:mm,backgroundColor:mm.map(function(v){return v>65?'#dc2626':v>55?'#d97706':cc.text;}),borderRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cc.text}},y:{ticks:{color:cc.text}}}}});
 }
 
 // ── MOTORISTA ────────────────────────────────────────────────────────────────
@@ -6275,15 +6508,15 @@ function _invMotoristaDetail(nome){
         +'</table></div></div></div>';
     el.style.display='block';
     el.scrollIntoView({behavior:'smooth',block:'start'});
-    var cc=_cc();
+    var cc=_cc(); var ink=document.documentElement.classList.contains('dark')?'#f1f5f9':'#0f172a';
     _ciMT=_dChart(_ciMT);
     _ciMT=new Chart(document.getElementById('_cmt'),{type:'line',data:{labels:regs.map(function(r){return r.data;}),datasets:[
-        {label:'L/100km',data:regs.map(function(r){return parseFloat(r.l100);}),borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,0.1)',fill:true,tension:0.4,pointRadius:3,borderWidth:2},
-        {label:'Média Frota',data:regs.map(function(){return parseFloat(mg.toFixed(2));}),borderColor:'#059669',borderDash:[5,5],borderWidth:2,pointRadius:0,fill:false}
+        {label:'L/100km',data:regs.map(function(r){return parseFloat(r.l100);}),borderColor:ink,backgroundColor:'transparent',fill:false,tension:0.2,pointRadius:3,pointBackgroundColor:regs.map(function(r){var v=parseFloat(r.l100);return v>65?'#dc2626':v>55?'#d97706':ink;}),pointBorderWidth:0,borderWidth:2},
+        {label:'Média Frota',data:regs.map(function(){return parseFloat(mg.toFixed(2));}),borderColor:ink,borderDash:[6,4],borderWidth:1,pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cc.text}}},scales:{x:{ticks:{color:cc.text,maxRotation:45,font:{size:10}}},y:{ticks:{color:cc.text}}}}});
     var vn=Object.keys(viats),vm=vn.map(function(v){return (viats[v].s/viats[v].n).toFixed(2);});
     _ciMV=_dChart(_ciMV);
-    _ciMV=new Chart(document.getElementById('_cmv'),{type:'bar',data:{labels:vn,datasets:[{label:'L/100km',data:vm,backgroundColor:vm.map(function(v){return v>65?'rgba(220,38,38,0.75)':v>55?'rgba(217,119,6,0.75)':'rgba(5,150,105,0.75)';}),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cc.text}},y:{ticks:{color:cc.text}}}}});
+    _ciMV=new Chart(document.getElementById('_cmv'),{type:'bar',data:{labels:vn,datasets:[{label:'L/100km',data:vm,backgroundColor:vm.map(function(v){return v>65?'#dc2626':v>55?'#d97706':cc.text;}),borderRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cc.text}},y:{ticks:{color:cc.text}}}}});
 }
 
 // ── ROTA ─────────────────────────────────────────────────────────────────────
@@ -6360,14 +6593,14 @@ function _invRotaDetail(dest){
         +'</table></div></div></div>';
     el.style.display='block';
     el.scrollIntoView({behavior:'smooth',block:'start'});
-    var cc=_cc();
+    var cc=_cc(); var ink=document.documentElement.classList.contains('dark')?'#f1f5f9':'#0f172a';
     var mn=Object.keys(mots),mm=mn.map(function(m){return (mots[m].s/mots[m].n).toFixed(2);});
     _ciRM=_dChart(_ciRM);
-    _ciRM=new Chart(document.getElementById('_crm'),{type:'bar',data:{labels:mn,datasets:[{label:'L/100km',data:mm,backgroundColor:mm.map(function(v){return v>65?'rgba(220,38,38,0.75)':v>55?'rgba(217,119,6,0.75)':'rgba(5,150,105,0.75)';}),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cc.text}},y:{ticks:{color:cc.text}}}}});
+    _ciRM=new Chart(document.getElementById('_crm'),{type:'bar',data:{labels:mn,datasets:[{label:'L/100km',data:mm,backgroundColor:mm.map(function(v){return v>65?'#dc2626':v>55?'#d97706':cc.text;}),borderRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cc.text}},y:{ticks:{color:cc.text}}}}});
     _ciRT=_dChart(_ciRT);
     _ciRT=new Chart(document.getElementById('_crt'),{type:'line',data:{labels:regs.map(function(r){return r.data;}),datasets:[
-        {label:'L/100km',data:regs.map(function(r){return parseFloat(r.l100);}),borderColor:'#0d9488',backgroundColor:'rgba(13,148,136,0.1)',fill:true,tension:0.4,pointRadius:3,borderWidth:2},
-        {label:'Média Frota',data:regs.map(function(){return parseFloat(mg.toFixed(2));}),borderColor:'#ea580c',borderDash:[5,5],borderWidth:2,pointRadius:0,fill:false}
+        {label:'L/100km',data:regs.map(function(r){return parseFloat(r.l100);}),borderColor:ink,backgroundColor:'transparent',fill:false,tension:0.2,pointRadius:3,pointBackgroundColor:regs.map(function(r){var v=parseFloat(r.l100);return v>65?'#dc2626':v>55?'#d97706':ink;}),pointBorderWidth:0,borderWidth:2},
+        {label:'Média Frota',data:regs.map(function(){return parseFloat(mg.toFixed(2));}),borderColor:ink,borderDash:[6,4],borderWidth:1,pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cc.text}}},scales:{x:{ticks:{color:cc.text,maxRotation:45,font:{size:10}}},y:{ticks:{color:cc.text}}}}});
 }
 
@@ -6482,13 +6715,13 @@ function _invPadroes(){
     });
     var ml2=Object.keys(mmap).sort();
     if(ml2.length){
-        var cc=_cc();
+        var cc=_cc(); var ink=document.documentElement.classList.contains('dark')?'#f1f5f9':'#0f172a';
         _ciPB=_dChart(_ciPB);
         _ciPB=new Chart(document.getElementById('chartPadroesBar'),{
             type:'bar',
             data:{labels:ml2,datasets:[
-                {label:'ROUBO',data:ml2.map(function(k){return mmap[k].r;}),backgroundColor:'rgba(24,24,27,0.85)',borderRadius:4},
-                {label:'CRÍTICO',data:ml2.map(function(k){return mmap[k].c;}),backgroundColor:'rgba(220,38,38,0.75)',borderRadius:4}
+                {label:'ROUBO',data:ml2.map(function(k){return mmap[k].r;}),backgroundColor:ink,borderRadius:0},
+                {label:'CRÍTICO',data:ml2.map(function(k){return mmap[k].c;}),backgroundColor:'#dc2626',borderRadius:0}
             ]},
             options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:cc.text}}},scales:{x:{stacked:true,ticks:{color:cc.text}},y:{stacked:true,ticks:{color:cc.text,stepSize:1}}}}
         });
