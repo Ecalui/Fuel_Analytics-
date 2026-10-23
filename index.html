@@ -452,6 +452,139 @@
         .main .page-period-pill { background: none; border: 0; border-radius: 0; padding: 0; margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
         .main .page-period-pill i { display: none; }
 
+        /* ===== HISTÓRICO + modais Justificar/Editar/Apagar + menu de ações: linguagem de linhas finas (só visual) ===== */
+        #tab-hist.tab-active { animation: none; }
+        #tab-hist .page-period-pill { display: none; }
+        #tab-hist > .card { background: none; border: 0; border-top: 2px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin: 0; }
+        #tab-hist > .card .card-title { display: none; }
+        #tab-hist .card-header { margin-bottom: 14px; }
+        #tab-hist .card-header > div:last-child { width: 100%; align-items: stretch; gap: 8px; }
+        #tab-hist #busca-geral { flex: 1 1 260px; max-width: 360px !important; min-height: 48px; padding: 10px 12px !important; font-size: 14px !important; border-radius: 0; border: 1px solid var(--text-muted); }
+        #tab-hist #busca-geral:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: -1px; }
+        #tab-hist .card-header .btn { border-radius: 0; min-height: 48px; padding: 0 16px; font-size: 13px; font-weight: 600; transition: none; background: transparent; color: var(--text-primary); border: 1px solid var(--text-secondary); box-shadow: none; }
+        #tab-hist .card-header .btn:hover { transform: none; box-shadow: none; border-color: var(--text-primary); background: transparent; }
+        #tab-hist .card-header .btn i { display: none; }
+
+        /* tabela */
+        #tab-hist .table-wrap { border: 0; border-radius: 0; background: none; }
+        #tab-hist th { background: var(--bg-page); position: sticky; top: 0; z-index: 2; font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); border-bottom: 1px solid var(--text-primary); padding: 10px 8px; white-space: nowrap; }
+        #tab-hist td { border-bottom: 1px solid var(--border); padding: 11px 8px; font-size: 13px; color: var(--text-primary); }
+        #tab-hist tr:hover td { background: none; }
+        #tab-hist th:nth-child(7), #tab-hist th:nth-child(8), #tab-hist th:nth-child(9), #tab-hist td:nth-child(7), #tab-hist td:nth-child(8), #tab-hist td:nth-child(9) { text-align: right; }
+        #tab-hist td:nth-child(7), #tab-hist td:nth-child(8), #tab-hist td:nth-child(9) { font-family: 'JetBrains Mono', monospace; font-weight: 500; white-space: nowrap; }
+        #tab-hist td:nth-child(2) { font-size: 12px !important; color: var(--text-secondary) !important; }
+        #tab-hist td:nth-child(4), #tab-hist td:nth-child(6), #tab-hist td:nth-child(10) { color: var(--text-secondary) !important; font-size: 12px !important; }
+        #tab-hist td small { color: var(--text-secondary) !important; font-size: 11px !important; font-weight: 400; }
+        #tab-hist td i[style*="1d4ed8"], #tab-hist td i[style*="var(--info)"] { color: var(--text-secondary) !important; }
+        #tab-hist tbody tr[class^="row-"] { background: none !important; }
+        #tab-hist tbody tr[class^="row-"] td { color: var(--text-primary) !important; background: none !important; }
+        #tab-hist tbody tr[class^="row-"] td:nth-child(2), #tab-hist tbody tr[class^="row-"] td:nth-child(4), #tab-hist tbody tr[class^="row-"] td:nth-child(6), #tab-hist tbody tr[class^="row-"] td:nth-child(10) { color: var(--text-secondary) !important; }
+        #tab-hist tbody tr.row-roubo td:nth-child(8), #tab-hist tbody tr.row-roubo td:nth-child(11) { color: var(--danger) !important; }
+        #tab-hist .badge { background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0; font-size: 12px; font-weight: 500; color: var(--text-primary); letter-spacing: 0; gap: 7px; white-space: nowrap; }
+        #tab-hist .badge::before { width: 8px; height: 8px; border-radius: 0; opacity: 1; background: var(--text-muted); }
+        #tab-hist .badge-ok::before { background: var(--success); }
+        #tab-hist .badge-alto::before, #tab-hist .badge-pedreira-alto::before { background: var(--warning); }
+        #tab-hist .badge-critico, #tab-hist .badge-roubo, #tab-hist .badge-pedreira-critico, #tab-hist .badge-pedreira-roubo { color: var(--danger); }
+        #tab-hist .badge-critico::before, #tab-hist .badge-roubo::before, #tab-hist .badge-pedreira-critico::before, #tab-hist .badge-pedreira-roubo::before { background: var(--danger); }
+        #tab-hist .empty-state { padding: 28px 0; }
+        #tab-hist .empty-state i { display: none; }
+
+        /* ações por linha */
+        #tab-hist td:last-child { white-space: nowrap; text-align: right; }
+        #tab-hist .btn-just { background: transparent; border: 1px solid var(--text-primary); border-radius: 0; color: var(--text-primary); font: 600 12px 'Outfit', sans-serif; min-height: 40px; padding: 0 12px; margin-right: 6px; cursor: pointer; transition: none; }
+        #tab-hist .btn-just:hover { background: transparent; transform: none; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; }
+        #tab-hist .btn-mais { background: transparent; border: 1px solid var(--text-muted); border-radius: 0; color: var(--text-primary); width: 40px; height: 40px; padding: 0; font-size: 18px; line-height: 1; cursor: pointer; transition: none; vertical-align: middle; }
+        #tab-hist .btn-mais:hover { background: transparent; border-color: var(--text-primary); }
+        #menuAcoes { background: var(--bg-card); border: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 0; min-width: 220px; overflow: hidden; }
+        #menuAcoes div { display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 500; color: var(--text-primary); cursor: pointer; }
+        #menuAcoes div:last-child { border-bottom: 0; }
+        #menuAcoes div:hover { background: none; text-decoration: underline; text-underline-offset: 3px; }
+        #menuAcoes div.perigo { color: var(--danger); }
+        #menuAcoes i { display: none; }
+
+        /* paginação */
+        #tab-hist #progress-placeholder, #tab-hist .progress-bar { display: none; }
+        #tab-hist #historico-paginacao > div { display: flex !important; flex-wrap: wrap; align-items: center; gap: 8px 6px !important; padding: 14px 0 4px !important; font-size: 13px !important; color: var(--text-secondary) !important; }
+        #tab-hist #historico-paginacao b { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--text-primary); }
+        #tab-hist #historico-paginacao .btn { border-radius: 0; min-width: 44px; min-height: 44px; padding: 0; justify-content: center; transition: none; background: transparent; border: 1px solid var(--text-secondary); color: var(--text-primary); box-shadow: none; }
+        #tab-hist #historico-paginacao .btn:disabled { opacity: 0.35; }
+        #tab-hist #historico-paginacao .btn:last-of-type { margin-left: auto; }
+        #tab-hist #historico-paginacao span { font-family: 'JetBrains Mono', monospace; font-size: 12px !important; color: var(--text-secondary) !important; flex-basis: 100%; }
+
+        /* até 1279px a tabela de 11 colunas não cabe: cada registo passa a um bloco de linhas, sem scroll lateral */
+        @media (max-width: 1279px) {
+            #tab-hist .table-scroll { max-height: none; overflow: visible; }
+            #tab-hist table, #tab-hist tbody { display: block; }
+            #tab-hist thead { display: none; }
+            #tab-hist tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); column-gap: 40px; }
+            #tab-hist tbody tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--border); min-width: 0; }
+            #tab-hist tbody tr:only-child { grid-column: 1 / -1; }
+            #tab-hist tbody td { display: block; border: 0; padding: 0; text-align: left; min-width: 0; }
+            #tab-hist tbody td:nth-child(3) { grid-area: 1 / 1; font-size: 16px; margin-right: 10px; }
+            #tab-hist tbody td:nth-child(4) { grid-area: 1 / 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #tab-hist tbody td:nth-child(11) { grid-area: 1 / 3; justify-self: end; }
+            #tab-hist tbody td:nth-child(5) { grid-area: 2 / 1 / 2 / 3; font-size: 14px; margin: 6px 10px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            #tab-hist tbody td:nth-child(6) { grid-area: 2 / 3; justify-self: end; margin-top: 6px; }
+            #tab-hist tbody td:nth-child(1) { grid-area: 3 / 1; font-size: 12px; color: var(--text-secondary) !important; margin: 4px 8px 0 0; }
+            #tab-hist tbody td:nth-child(2) { grid-area: 3 / 2; margin-top: 4px; }
+            #tab-hist tbody td:nth-child(10) { grid-area: 3 / 3; justify-self: end; margin-top: 4px; }
+            #tab-hist tbody td:nth-child(7) { grid-area: 4 / 1; text-align: left; margin: 8px 12px 0 0; }
+            #tab-hist tbody td:nth-child(7)::after { content: ' km'; color: var(--text-secondary); font-size: 12px; }
+            #tab-hist tbody td:nth-child(8) { grid-area: 4 / 2; text-align: left; margin-top: 8px; }
+            #tab-hist tbody td:nth-child(8)::after { content: ' L/100'; color: var(--text-secondary); font-size: 12px; }
+            #tab-hist tbody td:nth-child(9) { grid-area: 4 / 3; justify-self: end; text-align: right; margin-top: 8px; }
+            #tab-hist tbody td:nth-child(12) { display: contents; }
+            #tab-hist .btn-mais { grid-area: 1 / 4 / 3 / 5; align-self: start; width: 44px; height: 44px; margin-left: 6px; }
+            #tab-hist .btn-just { grid-area: 5 / 1 / 5 / 4; justify-self: start; min-height: 44px; margin: 10px 0 0; padding: 0 16px; }
+            #tab-hist tbody td[colspan] { grid-area: auto; }
+        }
+        @media (max-width: 768px) {
+            #tab-hist .page-desc { display: none; }
+            #tab-hist tbody { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            #tab-hist .card-header .btn { flex: 1 1 calc(50% - 5px); }
+            #tab-hist #busca-geral { flex-basis: 100%; max-width: none !important; }
+        }
+
+        /* modais abertos a partir do Histórico: Justificar, Editar, Apagar */
+        #justModal, #editModal, #deleteModal { backdrop-filter: none; animation: none; padding: 16px; }
+        #justModal .modal-box, #editModal .modal-box, #deleteModal .modal-box { background: var(--bg-card); border: 1px solid var(--text-primary); border-top-width: 2px; border-radius: 0; box-shadow: none; padding: 20px 20px 0; width: 100%; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; }
+        #justModal .card-title, #editModal .card-title, #deleteModal .card-title { font-size: 16px; font-weight: 600; color: var(--text-primary) !important; }
+        #deleteModal .card-title { color: var(--danger) !important; }
+        #justModal .card-title i, #editModal .card-title i, #deleteModal .card-title i { display: none; }
+        #justModal .modal-box > p { color: var(--text-secondary) !important; font-size: 13px !important; line-height: 1.5; }
+        #justModal .modal-box > div[style*="bg-card-alt"] { background: none !important; border: 0 !important; border-top: 1px solid var(--border) !important; border-bottom: 1px solid var(--border) !important; border-radius: 0 !important; padding: 12px 0 !important; }
+        #justModal span[style*="text-transform"] { text-transform: none !important; letter-spacing: 0.02em !important; font-size: 12px !important; color: var(--text-secondary) !important; }
+        #justModal .modal-box > div[style*="text-transform:uppercase"] { text-transform: none !important; letter-spacing: 0.02em !important; font-size: 12px !important; font-weight: 500 !important; color: var(--text-secondary) !important; }
+        #justModal #just-placa, #justModal #just-data, #justModal #just-l100 { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #justModal .just-modal-motivos { gap: 6px; }
+        #justModal .just-motivo-btn { border-radius: 0; background: transparent; border: 1px solid var(--text-muted); color: var(--text-primary); min-height: 48px; font-size: 13px; font-weight: 500; line-height: 1.3; transition: none; }
+        #justModal .just-motivo-btn i { display: none; }
+        #justModal .just-motivo-btn:hover { background: transparent; border-color: var(--text-primary); color: var(--text-primary); }
+        #justModal .just-motivo-btn.selected { background: var(--text-primary); border-color: var(--text-primary); color: var(--bg-card); }
+        #justModal label, #editModal label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 6px; }
+        #justModal input, #justModal textarea, #editModal input, #editModal textarea { border-radius: 0; border: 1px solid var(--text-muted); min-height: 48px; padding: 10px 12px; }
+        #justModal textarea, #editModal textarea { min-height: 88px; }
+        #justModal input:focus, #justModal textarea:focus, #editModal input:focus, #editModal textarea:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: -1px; }
+        #editModal input[type="number"], #editModal input[type="date"], #editModal input[type="time"] { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #editModal input[readonly] { background: transparent !important; border-style: dashed; border-color: var(--border); }
+        #editModal #editForm { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+        #editModal #editForm > div { margin-bottom: 0 !important; min-width: 0; }
+        #editModal #editForm > div:nth-child(n+6):nth-child(-n+7), #editModal #editForm > div:nth-child(n+10) { grid-column: 1 / -1; }
+        #justModal .modal-actions, #editModal .modal-actions, #deleteModal .modal-actions { position: sticky; bottom: 0; background: var(--bg-card); border-top: 1px solid var(--text-primary); margin: 20px -20px 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); gap: 10px; }
+        #justModal .btn, #editModal .btn, #deleteModal .btn { border-radius: 0; min-height: 52px; padding: 0 20px; transition: none; font-weight: 600; box-shadow: none; }
+        #justModal .btn:hover, #editModal .btn:hover, #deleteModal .btn:hover { transform: none; box-shadow: none; }
+        #justModal .btn i, #editModal .btn i, #deleteModal .btn i { display: none; }
+        #justModal .btn-ghost, #editModal .btn-ghost, #deleteModal .btn-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--text-secondary); }
+        #justModal .btn-success, #editModal .btn-primary { background: var(--text-primary); color: var(--bg-card); border: 1px solid var(--text-primary); }
+        #deleteModal .btn-danger-outline { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+        @media (max-width: 768px) {
+            #justModal .modal-actions, #editModal .modal-actions, #deleteModal .modal-actions { flex-direction: row; }
+            #justModal .modal-actions .btn:last-child, #editModal .modal-actions .btn:last-child, #deleteModal .modal-actions .btn:last-child { flex: 1 1 auto; }
+        }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
@@ -1636,8 +1769,8 @@ document.addEventListener('DOMContentLoaded', function(){
                 <div class="card-title"><i class="fas fa-clock-rotate-left"></i>Histórico de Registos</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input type="text" id="busca-geral" placeholder="Filtrar placa ou motorista..." onkeyup="_geralPagina=1;debounce(atualizarGeral, 300)()" style="max-width:280px;padding:10px 14px;font-size:14px">
-                    <button class="btn btn-success btn-sm" onclick="exportarListaAbastecimentos()" title="Exportar Lista"><i class="fas fa-file-csv"></i></button>
-                    <button class="btn btn-ghost btn-sm" onclick="exportarHistoricoCSV()" title="Exportar Histórico Completo"><i class="fas fa-download"></i></button>
+                    <button class="btn btn-success btn-sm" onclick="exportarListaAbastecimentos()" title="Exportar Lista"><i class="fas fa-file-csv"></i>Exportar lista</button>
+                    <button class="btn btn-ghost btn-sm" onclick="exportarHistoricoCSV()" title="Exportar Histórico Completo"><i class="fas fa-download"></i>Exportar completo</button>
                 </div>
             </div>
             <div class="table-wrap">
