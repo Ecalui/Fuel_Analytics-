@@ -7126,11 +7126,12 @@ function _supaSnapshotDoDb() {
     var snap = {};
     if (Array.isArray(db)) db.forEach(function(r){
         var lim = _supaLimparRegisto(r);
-        if (lim) { snap[lim.id] = _supaH(JSON.stringify(lim)); _supaPre[lim.id] = lim; }
+        if (lim) { snap[lim.id] = _supaH(JSON.stringify(lim)); if (window._fuelDiag) _supaPre[lim.id] = lim; }
     });
     _supaGravarSnapshot(snap);
 }
 function _fuelDiagPosCarga() {
+    if (!window._fuelDiag) return;
     try {
         var n = 0, ex = [];
         db.forEach(function(r) {
@@ -7268,13 +7269,25 @@ async function supaGravarTudo() {
 
 // Carregamento à chegada: tenta nuvem, senão cai no local
 // Redesenha tabelas E gráficos do dashboard após carregar dados (evita gráficos vazios)
-function _supaRedesenharTudo() {
+function _supaRedesenharTudo(soPlacas) {
     try { if (typeof migrarUUIDs === 'function') migrarUUIDs(); } catch(e){}
     // RECALCULAR campos derivados (l100, status, dist...) — a nuvem só guarda campos base
     try {
         if (typeof recalcularViaturaCompleta === 'function' && Array.isArray(db)) {
             var placasUnicas = {};
-            db.forEach(function(r){ if (r && r.placa) placasUnicas[r.placa] = true; });
+            if (Array.isArray(soPlacas)) {
+                // carga incremental: só as viaturas afectadas, repostas ao estado "acabado de vir da nuvem" (campos base)
+                soPlacas.forEach(function(p){ placasUnicas[p] = true; });
+                db.forEach(function(r, i) {
+                    if (r && placasUnicas[r.placa]) {
+                        var b = {}; SUPA_CAMPOS.forEach(function(c){ if (r[c] !== undefined) b[c] = r[c]; });
+                        if (r.atualizado_em) b.atualizado_em = r.atualizado_em;
+                        db[i] = b;
+                    }
+                });
+            } else {
+                db.forEach(function(r){ if (r && r.placa) placasUnicas[r.placa] = true; });
+            }
             if (typeof cache !== 'undefined') cache = { dashStats: null, investData: null, lastUpdate: null };
             _fuelSilenciarAvisos = true; // carregamento: sem uma chuva de avisos por viatura
             try { Object.keys(placasUnicas).forEach(function(placa){ recalcularViaturaCompleta(placa); }); }
@@ -7289,6 +7302,137 @@ function _supaRedesenharTudo() {
     } catch(e){ console.error('[Supabase] Erro ao redesenhar dashboard:', e); }
 }
 
+// ===== CARGA INCREMENTAL =====
+// Em vez de ler a tabela toda em cada arranque, lê só os registos com atualizado_em mais recente que a marca
+// guardada no espelho. Apagados: compara a contagem da nuvem com a local (e só então lê a lista de ids).
+// Qualquer anomalia -> devolve false e a carga completa (a de sempre) trata de tudo.
+function _supaConverterLote(lote) {
+    lote.forEach(function(r) {
+        if (r.ts !== null && r.ts !== undefined) r.ts = Number(r.ts);
+        if (r.km !== null && r.km !== undefined) r.km = Number(r.km);
+        if (r.litros !== null && r.litros !== undefined) r.litros = Number(r.litros);
+        if (r.valor !== null && r.valor !== undefined) r.valor = Number(r.valor);
+    });
+    return lote;
+}
+function _supaMaxMarca(arr, inicial) {
+    var best = inicial || '', bt = best ? Date.parse(best) : -1;
+    (arr || []).forEach(function(r) {
+        if (r && r.atualizado_em) { var t = Date.parse(r.atualizado_em); if (!isNaN(t) && t >= bt) { bt = t; best = r.atualizado_em; } }
+    });
+    return best;
+}
+// Junta ao array base os registos alterados (por id). Devolve {placa:true} das viaturas afectadas.
+function _supaAplicarAlteracoes(base, alterados) {
+    var pos = {}, placas = {};
+    base.forEach(function(r, i) { if (r && r.id != null) pos[String(r.id)] = i; });
+    alterados.forEach(function(n) {
+        if (!n || n.id == null) return;
+        var k = String(n.id);
+        if (pos[k] !== undefined) {
+            var velho = base[pos[k]];
+            if (velho && velho.placa) placas[velho.placa] = true;
+            base[pos[k]] = n;
+        } else { pos[k] = base.length; base.push(n); }
+        if (n.placa) placas[n.placa] = true;
+    });
+    return placas;
+}
+// Remove do array base os registos que a nuvem já não tem (só os que já tinham sido sincronizados). Devolve os ids removidos.
+function _supaRemoverApagados(base, idsNuvem, snap, placas) {
+    var removidos = [];
+    for (var i = base.length - 1; i >= 0; i--) {
+        var r = base[i], k = (r && r.id != null) ? String(r.id) : null;
+        if (k !== null && !idsNuvem[k] && snap[k] !== undefined) {
+            if (r.placa) placas[r.placa] = true;
+            removidos.push(k); base.splice(i, 1);
+        }
+    }
+    return removidos;
+}
+async function supaLerAlterados(desdeIso) {
+    await _supaTokenValido();
+    var passo = 1000, off = 0, todos = [];
+    while (true) {
+        var url = SUPA_URL + '/rest/v1/' + SUPA_TABELA + '?select=*&atualizado_em=gte.' + encodeURIComponent(desdeIso) + '&order=atualizado_em.asc,id.asc&limit=' + passo + '&offset=' + off;
+        var resp = await fetch(url, { method: 'GET', headers: _supaHeaders() });
+        if (!resp.ok) {
+            var txt = await resp.text();
+            var err = new Error('Erro a ler alterações: ' + resp.status + ' ' + txt);
+            err.semColuna = (resp.status === 400 || resp.status === 404);
+            throw err;
+        }
+        var lote = _supaConverterLote(await resp.json());
+        todos = todos.concat(lote);
+        if (lote.length < passo) break;
+        off += passo;
+    }
+    return todos;
+}
+async function supaContarNuvem() {
+    await _supaTokenValido();
+    var resp = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA + '?select=id&limit=1', { method: 'GET', headers: _supaHeaders({ 'Prefer': 'count=exact' }) });
+    if (!resp.ok) throw new Error('Erro a contar na nuvem: ' + resp.status);
+    var cr = resp.headers.get('Content-Range');
+    if (cr && cr.indexOf('/') > -1) { var t = parseInt(cr.split('/')[1], 10); if (!isNaN(t)) return t; }
+    return null;
+}
+async function supaLerIds() {
+    await _supaTokenValido();
+    var passo = 1000, off = 0, ids = {};
+    while (true) {
+        var resp = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA + '?select=id&order=id.asc&limit=' + passo + '&offset=' + off, { method: 'GET', headers: _supaHeaders() });
+        if (!resp.ok) throw new Error('Erro a ler ids: ' + resp.status);
+        var lote = await resp.json();
+        lote.forEach(function(r) { ids[String(r.id)] = 1; });
+        if (lote.length < passo) break;
+        off += passo;
+    }
+    return ids;
+}
+// true = tratado (ecrã/espelho já actualizados); false = fazer carga completa
+async function _supaCargaIncremental() {
+    var t0 = performance.now();
+    try {
+        var v0 = _fuelEscritas;
+        var marcaAntes = _supaMarca;
+        var desde = new Date(Date.parse(_supaMarca) - 120000).toISOString(); // 2 min de sobreposição (idempotente)
+        var alterados = await supaLerAlterados(desde);
+        var total = await supaContarNuvem();
+        if (total === null) return false;
+        if (_fuelEscritas !== v0) { console.warn('[Offline] Edições durante a leitura incremental; a manter o db local.'); return true; }
+
+        var snap = _supaLerSnapshot();
+        // só o que realmente difere do último estado sincronizado (a sobreposição e os nossos próprios envios ficam de fora)
+        var novos = alterados.filter(function(n) { var l = _supaLimparRegisto(n); return l && !_supaIgual(snap[l.id], JSON.stringify(l)); });
+
+        var copia = db.slice(), placas = _supaAplicarAlteracoes(copia, novos), removidos = [];
+        if (copia.length > total) removidos = _supaRemoverApagados(copia, await supaLerIds(), snap, placas);
+        if (copia.length !== total) { console.warn('[Incremental] Contagem diverge (local ' + copia.length + ' vs nuvem ' + total + '): a fazer carga completa.'); return false; }
+
+        db = copia;
+        var snapN = Object.assign({}, snap);
+        novos.forEach(function(n) { var l = _supaLimparRegisto(n); if (l) snapN[l.id] = _supaH(JSON.stringify(l)); });
+        removidos.forEach(function(id) { delete snapN[id]; });
+        _supaGravarSnapshot(snapN);
+
+        _supaMarca = _supaMaxMarca(alterados, _supaMarca);
+        _supaUltimaSync = Date.now(); _supaEstado = 'ok'; _supaAvisouFalha = false;
+        var mudou = novos.length + removidos.length;
+        if (mudou) { _supaRedesenharTudo(Object.keys(placas)); _espelhoGravar(); }
+        else if (_supaMarca !== marcaAntes) { _espelhoGravarMeta(); }
+        console.log('[Incremental] ' + novos.length + ' alterados, ' + removidos.length + ' apagados, ' + db.length + ' no total, em ' + Math.round(performance.now() - t0) + ' ms.');
+        return true;
+    } catch (e) {
+        if (e && e.semColuna) {
+            _supaSemColuna = true;
+            console.warn('[Incremental] A tabela ainda não tem a coluna atualizado_em: a usar carga completa. Executa o SQL de preparação no Supabase para activar a carga incremental.');
+            return false;
+        }
+        throw e; // erro de rede: o tratamento geral mantém a cópia local
+    }
+}
+
 // Arranque dos dados: 1) mostra o espelho local já  2) envia pendências  3) lê a nuvem e actualiza
 async function carregarDadosNuvem() {
     var primeira = !_fuelBootFeito;
@@ -7298,6 +7442,7 @@ async function carregarDadosNuvem() {
     // 1) ESPELHO: mostrar já o que está guardado neste dispositivo
     if (primeira) {
         var esp = await _espelhoLer();
+        _supaMarca = esp.marca || ''; _supaCheioEm = esp.cheioEm || 0;
         if (esp.dados.length) {
             db = esp.dados; temEspelho = true;
             if (esp.ultimaSync) _supaUltimaSync = esp.ultimaSync;
@@ -7331,6 +7476,11 @@ async function carregarDadosNuvem() {
             if (!enviou) throw new Error('Não foi possível enviar as alterações pendentes');
         }
 
+        // 3a) Carga INCREMENTAL (só o que mudou) quando há espelho, marca e snapshot; senão carga completa
+        if (_FUEL_INCREMENTAL && temEspelho && _supaMarca && !_supaSemColuna && jaSincronizouAntes
+            && (Date.now() - _supaCheioEm) < _FUEL_CHEIO_DIAS * 86400000) {
+            if (await _supaCargaIncremental()) { _fuelOverlay(null); _supaAtualizarIndicador(); return; }
+        }
         // 3) LER a nuvem (repete se o utilizador gravou algo durante a leitura)
         var daNuvem, v0, tent = 0;
         do { v0 = _fuelEscritas; var _tR = performance.now(); daNuvem = await supaLer(); tent++; console.log('[Supabase] Leitura da nuvem: ' + Math.round(performance.now() - _tR) + ' ms'); } while (_fuelEscritas !== v0 && tent < 3);
@@ -7357,6 +7507,7 @@ async function carregarDadosNuvem() {
             } catch(e) {}
             db = daNuvem;
             _supaSnapshotDoDb();               // baseline: o que está na nuvem = snapshot
+            _supaMarca = _supaMaxMarca(daNuvem, ''); _supaCheioEm = Date.now();
             _supaUltimaSync = Date.now();
             _supaEstado = 'ok'; _supaAvisouFalha = false;
             _supaRedesenharTudo();
@@ -7398,6 +7549,11 @@ function _carregarAuxiliaresLocais() {
 var _fuelBootFeito = false;
 var _fuelEscritas = 0;          // conta gravações do utilizador (detecta edições durante uma leitura)
 var _supaUltimaSync = 0;
+var _FUEL_INCREMENTAL = true;     // carga incremental (só o que mudou); false = sempre carga completa
+var _FUEL_CHEIO_DIAS = 7;         // de X em X dias força uma carga completa (auto-correção)
+var _supaMarca = '';              // maior atualizado_em já recebido da nuvem (guardado no espelho)
+var _supaCheioEm = 0;             // quando foi a última carga completa
+var _supaSemColuna = false;       // a tabela ainda não tem atualizado_em
 var _supaAvisouFalha = false;
 var _fuelRetomando = false;
 
@@ -7445,17 +7601,25 @@ async function _espelhoGravar() {
     try {
         var idb = await _idbAbrir();
         if (!idb || !Array.isArray(db)) return;
-        var meta = { email: (_supaEmail || '').toLowerCase(), ultimaSync: _supaUltimaSync, n: db.length, em: Date.now() };
+        var meta = { email: (_supaEmail || '').toLowerCase(), ultimaSync: _supaUltimaSync, n: db.length, em: Date.now(), marca: _supaMarca, cheioEm: _supaCheioEm };
         try { await _idbGravar(idb, { db: db, meta: meta }); }
         catch(e) { await _idbGravar(idb, { db: JSON.parse(JSON.stringify(db)), meta: meta }); }
     } catch(e) { console.warn('[Offline] Espelho não gravado:', e); }
+}
+// Só actualiza os metadados (marca/hora da sync) — barato, sem reescrever os registos todos
+async function _espelhoGravarMeta() {
+    try {
+        var idb = await _idbAbrir();
+        if (!idb || !Array.isArray(db)) return;
+        await _idbGravar(idb, { meta: { email: (_supaEmail || '').toLowerCase(), ultimaSync: _supaUltimaSync, n: db.length, em: Date.now(), marca: _supaMarca, cheioEm: _supaCheioEm } });
+    } catch(e) {}
 }
 async function _espelhoLimpar() {
     clearTimeout(_espelhoTimer);
     try { var idb = await _idbAbrir(); if (idb) await _idbGravar(idb, { db: [], meta: { email: (_supaEmail || '').toLowerCase(), ultimaSync: 0, n: 0, em: Date.now() } }); } catch(e) {}
 }
 async function _espelhoLer() {
-    var out = { dados: [], ultimaSync: 0 };
+    var out = { dados: [], ultimaSync: 0, marca: '', cheioEm: 0 };
     try {
         var idb = await _idbAbrir();
         if (idb) {
@@ -7465,7 +7629,7 @@ async function _espelhoLer() {
                 var atual = (_supaEmail || '').toLowerCase();
                 // espelho de OUTRO utilizador: não o mostrar (a nuvem é que manda para esta conta)
                 if (meta.email && atual && meta.email !== atual) { console.warn('[Offline] Espelho pertence a outra conta; ignorado.'); return out; }
-                out.dados = dados; out.ultimaSync = meta.ultimaSync || 0;
+                out.dados = dados; out.ultimaSync = meta.ultimaSync || 0; out.marca = meta.marca || ''; out.cheioEm = meta.cheioEm || 0;
                 return out;
             }
         }
