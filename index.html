@@ -926,6 +926,71 @@
             #tab-invest .rota-card-metrics { grid-template-columns: 1fr 1fr; row-gap: 12px; }
         }
 
+        /* ===== RELATÓRIOS: linguagem de linhas finas (só visual; tudo limitado a #tab-relatorios) ===== */
+        #tab-relatorios.tab-active { animation: none; }
+
+        /* blocos: linha em vez de cartão */
+        #tab-relatorios .card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin: 0 0 36px; overflow: visible; }
+        #tab-relatorios .card:hover { transform: none; box-shadow: none; }
+        #tab-relatorios .card-title { font-size: 15px; font-weight: 600; margin-bottom: 0; }
+        #tab-relatorios .card-title i { display: none; }
+
+        /* campos retos, rótulos em texto normal */
+        #tab-relatorios label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 6px; }
+        #tab-relatorios input:not([type="checkbox"]), #tab-relatorios select { min-height: 48px; padding: 10px 12px; border-radius: 0; border: 1px solid var(--text-muted); background: var(--bg-card); color: var(--text-primary); font-size: 14px; }
+        #tab-relatorios input:not([type="checkbox"]):focus, #tab-relatorios select:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: 0; }
+        #tab-relatorios input[type="date"], #tab-relatorios input[type="number"] { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-relatorios .form-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; margin-top: 18px !important; }
+
+        /* filtros avançados: separados por linha fina, sem caixa */
+        #tab-relatorios .filter-bar { background: none; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 18px 0 0; margin: 22px 0 0 !important; gap: 16px 32px; align-items: flex-start; }
+        #tab-relatorios .filter-bar input:not([type="checkbox"]), #tab-relatorios .filter-bar select { max-width: 220px; }
+        #tab-relatorios .filter-group { gap: 6px; }
+
+        /* caixas de marcar: linhas com área de toque de 44px */
+        #tab-relatorios .filter-group label:has(> input[type="checkbox"]) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin: 0; padding-right: 8px; font-size: 13px; font-weight: 500; color: var(--text-primary); letter-spacing: 0; cursor: pointer; }
+        #tab-relatorios input[type="checkbox"] { width: 18px; height: 18px; min-height: 0; padding: 0; margin: 0; flex: none; accent-color: var(--text-primary); cursor: pointer; }
+        #tab-relatorios input[type="checkbox"]:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+
+        /* tipo de relatório: lista de linhas, a escolhida leva barra de 2px */
+        #tab-relatorios .report-types { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); column-gap: 40px; row-gap: 0; margin: 18px 0 24px; border-top: 2px solid var(--text-primary); }
+        #tab-relatorios .report-type-card { background: none; border: 0; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; border-radius: 0; padding: 14px 0 14px 12px; text-align: left; transition: none; min-height: 44px; }
+        #tab-relatorios .report-type-card:hover { background: none; border-color: var(--border); border-left-color: transparent; }
+        #tab-relatorios .report-type-card:hover h4 { text-decoration: underline; text-underline-offset: 3px; }
+        #tab-relatorios .report-type-card.selected { background: none; border-left-color: var(--text-primary); }
+        #tab-relatorios .report-type-card i { display: none; }
+        #tab-relatorios .report-type-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        #tab-relatorios .report-type-card.selected h4 { font-weight: 700; }
+        #tab-relatorios .report-type-card p { font-size: 12px; line-height: 1.5; color: var(--text-secondary); }
+
+        /* assinatura: sem caixa tracejada */
+        #tab-relatorios .signature-area { background: none; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 18px 0 0; margin: 24px 0; max-width: 420px; }
+        #tab-relatorios .signature-box { text-align: left; }
+        #tab-relatorios .signature-box label { margin-bottom: 6px; }
+        #tab-relatorios .signature-box label i { display: none; }
+        #tab-relatorios .signature-input { min-height: 48px; padding: 10px 12px; border-radius: 0; border: 1px solid var(--text-muted); background: var(--bg-card); font-size: 14px; }
+        #tab-relatorios .signature-date { font-size: 12px; color: var(--text-secondary); }
+
+        /* exportar: duas colunas separadas por linha, botões retos */
+        #tab-relatorios .export-grid { grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 8px; }
+        #tab-relatorios .export-card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; padding: 14px 0 0; text-align: left; }
+        #tab-relatorios .export-card > i { display: none; }
+        #tab-relatorios .export-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+        #tab-relatorios .btn { border-radius: 0; min-height: 52px; justify-content: center; transition: none; font-weight: 600; box-shadow: none; }
+        #tab-relatorios .btn:hover { transform: none; box-shadow: none; }
+        #tab-relatorios .btn i:not(.fa-spin) { display: none; }
+        #tab-relatorios .btn-dark, #tab-relatorios .btn-success { background: var(--text-primary); color: var(--bg-card); border: 1px solid var(--text-primary); }
+        #tab-relatorios .btn-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--text-secondary); }
+        #tab-relatorios .btn-ghost:hover { background: transparent; border-color: var(--text-primary); }
+        #tab-relatorios .btn:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+        @media (max-width: 768px) {
+            #tab-relatorios .export-grid { grid-template-columns: 1fr; gap: 28px; }
+            #tab-relatorios .report-types { grid-template-columns: 1fr; }
+            #tab-relatorios .filter-bar { flex-direction: column; align-items: stretch; }
+            #tab-relatorios .filter-bar input:not([type="checkbox"]), #tab-relatorios .filter-bar select { max-width: none; width: 100% !important; }
+            #tab-relatorios .signature-area { max-width: none; }
+        }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
