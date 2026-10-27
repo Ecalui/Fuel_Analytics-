@@ -3252,7 +3252,7 @@ function adicionarPrecoGasoleo() {
     // Acrescentar (nunca editar os antigos)
     PRECOS_GASOLEO.push({ desde: data, preco: valor });
     _ordenarPrecos();
-    localStorage.setItem('fuel_precos_gasoleo', JSON.stringify(PRECOS_GASOLEO));
+    try { localStorage.setItem('fuel_precos_gasoleo', JSON.stringify(PRECOS_GASOLEO)); } catch(e) { console.warn('[localStorage] cheio:', e); }
 
     // Registar no audit log
     try {
@@ -3262,7 +3262,7 @@ function adicionarPrecoGasoleo() {
             usuario: usuarioAtual ? usuarioAtual.nome : '--',
             detalhe: 'Novo preço ' + valor + ' Kz/L a partir de ' + data
         });
-        localStorage.setItem('fuel_analytics_audit', JSON.stringify(auditLog));
+        try { localStorage.setItem('fuel_analytics_audit', JSON.stringify(auditLog)); } catch(e) { console.warn('[localStorage] cheio:', e); }
     } catch(e) {}
 
     // Limpar campos e recalcular tudo (o novo preço afeta cálculos futuros)
@@ -3651,8 +3651,12 @@ function debounce(func, delay) {
 function registrarAcesso(nome, perfil, acao, ip, sucesso, obs) {
     obs = obs || '';
     acessos.unshift({ timestamp: new Date().toLocaleString('pt-PT'), perfil: perfil, nome: nome, ip: ip, acao: acao, sucesso: sucesso, observacoes: obs });
-    if (acessos.length > 5000) acessos.pop();
-    localStorage.setItem('fuel_acessos', JSON.stringify(acessos));
+    if (acessos.length > 300) acessos.length = 300;
+    // localStorage tem ~5 MB: se estiver cheio, encolhe o registo e tenta de novo; nunca bloqueia o login
+    for (var n = acessos.length; n >= 0; n = Math.floor(n / 2)) {
+        try { localStorage.setItem('fuel_acessos', JSON.stringify(acessos.slice(0, n))); return; }
+        catch (e) { if (n === 0) { console.warn('[Acessos] localStorage cheio; registo de acessos não guardado localmente.', e); return; } }
+    }
 }
 
 function logout() {
@@ -4156,7 +4160,7 @@ function salvarConfiguracoes() {
     CONFIG.partilhado.expiracaoDias = parseInt(document.getElementById('config-partilhado-expiracao').value);
     CONFIG.partilhado.tentativasMax = parseInt(document.getElementById('config-partilhado-tentativas').value);
     CONFIG.partilhado.tempoBloqueio = parseInt(document.getElementById('config-partilhado-bloqueio').value);
-    localStorage.setItem('fuel_config', JSON.stringify(CONFIG));
+    try { localStorage.setItem('fuel_config', JSON.stringify(CONFIG)); } catch(e) { console.warn('[localStorage] cheio:', e); }
     showToast('Configurações guardadas com sucesso!', 'success');
 }
 
@@ -4398,7 +4402,7 @@ function salvarMetasMarca() {
         }
     });
     // Guardar no localStorage e recalcular toda a frota
-    localStorage.setItem('fuel_metas_marca', JSON.stringify(METAS_MARCA));
+    try { localStorage.setItem('fuel_metas_marca', JSON.stringify(METAS_MARCA)); } catch(e) { console.warn('[localStorage] cheio:', e); }
     cache = { dashStats: null, investData: null, lastUpdate: null };
     var placasUnicas = {};
     db.forEach(function(r){ placasUnicas[r.placa] = true; });
@@ -4435,7 +4439,7 @@ function salvarRotasEspeciais() {
     if (!kw || isNaN(ft) || ft < 100 || ft > 200) { showToast('Verifique os valores', 'warning'); return; }
     ROTAS_ESPECIAIS.keywords = kw.split(',').map(function(k){ return k.trim().toLowerCase(); }).filter(Boolean);
     ROTAS_ESPECIAIS.fator = ft / 100;
-    localStorage.setItem('fuel_rotas_especiais', JSON.stringify({ keywords: ROTAS_ESPECIAIS.keywords, fator: ROTAS_ESPECIAIS.fator }));
+    try { localStorage.setItem('fuel_rotas_especiais', JSON.stringify({ keywords: ROTAS_ESPECIAIS.keywords, fator: ROTAS_ESPECIAIS.fator })); } catch(e) { console.warn('[localStorage] cheio:', e); }
     cache = { dashStats: null, investData: null, lastUpdate: null };
     var pu = {};
     db.forEach(function(r){ pu[r.placa] = true; });
@@ -4506,7 +4510,7 @@ function _softDelete(registos, placa, motivo) {
             motivo: motivo
         });
     });
-    localStorage.setItem('fuel_lixeira', JSON.stringify(_lixeiraSoftDelete));
+    try { localStorage.setItem('fuel_lixeira', JSON.stringify(_lixeiraSoftDelete)); } catch(e) { console.warn('[localStorage] cheio:', e); }
     // Apagar diretamente da nuvem os registos removidos
     if (typeof supaApagarIds === 'function' && idsParaNuvem.length) supaApagarIds(idsParaNuvem);
 }
@@ -7462,7 +7466,7 @@ function _supaPersistirSessao() {
     try {
         if (!FUEL_SESSAO_PERSISTENTE) { localStorage.removeItem('fuel_sessao'); return; }
         if (!_supaRefreshToken || !_supaAccessToken) return;
-        localStorage.setItem('fuel_sessao', JSON.stringify({ rt: _supaRefreshToken, at: _supaAccessToken, e: _supaEmail || '' }));
+        try { localStorage.setItem('fuel_sessao', JSON.stringify({ rt: _supaRefreshToken, at: _supaAccessToken, e: _supaEmail || '' })); } catch(e) { console.warn('[localStorage] cheio:', e); }
     } catch(e) {}
 }
 function _supaLerSessaoGuardada() {
@@ -7690,8 +7694,8 @@ function restaurar(input) {
             var p = JSON.parse(reader.result);
             if ((p.versao === '3.1' || p.versao === '3.2') && Array.isArray(p.registos)) {
                 db = p.registos; auditLog = p.auditLog||[]; CONFIG = p.config||CONFIG; acessos = p.acessos||[];
-                localStorage.setItem('fuel_config', JSON.stringify(CONFIG));
-                localStorage.setItem('fuel_acessos', JSON.stringify(acessos));
+                try { localStorage.setItem('fuel_config', JSON.stringify(CONFIG)); } catch(e) {}
+                try { localStorage.setItem('fuel_acessos', JSON.stringify(acessos.slice(0, 300))); } catch(e) {}
             } else if (Array.isArray(p)) { db = p; auditLog = []; }
             else { showToast('Formato de ficheiro inválido.', 'error'); return; }
             salvarDadosLocal(); atualizarTabelas();
@@ -8087,7 +8091,7 @@ async function iniciarAppAutenticada() {
                 _lixeiraSoftDelete = _lixeiraSoftDelete.filter(function(e) {
                     return new Date(e.expiraEm).getTime() > agora;
                 });
-                localStorage.setItem('fuel_lixeira', JSON.stringify(_lixeiraSoftDelete));
+                try { localStorage.setItem('fuel_lixeira', JSON.stringify(_lixeiraSoftDelete)); } catch(e) { console.warn('[localStorage] cheio:', e); }
             } catch(e) { _lixeiraSoftDelete = []; }
         }
 
