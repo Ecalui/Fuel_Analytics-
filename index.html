@@ -7101,7 +7101,23 @@ function _supaAssinatura(r) {
     return JSON.stringify(lim);
 }
 
+// Hash curto (cyrb53): o snapshot guarda só isto em vez do registo inteiro -> ocupa ~20x menos no localStorage
+function _supaH(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 'h' + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+// Igual se o guardado for a assinatura completa (formato antigo) ou o seu hash (formato novo)
+function _supaIgual(guardado, assin) { return guardado === assin || guardado === _supaH(assin); }
+var _supaPre = {}, _supaUltimoEnvio = {}; // só diagnóstico (memória)
+var _supaSnapMem = null; // cópia em memória: mesmo com o localStorage cheio, a contagem de pendentes fica correta na sessão
 function _supaLerSnapshot() {
+    if (_supaSnapMem) return _supaSnapMem;
     try { var s = localStorage.getItem(_SUPA_SNAPSHOT_KEY); return s ? JSON.parse(s) : {}; }
     catch(e) { return {}; }
 }
@@ -7110,12 +7126,29 @@ function _supaSnapshotDoDb() {
     var snap = {};
     if (Array.isArray(db)) db.forEach(function(r){
         var lim = _supaLimparRegisto(r);
-        if (lim) snap[lim.id] = JSON.stringify(lim);
+        if (lim) { snap[lim.id] = _supaH(JSON.stringify(lim)); _supaPre[lim.id] = lim; }
     });
     _supaGravarSnapshot(snap);
 }
+function _fuelDiagPosCarga() {
+    try {
+        var n = 0, ex = [];
+        db.forEach(function(r) {
+            var l = _supaLimparRegisto(r); if (!l) return;
+            var antes = _supaPre[l.id];
+            if (antes && JSON.stringify(antes) !== JSON.stringify(l)) {
+                n++;
+                if (ex.length < 5) { var d = {}; SUPA_CAMPOS.forEach(function(k) { if (JSON.stringify(antes[k]) !== JSON.stringify(l[k])) d[k] = [antes[k], l[k]]; }); ex.push({ id: l.id, placa: l.placa, mudou: d }); }
+            }
+        });
+        if (n) console.warn('[Diag] ' + n + ' registos alterados localmente DEPOIS de carregar da nuvem (vão ser reenviados). Exemplos: ' + JSON.stringify(ex));
+        else console.log('[Diag] nenhuma alteração local após carregar.');
+    } catch(e) {}
+    _supaPre = {};
+}
 function _supaGravarSnapshot(snap) {
-    try { localStorage.setItem(_SUPA_SNAPSHOT_KEY, JSON.stringify(snap)); } catch(e){}
+    _supaSnapMem = snap;
+    try { localStorage.setItem(_SUPA_SNAPSHOT_KEY, JSON.stringify(snap)); } catch(e){ console.warn('[Supabase] localStorage cheio: referência de sync só em memória nesta sessão.', e); }
 }
 
 // DELETE DIRETO: apaga da nuvem os ids indicados, no momento em que a app os apaga.
@@ -7173,8 +7206,8 @@ async function supaGravarTudo() {
             if (!lim) return;                          // sem id, ignora
             var assin = JSON.stringify(lim);
             idsAtuais[lim.id] = true;
-            snapNovo[lim.id] = assin;
-            if (snapAntigo[lim.id] !== assin) {        // novo ou alterado
+            snapNovo[lim.id] = _supaH(assin);
+            if (!_supaIgual(snapAntigo[lim.id], assin)) {        // novo ou alterado
                 paraUpsert.push(lim);
             }
         });
@@ -7185,6 +7218,7 @@ async function supaGravarTudo() {
             if (!idsAtuais[id]) paraApagar.push(id);
         });
 
+        if (paraUpsert.length && paraUpsert.length <= 20) console.log('[Diag] a enviar: ' + paraUpsert.map(function(x){ return x.id + ' ' + x.placa + ' ' + x.data; }).join(' | '));
         // 1) UPSERT dos novos/alterados (em lotes) — merge-duplicates elimina o erro 409
         var passo = 500;
         for (var i = 0; i < paraUpsert.length; i += passo) {
@@ -7197,7 +7231,7 @@ async function supaGravarTudo() {
             });
             if (!up.ok) throw new Error('Erro no upsert: ' + up.status + ' ' + await up.text());
             // lote confirmado: avança o snapshot já, para uma falha a meio não reenviar (nem recarimbar) o que já foi
-            lote.forEach(function(x){ snapParcial[x.id] = JSON.stringify(x); });
+            lote.forEach(function(x){ snapParcial[x.id] = _supaH(JSON.stringify(x)); _supaUltimoEnvio[x.id] = JSON.stringify(x); });
             _supaGravarSnapshot(snapParcial);
         }
 
@@ -7315,11 +7349,18 @@ async function carregarDadosNuvem() {
             _supaRedesenharTudo();
             supaGravarTudo();
         } else {
+            try { // diagnóstico: a nuvem devolve o que foi enviado?
+                var dv = [];
+                daNuvem.forEach(function(r) { var l = _supaLimparRegisto(r); if (l && _supaUltimoEnvio[l.id] && _supaUltimoEnvio[l.id] !== JSON.stringify(l)) dv.push(l.id); });
+                if (dv.length) console.warn('[Diag] A nuvem devolveu valores diferentes dos enviados em ' + dv.length + ' registos (ex.: ' + dv.slice(0, 3).join(', ') + '). Possível regra/trigger na tabela.');
+                _supaUltimoEnvio = {};
+            } catch(e) {}
             db = daNuvem;
             _supaSnapshotDoDb();               // baseline: o que está na nuvem = snapshot
             _supaUltimaSync = Date.now();
             _supaEstado = 'ok'; _supaAvisouFalha = false;
             _supaRedesenharTudo();
+            _fuelDiagPosCarga();
             _espelhoGravar();                  // espelho = nuvem
             console.log('[Supabase] Carregados ' + db.length + ' registos da nuvem aos ' + Math.round(performance.now()) + ' ms.');
         }
@@ -7442,7 +7483,7 @@ function _supaContarPendentes() {
             var lim = _supaLimparRegisto(r);
             if (!lim) return;
             ids[lim.id] = 1;
-            if (snap[lim.id] !== JSON.stringify(lim)) n++;
+            if (!_supaIgual(snap[lim.id], JSON.stringify(lim))) n++;
         });
         Object.keys(snap).forEach(function(id) { if (!ids[id]) n++; });
         return n;
@@ -7578,7 +7619,7 @@ var _FUEL_LIMITE_ENVIO = 300;
 function _fuelDiagnosticoDiferencas() {
     try {
         var sn = _supaLerSnapshot(), n = 0, ex = null;
-        db.forEach(function (r) { var l = _supaLimparRegisto(r); if (l && sn[l.id] !== JSON.stringify(l)) { n++; if (!ex) ex = l; } });
+        db.forEach(function (r) { var l = _supaLimparRegisto(r); if (l && !_supaIgual(sn[l.id], JSON.stringify(l))) { n++; if (!ex) ex = l; } });
         var t = 'Registos: ' + db.length + ' · referência: ' + Object.keys(sn).length + ' · diferentes: ' + n;
         if (ex) {
             var o = {}; try { o = JSON.parse(sn[ex.id] || '{}'); } catch (e) {}
