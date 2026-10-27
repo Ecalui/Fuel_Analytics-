@@ -7448,6 +7448,7 @@ async function carregarDadosNuvem() {
             if (esp.ultimaSync) _supaUltimaSync = esp.ultimaSync;
             _carregarAuxiliaresLocais();
             _supaRedesenharTudo();
+            _fuelTempos.espelho = performance.now();
             console.log('[Offline] Espelho no ecrã aos ' + Math.round(performance.now()) + ' ms (' + db.length + ' registos)');
         }
     }
@@ -7479,7 +7480,7 @@ async function carregarDadosNuvem() {
         // 3a) Carga INCREMENTAL (só o que mudou) quando há espelho, marca e snapshot; senão carga completa
         if (_FUEL_INCREMENTAL && temEspelho && _supaMarca && !_supaSemColuna && jaSincronizouAntes
             && (Date.now() - _supaCheioEm) < _FUEL_CHEIO_DIAS * 86400000) {
-            if (await _supaCargaIncremental()) { _fuelOverlay(null); _supaAtualizarIndicador(); return; }
+            if (await _supaCargaIncremental()) { _fuelOverlay(null); _supaAtualizarIndicador(); _fuelRelatarTempos('incremental'); return; }
         }
         // 3) LER a nuvem (repete se o utilizador gravou algo durante a leitura)
         var daNuvem, v0, tent = 0;
@@ -7517,6 +7518,7 @@ async function carregarDadosNuvem() {
         }
         _fuelOverlay(null);
         _supaAtualizarIndicador();
+        _fuelRelatarTempos('completa');
     } catch (e) {
         // Falha de LEITURA/ENVIO -> nunca apagar. O espelho (se existir) já está no ecrã.
         console.error('[Supabase] Nuvem indisponível, a usar a cópia local:', e);
@@ -7551,6 +7553,18 @@ var _fuelEscritas = 0;          // conta gravações do utilizador (detecta edi�
 var _supaUltimaSync = 0;
 var _FUEL_INCREMENTAL = true;     // carga incremental (só o que mudou); false = sempre carga completa
 var _FUEL_CHEIO_DIAS = 7;         // de X em X dias força uma carga completa (auto-correção)
+var _fuelTempos = {}, _fuelTemposMostrados = false;
+// Mostra UMA vez por abertura quanto tempo demorou (em segundos), sem precisar da consola
+function _fuelRelatarTempos(modo) {
+    if (_fuelTemposMostrados || !window._fuelT0) return;
+    _fuelTemposMostrados = true;
+    var seg = function(t) { return t ? ((t - window._fuelT0) / 1000).toFixed(1).replace('.', ',') + ' s' : '—'; };
+    var msg = '⏱ Dados no ecrã: ' + seg(_fuelTempos.espelho) + ' · nuvem confirmada: ' + seg(performance.now()) + ' (' + modo + ')';
+    window._fuelUltimosTempos = msg;
+    console.log('[Tempos] ' + msg);
+    try { showToast(msg, 'info', 10000); } catch(e) {}
+    try { _supaAtualizarIndicador(); } catch(e) {}
+}
 var _supaMarca = '';              // maior atualizado_em já recebido da nuvem (guardado no espelho)
 var _supaCheioEm = 0;             // quando foi a última carga completa
 var _supaSemColuna = false;       // a tabela ainda não tem atualizado_em
@@ -7741,7 +7755,7 @@ function _supaAtualizarIndicador() {
         };
         document.body.appendChild(el);
     }
-    el.title = 'Clique para sincronizar agora';
+    el.title = 'Clique para sincronizar agora' + (window._fuelUltimosTempos ? '\n' + window._fuelUltimosTempos : '');
     var pend = _supaContarPendentes();
     var hora = _supaUltimaSync ? new Date(_supaUltimaSync).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
     var cor, txt;
@@ -8257,6 +8271,7 @@ window.onload = async function() {
 
 
 async function iniciarAppAutenticada() {
+    window._fuelT0 = performance.now();
     try {
         _fuelSplash(false);
         // --- Identidade: vem do JWT do Supabase (app_metadata.role). Só para a interface; a RLS é que protege.
