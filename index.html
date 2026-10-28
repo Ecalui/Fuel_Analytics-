@@ -1154,150 +1154,8 @@
         .invest-header h2 { font-size: 22px; margin-bottom: 16px; }
         .invest-total { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #fca5a5; }
 
-        /* ===== AI SECTION ===== */
-        .ai-chat-wrapper {
-            display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 500px;
-            background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border);
-            overflow: hidden; box-shadow: var(--shadow-md);
-        }
-        .ai-chat-header {
-            background: linear-gradient(135deg, #0f172a, #1a1037);
-            padding: 18px 24px; display: flex; align-items: center; gap: 14px; flex-shrink: 0;
-            border-bottom: 1px solid rgba(168,85,247,0.2);
-        }
-        .ai-chat-avatar {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: linear-gradient(135deg, #7c3aed, #a855f7);
-            display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
-        }
-        .ai-chat-header-info h3 { color: white; font-size: 16px; margin-bottom: 2px; }
-        .ai-chat-header-info p { color: rgba(255,255,255,0.5); font-size: 12px; }
-        .ai-status-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: #10b981;
-            box-shadow: 0 0 6px rgba(16,185,129,0.6); display: inline-block; margin-right: 6px;
-        }
-        .ai-data-pill {
-            margin-left: auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px; padding: 6px 14px; font-size: 12px; color: rgba(255,255,255,0.7);
-            display: flex; align-items: center; gap: 6px; white-space: nowrap;
-        }
-
-        /* Chat messages */
-        .ai-chat-messages {
-            flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 18px;
-            scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-        }
-        .ai-chat-messages::-webkit-scrollbar { width: 4px; }
-        .ai-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        .ai-msg { display: flex; gap: 12px; max-width: 90%; animation: msgEnter 0.25s ease; }
-        @keyframes msgEnter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-        .ai-msg.user { align-self: flex-end; flex-direction: row-reverse; }
-        .ai-msg.assistant { align-self: flex-start; }
-
-        .ai-msg-avatar {
-            width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; font-size: 15px;
-        }
-        .ai-msg.user .ai-msg-avatar { background: linear-gradient(135deg, var(--accent), #f97316); }
-        .ai-msg.assistant .ai-msg-avatar { background: linear-gradient(135deg, #7c3aed, #a855f7); }
-
-        .ai-msg-bubble {
-            padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.65;
-            max-width: 100%;
-        }
-        .ai-msg.user .ai-msg-bubble {
-            background: var(--accent); color: white; border-radius: 14px 4px 14px 14px;
-        }
-        .ai-msg.assistant .ai-msg-bubble {
-            background: var(--bg-card-alt); color: var(--text-primary);
-            border: 1px solid var(--border); border-radius: 4px 14px 14px 14px;
-        }
-        .ai-msg.assistant .ai-msg-bubble h1,
-        .ai-msg.assistant .ai-msg-bubble h2,
-        .ai-msg.assistant .ai-msg-bubble h3 { margin: 12px 0 6px; color: var(--text-primary); font-size: 15px; }
-        .ai-msg.assistant .ai-msg-bubble ul,
-        .ai-msg.assistant .ai-msg-bubble ol { padding-left: 18px; margin: 6px 0; }
-        .ai-msg.assistant .ai-msg-bubble li { margin-bottom: 4px; }
-        .ai-msg.assistant .ai-msg-bubble strong { color: var(--accent); }
-        .ai-msg.assistant .ai-msg-bubble code {
-            background: var(--bg-card); padding: 2px 6px; border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace; font-size: 12px; border: 1px solid var(--border);
-        }
-        .ai-msg.assistant .ai-msg-bubble table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 13px; }
-        .ai-msg.assistant .ai-msg-bubble th { background: var(--bg-card); padding: 8px; border: 1px solid var(--border); font-weight: 700; }
-        .ai-msg.assistant .ai-msg-bubble td { padding: 7px 8px; border: 1px solid var(--border); }
-
-        .ai-msg-time { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: right; }
-        .ai-msg.assistant .ai-msg-time { text-align: left; }
-
-        /* Typing indicator */
-        .ai-typing { display: flex; gap: 5px; align-items: center; padding: 14px 16px; }
-        .ai-typing span {
-            width: 7px; height: 7px; border-radius: 50%; background: #a855f7;
-            animation: typing 1.2s ease-in-out infinite;
-        }
-        .ai-typing span:nth-child(2) { animation-delay: 0.2s; }
-        .ai-typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing { 0%,60%,100% { transform: translateY(0); opacity:0.4; } 30% { transform: translateY(-6px); opacity:1; } }
-
-        /* Suggestions */
-        .ai-suggestions {
-            padding: 0 24px 16px; display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0;
-        }
-        .ai-suggestion-btn {
-            padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--bg-card-alt); color: var(--text-secondary); font-size: 12px;
-            cursor: pointer; font-family: 'Karla', sans-serif; font-weight: 500; transition: 0.2s;
-            white-space: nowrap;
-        }
-        .ai-suggestion-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-
-        /* Input area */
-        .ai-chat-input-area {
-            padding: 16px 24px; border-top: 1px solid var(--border); background: var(--bg-card);
-            display: flex; gap: 12px; align-items: flex-end; flex-shrink: 0;
-        }
-        .ai-chat-input-area textarea {
-            flex: 1; resize: none; border-radius: var(--radius-sm); font-size: 14px;
-            min-height: 48px; max-height: 120px; overflow-y: auto; padding: 13px 16px;
-            font-family: 'Karla', sans-serif; line-height: 1.5;
-        }
-        .ai-send-btn {
-            width: 48px; height: 48px; border-radius: 12px; border: none;
-            background: linear-gradient(135deg, #7c3aed, #a855f7); color: white;
-            cursor: pointer; font-size: 17px; flex-shrink: 0; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .ai-send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(124,58,237,0.4); }
-        .ai-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        /* Welcome state */
-        .ai-welcome {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 20px; text-align: center; flex: 1; color: var(--text-muted);
-        }
-        .ai-welcome-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
-        .ai-welcome h3 { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
-        .ai-welcome p { font-size: 13px; max-width: 400px; line-height: 1.6; }
-
         .loading-pulse { color: var(--text-muted); animation: pulse 1.5s ease-in-out infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .ai-key-section {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(168,85,247,0.3);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .ai-key-section label { color: rgba(255,255,255,0.7); }
-        .ai-key-section input {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.15);
-            color: white;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-        }
 
         /* ===== DRIVER RANK - MELHORADO ===== */
         .rank-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
@@ -1766,24 +1624,6 @@
         }
 
 
-        .ai-key-section {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(168,85,247,0.3);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .ai-key-section label { color: rgba(255,255,255,0.7); }
-        .ai-key-section input {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.15);
-            color: white;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-        }
-        .ai-key-section input::placeholder { color: rgba(255,255,255,0.3); }
-        .ai-key-section input:focus { border-color: rgba(168,85,247,0.5); box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
-        .ai-key-note { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 6px; }
 
         /* ===== FILTRO GLOBAL DASHBOARD ===== */
         .dash-filter-bar {
@@ -1926,7 +1766,6 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="nav-section">Auditoria</div>
         <a class="nav-link" id="nav-invest" onclick="switchTab('invest', this)"><i class="fas fa-user-secret"></i>Investigação</a>
         <a class="nav-link" id="nav-relatorios" onclick="switchTab('relatorios', this)"><i class="fas fa-file-export"></i>Relatórios</a>
-        <a class="nav-link" id="nav-ia" onclick="switchTab('ia', this)"><i class="fas fa-robot"></i>Análise IA</a>
 
         <div class="nav-section">Gestão</div>
         <a class="nav-link" id="nav-ceo" onclick="switchTab('ceo', this)"><i class="fas fa-briefcase"></i>Dashboard CEO</a>
@@ -2495,63 +2334,6 @@ document.addEventListener('DOMContentLoaded', function(){
                     <button class="btn btn-success btn-lg" onclick="exportarExcel()" style="width:100%"><i class="fas fa-file-excel"></i>Exportar Excel</button>
                     <button class="btn btn-ghost" onclick="exportarCSV()" style="margin-top:8px;width:100%"><i class="fas fa-file-csv"></i>Exportar CSV</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== ANÁLISE IA ==================== -->
-    <div id="tab-ia" class="tab-content">
-        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Inteligência Artificial</div><h1 class="page-title">Assistente IA da Frota</h1><p class="page-desc">Faça perguntas em linguagem natural sobre os dados da frota</p></div><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Em desenvolvimento</div></div>
-
-        <div class="ai-chat-wrapper">
-            <!-- Header -->
-            <div class="ai-chat-header">
-                <div class="ai-chat-avatar">🤖</div>
-                <div class="ai-chat-header-info">
-                    <h3><span class="ai-status-dot"></span>Assistente Fuel Analytics</h3>
-                    <p>Acesso total à base de dados da frota • Responde em Português</p>
-                </div>
-                <div class="ai-data-pill" id="ia-data-pill">
-                    <i class="fas fa-database"></i> <span id="ia-registo-count">0 registos</span>
-                </div>
-            </div>
-
-            <!-- Messages -->
-            <div class="ai-chat-messages" id="ia-chat-messages">
-                <div class="ai-welcome" id="ia-welcome">
-                    <div class="ai-welcome-icon">🚛</div>
-                    <h3>Olá! Sou o assistente da sua frota.</h3>
-                    <p>Posso responder a qualquer pergunta sobre os dados de combustível. Experimente uma das sugestões abaixo ou escreva a sua própria pergunta.</p>
-                </div>
-            </div>
-
-            <!-- Suggestions -->
-            <div class="ai-suggestions" id="ia-suggestions">
-                <button class="ai-suggestion-btn" onclick="iaUsarSugestao(this)">📋 Quem tem a matrícula X hoje?</button>
-                <button class="ai-suggestion-btn" onclick="iaUsarSugestao(this)">🔴 Motoristas com mais alertas</button>
-                <button class="ai-suggestion-btn" onclick="iaUsarSugestao(this)">⛽ Dias com maior consumo de litros</button>
-                <button class="ai-suggestion-btn" onclick="iaUsarSugestao(this)">💸 Total de prejuízo este mês</button>
-                <button class="ai-suggestion-btn" onclick="iaUsarSugestao(this)">🚛 Viatura com mais abastecimentos</button>
-                <button class="ai-suggestion-btn" onclick="iaUsarSugestao(this)">📊 Resumo geral da frota</button>
-            </div>
-
-            <!-- API Key strip -->
-            <div id="ia-key-strip" style="padding:10px 24px;border-top:1px solid var(--border);background:var(--bg-card-alt);display:flex;align-items:center;gap:10px;flex-shrink:0;">
-                <i class="fas fa-key" style="color:var(--text-muted);font-size:13px;flex-shrink:0;"></i>
-                <input type="password" id="ia-api-key-field" placeholder="Chave API Anthropic — sk-ant-api03-..." 
-                    style="flex:1;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',monospace;border-radius:8px;"
-                    onchange="if(this.value){document.getElementById('ia-key-strip').style.borderColor='var(--success)';}" >
-                <span style="font-size:11px;color:var(--text-muted);flex-shrink:0;">Usada apenas nesta sessão</span>
-            </div>
-
-            <!-- Input -->
-            <div class="ai-chat-input-area">
-                <textarea id="ia-chat-input" placeholder="Pergunte qualquer coisa sobre a frota... Ex: Quais as viaturas que abasteceram mais de 300L?" rows="1"
-                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();iaEnviarMensagem();}"
-                    oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
-                <button class="ai-send-btn" id="ia-send-btn" onclick="iaEnviarMensagem()" title="Enviar (Enter)">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -3535,7 +3317,6 @@ function switchTab(tabId, el) {
     if (tabId === 'admin-gerir-viaturas') popularSelectViaturas();
     if (tabId === 'relatorios') popularSelectsRelatorio();
     if (tabId === 'ceo') { popularFiltrosCEO(); atualizarCEO(); }
-    if (tabId === 'ia') { iaAtualizarContador(); }
     atualizarTabelas();
     resetarTimeout();
 }
@@ -3751,23 +3532,19 @@ function aplicarPermissoes() {
     var ctaNovo = document.getElementById('dash-cta-novo');
     if (ctaNovo) ctaNovo.style.display = (isAdmin || isChefia) ? 'inline-flex' : 'none';
 
-    // Botao IA - admin, relatorista e chefia
-    var btnIA = document.getElementById('ia-btn');
-    if (btnIA) { btnIA.disabled = !(isAdmin || isRelatorista || isChefia); btnIA.style.opacity = (isAdmin || isRelatorista || isChefia) ? '1' : '0.5'; }
-
     // Seccao admin na sidebar - so admin
     document.getElementById('admin-section-sidebar').style.display = isAdmin ? 'block' : 'none';
 
     // Controlo de abas visiveis para chefia
     if (isChefia) {
         var abasPermitidas = ['nav-dash', 'nav-reg', 'nav-hist', 'nav-analise', 'nav-relatorios'];
-        var todasAbas = ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ia','nav-ceo'];
+        var todasAbas = ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ceo'];
         todasAbas.forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = abasPermitidas.indexOf(id) >= 0 ? 'flex' : 'none';
         });
     } else {
-        ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ia','nav-ceo'].forEach(function(id) {
+        ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ceo'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = 'flex';
         });
@@ -6165,223 +5942,6 @@ function exportarHistoricoCSV() {
     URL.revokeObjectURL(url); showToast('Histórico exportado com sucesso!', 'success');
 }
 
-// ===== ASSISTENTE IA — CHAT CONVERSACIONAL =====
-var iaChatHistory = [];
-var iaTyping = false;
-
-function iaAtualizarContador() {
-    var el = document.getElementById('ia-registo-count');
-    if (el) el.textContent = db.length.toLocaleString() + ' registos';
-}
-
-function iaConstruirContexto(pergunta) {
-    var agora = new Date();
-    var totalRegistos = db.length;
-    var totalGasto = db.reduce(function(s,r){return s+(r.valor||0);},0);
-    var totalLitros = db.reduce(function(s,r){return s+(r.litros||0);},0);
-    var registosComConsumo = db.filter(function(r){return Number(r.l100)>0;});
-    var mediaGeral = registosComConsumo.length > 0
-        ? (registosComConsumo.reduce(function(s,r){return s+Number(r.l100);},0)/registosComConsumo.length).toFixed(1) : 0;
-    var roubos = db.filter(function(r){return r.status==='ROUBO';});
-    var criticos = db.filter(function(r){return r.status==='CRITICO';});
-    var prejuizoTotal = db.reduce(function(s,r){return s+(r.perdaAOA||0);},0);
-
-    // Viaturas únicas
-    var viaturas = {};
-    db.forEach(function(r){
-        if (!viaturas[r.placa]) viaturas[r.placa] = {placa:r.placa, marca:r.marca||'', abastecimentos:0, litros:0, valor:0, motoristas:new Set(), ultimaData:'', ultimoMotorista:''};
-        viaturas[r.placa].abastecimentos++;
-        viaturas[r.placa].litros += (r.litros||0);
-        viaturas[r.placa].valor += (r.valor||0);
-        if (r.moto) viaturas[r.placa].motoristas.add(r.moto);
-        if (!viaturas[r.placa].ultimaData || r.data > viaturas[r.placa].ultimaData) {
-            viaturas[r.placa].ultimaData = r.data;
-            viaturas[r.placa].ultimoMotorista = r.moto || '';
-        }
-    });
-    var listaViaturas = Object.values(viaturas).map(function(v){
-        return v.placa + ' (' + v.marca + ') — últ.motorista: ' + v.ultimoMotorista + ' em ' + v.ultimaData + ', ' + v.abastecimentos + ' abast., ' + v.litros.toFixed(0) + 'L, ' + v.valor.toLocaleString() + ' AOA';
-    }).join('\n');
-
-    // Motoristas
-    var motoristas = {};
-    db.forEach(function(r){
-        if (!r.moto) return;
-        if (!motoristas[r.moto]) motoristas[r.moto] = {nome:r.moto, abastecimentos:0, litros:0, roubos:0, criticos:0, datas:[]};
-        motoristas[r.moto].abastecimentos++;
-        motoristas[r.moto].litros += (r.litros||0);
-        if (r.status==='ROUBO') motoristas[r.moto].roubos++;
-        if (r.status==='CRITICO') motoristas[r.moto].criticos++;
-        motoristas[r.moto].datas.push(r.data);
-    });
-    var listaMotoristas = Object.values(motoristas).sort(function(a,b){return (b.roubos+b.criticos)-(a.roubos+a.criticos);})
-        .slice(0,30).map(function(m){
-            return m.nome + ' — ' + m.abastecimentos + ' abast., ' + m.litros.toFixed(0) + 'L, alertas: ' + m.roubos + ' ROUBO / ' + m.criticos + ' CRÍTICO';
-        }).join('\n');
-
-    // Últimos 50 registos (mais relevantes para perguntas recentes)
-    var recentes = db.slice().sort(function(a,b){return _cmpCrono(b, a);}).slice(0,50);
-    var listaRecentes = recentes.map(function(r){
-        return r.data + ' ' + (r.hora||'') + ' | ' + r.placa + ' | ' + (r.moto||'') + ' | ' + (r.destino||'') + ' | ' + (r.litros||0) + 'L | ' + (r.valor||0).toLocaleString() + ' AOA | L/100: ' + (r.l100||'--') + ' | Status: ' + (r.status||'OK');
-    }).join('\n');
-
-    // Abastecimentos por data (agrupado)
-    var porData = {};
-    db.forEach(function(r){ porData[r.data]=(porData[r.data]||0)+(r.litros||0); });
-    var topDatas = Object.entries(porData).sort(function(a,b){return b[1]-a[1];}).slice(0,10)
-        .map(function(e){return e[0]+': '+e[1].toFixed(0)+'L';}).join(', ');
-
-    return `És o Assistente de Auditoria de Combustível da frota de camiões pesados de Angola (rota Chibia/Huíla → Porto do Namibe).
-Tens acesso COMPLETO à base de dados. Data actual: ${agora.toLocaleDateString('pt-PT')} (${agora.toISOString().slice(0,10)}).
-Responde sempre em Português Europeu. Sê directo, usa emojis com moderação. Usa tabelas quando útil.
-
-=== RESUMO GERAL ===
-Total registos: ${totalRegistos}
-Gasto total: ${totalGasto.toLocaleString()} AOA
-Total litros: ${totalLitros.toFixed(0)} L
-Consumo médio frota: ${mediaGeral} L/100km | Meta: ${META} L/100km
-Registos ROUBO: ${roubos.length} | CRÍTICO: ${criticos.length}
-Prejuízo total estimado: ${prejuizoTotal.toLocaleString()} AOA
-
-=== TOP 10 DIAS COM MAIS LITROS ===
-${topDatas}
-
-=== VIATURAS (${Object.keys(viaturas).length} no total) ===
-${listaViaturas}
-
-=== MOTORISTAS (top 30 por alertas) ===
-${listaMotoristas}
-
-=== ÚLTIMOS 50 ABASTECIMENTOS ===
-${listaRecentes}`;
-}
-
-function iaEnviarMensagem() {
-    if (iaTyping) return;
-    var input = document.getElementById('ia-chat-input');
-    var texto = input.value.trim();
-    if (!texto) return;
-    if (db.length === 0) { showToast('Sem dados na base de dados', 'warning'); return; }
-    var apiKey = (document.getElementById('ia-api-key-field') || {}).value || '';
-    if (!apiKey) { showToast('Insira a chave API Anthropic no campo em baixo', 'warning'); document.getElementById('ia-api-key-field').focus(); return; }
-
-    // Esconder welcome + suggestions após 1ª mensagem
-    var welcome = document.getElementById('ia-welcome');
-    var sugestoes = document.getElementById('ia-suggestions');
-    if (welcome) welcome.style.display = 'none';
-    if (sugestoes) sugestoes.style.display = 'none';
-
-    // Adicionar mensagem do utilizador
-    iaAdicionarMensagem('user', texto);
-    input.value = '';
-    input.style.height = 'auto';
-    iaChatHistory.push({ role: 'user', content: texto });
-
-    // Mostrar typing
-    iaTyping = true;
-    document.getElementById('ia-send-btn').disabled = true;
-    iaAdicionarTyping();
-
-    // Preparar mensagens para a API
-    var systemPrompt = iaConstruirContexto(texto);
-    var apiMessages = iaChatHistory.slice(-10); // máx 10 turnos
-
-    // Usar proxy CORS para contornar bloqueio do browser
-    var apiKey = (document.getElementById('ia-api-key-field') || {}).value || '';
-    var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://api.anthropic.com/v1/messages');
-    fetch(proxyUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1500,
-            system: systemPrompt,
-            messages: apiMessages
-        })
-    })
-    .then(function(res){ return res.json(); })
-    .then(function(data) {
-        iaRemoverTyping();
-        iaTyping = false;
-        document.getElementById('ia-send-btn').disabled = false;
-
-        if (data.error) {
-            iaAdicionarMensagem('assistant', '❌ Erro: ' + data.error.message);
-            iaChatHistory.pop(); // remover última mensagem user se falhou
-            return;
-        }
-
-        var resposta = (data.content||[]).map(function(i){return i.text||'';}).filter(Boolean).join('\n');
-        if (!resposta) resposta = '⚠️ Não obtive resposta. Tente novamente.';
-        iaChatHistory.push({ role: 'assistant', content: resposta });
-        iaAdicionarMensagem('assistant', resposta);
-    })
-    .catch(function(err) {
-        iaRemoverTyping();
-        iaTyping = false;
-        document.getElementById('ia-send-btn').disabled = false;
-        var msg = err.message || 'Erro de ligação';
-        iaAdicionarMensagem('assistant', '❌ Erro de ligação: ' + msg + '\n\nVerifique a sua ligação à internet.');
-        iaChatHistory.pop();
-    });
-}
-
-function iaAdicionarMensagem(role, texto) {
-    var container = document.getElementById('ia-chat-messages');
-    var agora = new Date().toLocaleTimeString('pt-PT', {hour:'2-digit',minute:'2-digit'});
-    var div = document.createElement('div');
-    div.className = 'ai-msg ' + role;
-    var icone = role === 'user' ? '👤' : '🤖';
-    var conteudo = role === 'assistant'
-        ? (typeof marked !== 'undefined' ? marked.parse(texto) : texto.replace(/\n/g,'<br>'))
-        : '<span>' + texto.replace(/</g,'&lt;') + '</span>';
-    div.innerHTML = '<div class="ai-msg-avatar">' + icone + '</div>' +
-        '<div><div class="ai-msg-bubble">' + conteudo + '</div>' +
-        '<div class="ai-msg-time">' + agora + '</div></div>';
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-
-function iaAdicionarTyping() {
-    var container = document.getElementById('ia-chat-messages');
-    var div = document.createElement('div');
-    div.className = 'ai-msg assistant';
-    div.id = 'ia-typing-indicator';
-    div.innerHTML = '<div class="ai-msg-avatar">🤖</div>' +
-        '<div class="ai-msg-bubble" style="padding:10px 14px;">' +
-        '<div class="ai-typing"><span></span><span></span><span></span></div></div>';
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-
-function iaRemoverTyping() {
-    var el = document.getElementById('ia-typing-indicator');
-    if (el) el.remove();
-}
-
-function iaUsarSugestao(btn) {
-    var mapa = {
-        '📋 Quem tem a matrícula X hoje?': 'Mostra-me todas as viaturas e o motorista que as usou mais recentemente. Inclui a data do último registo.',
-        '🔴 Motoristas com mais alertas': 'Quais os motoristas com mais alertas de ROUBO e CRÍTICO? Apresenta um ranking com os detalhes.',
-        '⛽ Dias com maior consumo de litros': 'Quais foram os dias com maior consumo total de litros? Lista os top 10.',
-        '💸 Total de prejuízo este mês': 'Qual o prejuízo total estimado este mês? Detalha por motorista e viatura.',
-        '🚛 Viatura com mais abastecimentos': 'Qual a viatura com mais abastecimentos registados? Apresenta o top 5.',
-        '📊 Resumo geral da frota': 'Faz um resumo executivo completo do estado actual da frota: gastos, consumos, alertas e principais preocupações.'
-    };
-    var texto = mapa[btn.textContent] || btn.textContent;
-    document.getElementById('ia-chat-input').value = texto;
-    iaEnviarMensagem();
-}
-
-// Manter compatibilidade com código antigo que possa referenciar estas funções
-function analisarComIA() { switchTab('ia', document.getElementById('nav-ia')); }
-function exportarAnaliseIA() { showToast('Use o assistente conversacional na aba IA', 'info'); }
-function copiarAnaliseIA() { showToast('Use o assistente conversacional na aba IA', 'info'); }
-function gerarPDFdaAnalise() { showToast('Use o assistente conversacional na aba IA', 'info'); }
 
 
 // ===== INVESTIGAÇÃO — SUB-ABAS =====
