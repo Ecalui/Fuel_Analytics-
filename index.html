@@ -5528,7 +5528,7 @@ function gerarRelatorioComAssinaturas() {
     }
     function assinatura(doc, y) {
         if (!comAss || !assResp) return;
-        if (y > 250) { doc.addPage(); y = 20; }
+        if (y > 242) { doc.addPage(); y = 20; }
         doc.setDrawColor(200, 200, 200); doc.line(14, y + 10, 90, y + 10); doc.line(110, y + 10, 196, y + 10);
         doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
         doc.text(assResp, 52, y + 15, { align: 'center' }); doc.text(assResp, 153, y + 15, { align: 'center' });
@@ -5826,7 +5826,7 @@ function gerarRelatorioComAssinaturas() {
             return [r.data, r.hora||'--', r.placa, r.marca||'--', r.moto, motivoCell, l100Cell, statusLabel];
         });
         doc.autoTable({
-            startY: ySim, margin: { left: 14, right: 14 },
+            startY: ySim, margin: { left: 14, right: 14, bottom: 24 },
             head: [['Data', 'Hora', 'Viatura', 'Marca', 'Motorista', 'Destino / Motivo', 'L/100km', 'Status']],
             body: rowsSimples,
             headStyles: { fillColor: [15,23,42], textColor: [255,255,255], fontSize: 8, fontStyle: 'bold' },
@@ -5863,6 +5863,7 @@ function gerarRelatorioComAssinaturas() {
         var totalJust = dados.filter(function(r){return r.justificado;}).length;
         if (totalJust > 0) {
             var yLeg = doc.lastAutoTable.finalY + 6;
+            if (yLeg + 10 > 272) { doc.addPage(); yLeg = 20; }
             doc.setFillColor(236,253,245); doc.roundedRect(14, yLeg, 182, 10, 2, 2, 'F');
             doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(5,120,80);
             doc.text('✓ ' + totalJust + ' registo(s) JUSTIFICADO(S) pelo administrador — excluídos do prejuízo confirmado. Consumo elevado com motivo documentado.', 18, yLeg+7);
