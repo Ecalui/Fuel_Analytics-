@@ -3940,7 +3940,8 @@ function exportarCEOPDF() {
 
     doc.setFontSize(8); doc.setTextColor(100,100,100);
     doc.text('Fuel Analytics PRO  |  Gerado por: ' + (usuarioAtual?.nome||'--') + ' (' + (usuarioAtual?.perfil||'--') + ')  |  ' + new Date().toLocaleString('pt-PT'), 14, 285);
-    doc.text('CONFIDENCIAL — Uso interno', 196, 285, { align: 'right' });
+    doc.text('CONFIDENCIAL — Uso interno', 179, 290, { align: 'right' });
+    desenharSeloAutor(doc);
     doc.save('CEO_Relatorio_Combustivel_' + new Date().toISOString().slice(0,10) + '.pdf');
     auditLog.push({ tipo: 'EXPORTACAO_PDF_CEO', data: new Date().toISOString(), usuario: usuarioAtual?.nome, perfil: usuarioAtual?.perfil, registos: dados.length });
     salvarDadosLocal();
@@ -5456,6 +5457,23 @@ function previewPDF() {
 }
 function fecharPreview() { document.getElementById('previewModal').style.display = 'none'; }
 
+// ===== SELO DE AUTORIA NOS PDFs =====
+// QR pequeno no canto inferior direito de todas as páginas, com 'powered by ecalui' por baixo; leva ao cartão digital do autor (GitHub Pages).
+var SELO_AUTOR_URL = 'https://ecalui.github.io/cart-o-digital/';
+var SELO_AUTOR_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPgAAAD4AQAAAADpqhamAAABS0lEQVR42uWZQW7EMAwDh4v8/8vTg2Q7bYF9gJUAgZ2cZEoUxUS+Xh/u/s6KXwXt/X57e/xPxxr2wng2t8f/AZLUCSSIWPtkQP6/vwcTyUn/WfFLlJBB/PfwRlsO+g7j/z/3GP73lP9CPucAbo8/xqzUL+5LlwE4gv9SyR8EtPogoAP6fwruxrtyQVLZMKL/2boHiIjug8mM+m/t0ydACv96NaH/E/RUgtnjQLwffzhsH5r/wxD+33o/WM1vtf4qg/v5r8ROjghMjQAmztC/ZXzUQ38r4gH6p/G3Cj/bCwKcgL8NtW37rIWiI/p/ziRYrNdqcMD8l//jXyufDJl/2+0p52flAssDneP/lurLnoEY0f+fk/mthEx3ATJA/z5vLsDmwyOKB8VfJZ/1YET/P/5v/fVw2QA9DAyI/8X4KRZYRuCM+e92ff/1+gHrW7+75ea93QAAAABJRU5ErkJggg==';
+function desenharSeloAutor(doc) {
+    try {
+        var total = doc.internal.getNumberOfPages();
+        for (var i = 1; i <= total; i++) {
+            doc.setPage(i);
+            doc.addImage(SELO_AUTOR_PNG, 'PNG', 186, 278, 10, 10);
+            doc.link(186, 278, 10, 10, { url: SELO_AUTOR_URL });
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(4.5); doc.setTextColor(150, 150, 150);
+            doc.text('powered by ecalui', 191, 291.2, { align: 'center' });
+        }
+    } catch (e) { console.warn('[Selo] não foi possível desenhar o QR de autoria:', e); } // nunca impede o relatório de sair
+}
+
 function gerarRelatorioComAssinaturas() {
     if (!usuarioAtual || (!_ehAdminAtual() && usuarioAtual.perfil !== 'relatorista')) { showToast('Sem permissão para realizar esta acção', 'error'); return; }
     var comAss = document.getElementById('pdf-assinatura')?.checked ?? true;
@@ -5523,7 +5541,7 @@ function gerarRelatorioComAssinaturas() {
         for (var i = 1; i <= total; i++) {
             doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
             doc.text('Fuel Analytics PRO — Documento Confidencial', 14, 290);
-            doc.text('Página ' + i + ' de ' + total, 196, 290, { align: 'right' });
+            doc.text('Página ' + i + ' de ' + total, 179, 290, { align: 'right' });
         }
     }
 
@@ -5606,7 +5624,7 @@ function gerarRelatorioComAssinaturas() {
         var rankMoto={};
         dados.filter(function(r){return !r.justificado&&Number(r.l100)>0;}).forEach(function(r){if(!rankMoto[r.moto])rankMoto[r.moto]={soma:0,n:0,prej:0,anom:0};rankMoto[r.moto].soma+=Number(r.l100);rankMoto[r.moto].n++;rankMoto[r.moto].prej+=(r.perdaAOA||0);if(r.status==='ROUBO'||r.status==='CRITICO')rankMoto[r.moto].anom++;});
         var topMoto=Object.entries(rankMoto).map(function(e){return[e[0],(e[1].soma/e[1].n).toFixed(1)+' L/100km',e[1].anom+' anomalias',e[1].prej.toLocaleString()+' AOA'];}).sort(function(a,b){return parseFloat(b[1])-parseFloat(a[1]);}).slice(0,5);
-        doc.autoTable({startY:y,head:[['Motorista','Média','Anomalias','Prejuízo']],body:topMoto,headStyles:{fillColor:[15,23,42]},styles:{fontSize:9},margin:{left:14,right:14}});
+        doc.autoTable({startY:y,head:[['Motorista','Média','Anomalias','Prejuízo']],body:topMoto,headStyles:{fillColor:[15,23,42]},styles:{fontSize:9},margin:{left:14,right:14,bottom:24}});
         var yExecFim=doc.lastAutoTable.finalY+10;
         // Secção de justificados (se existirem)
         var justExec = dados.filter(function(r){return r.justificado;});
@@ -5616,7 +5634,7 @@ function gerarRelatorioComAssinaturas() {
             doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(5,120,80);
             doc.text('Consumo elevado com motivo documentado. Excluídos do prejuízo confirmado.', 14, yExecFim); yExecFim+=8;
             doc.setTextColor(0,0,0);
-            doc.autoTable({startY:yExecFim,margin:{left:14,right:14},head:[['Data','Viatura','Motorista','L/100km','Motivo Justificação','Por']],body:justExec.map(function(r){return[r.data,r.placa,r.moto,r.l100||'--',(r.motivoJustificacao||'')+(r.obsJustificacao?' — '+r.obsJustificacao:''),(r.justificadoPor||'Admin')];}),headStyles:{fillColor:[5,150,105],textColor:[255,255,255]},styles:{fontSize:8}});
+            doc.autoTable({startY:yExecFim,margin:{left:14,right:14,bottom:24},head:[['Data','Viatura','Motorista','L/100km','Motivo Justificação','Por']],body:justExec.map(function(r){return[r.data,r.placa,r.moto,r.l100||'--',(r.motivoJustificacao||'')+(r.obsJustificacao?' — '+r.obsJustificacao:''),(r.justificadoPor||'Admin')];}),headStyles:{fillColor:[5,150,105],textColor:[255,255,255]},styles:{fontSize:8}});
             yExecFim=doc.lastAutoTable.finalY+10;
         }
         assinatura(doc,yExecFim);
@@ -5646,7 +5664,7 @@ function gerarRelatorioComAssinaturas() {
             else if(regs.length>=3)conclusao+='Padrão recorrente. Recomenda-se entrevista formal e monitorização reforçada.';
             else conclusao+='Ocorrências em número reduzido. Manter observação antes de conclusões definitivas.';
             y=paragrafo(doc,y,conclusao);
-            doc.autoTable({startY:y,margin:{left:14,right:14},head:[['Data','Viatura','Destino','L/100km','Prejuízo','Status']],body:regs.map(function(r){return[r.data,r.placa,r.destino||'--',r.l100,(r.perdaAOA||0).toLocaleString()+' AOA',r.status];}),headStyles:{fillColor:[220,38,38]},styles:{fontSize:8}});
+            doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['Data','Viatura','Destino','L/100km','Prejuízo','Status']],body:regs.map(function(r){return[r.data,r.placa,r.destino||'--',r.l100,(r.perdaAOA||0).toLocaleString()+' AOA',r.status];}),headStyles:{fillColor:[220,38,38]},styles:{fontSize:8}});
             y=doc.lastAutoTable.finalY+12;
         });
         if(y<240)assinatura(doc,y);else{doc.addPage();assinatura(doc,20);}
@@ -5661,7 +5679,7 @@ function gerarRelatorioComAssinaturas() {
         var ml=Object.keys(meses).sort();
         y=separador(doc,y,'EVOLUÇÃO MENSAL — '+ml.length+' meses analisados');
         var rows=ml.map(function(m,i){var d=meses[m];var med=d.nC>0?(d.somaC/d.nC).toFixed(1):'--';var var_='';if(i>0){var prev=meses[ml[i-1]];var pm=prev.nC>0?(prev.somaC/prev.nC):0;var cm=d.nC>0?(d.somaC/d.nC):0;if(pm>0){var diff=(((cm-pm)/pm)*100).toFixed(1);var_=(diff>0?'+':'')+diff+'%';}}return[m,d.nRegs,d.litros.toLocaleString()+' L',d.gasto.toLocaleString()+' AOA',med+' L/100',var_,d.roubos+d.criticos,d.prej.toLocaleString()+' AOA'];});
-        doc.autoTable({startY:y,margin:{left:14,right:14},head:[['Mês','Registos','Litros','Gasto','Média','Variação','Anomalias','Prejuízo']],body:rows,headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
+        doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['Mês','Registos','Litros','Gasto','Média','Variação','Anomalias','Prejuízo']],body:rows,headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
         y=doc.lastAutoTable.finalY+10;
         y=separador(doc,y,'ANÁLISE DO PERÍODO');
         var melhorMes=ml.reduce(function(b,m){return meses[m].nC>0&&(meses[m].somaC/meses[m].nC)<(meses[b].nC>0?meses[b].somaC/meses[b].nC:999)?m:b;},ml[0]);
@@ -5680,7 +5698,7 @@ function gerarRelatorioComAssinaturas() {
         dados.filter(function(r){return Number(r.l100)>0;}).forEach(function(r){if(!motoMap[r.moto])motoMap[r.moto]={soma:0,n:0,anom:0,prej:0,regs:[]};motoMap[r.moto].soma+=Number(r.l100);motoMap[r.moto].n++;motoMap[r.moto].regs.push({ts:r.ts,l:Number(r.l100)});if((r.status==='ROUBO'||r.status==='CRITICO')&&!r.justificado){motoMap[r.moto].anom++;motoMap[r.moto].prej+=(r.perdaAOA||0);}});
         var ranking=Object.entries(motoMap).map(function(e){var med=(e[1].soma/e[1].n).toFixed(1);var taxa=((e[1].anom/e[1].n)*100).toFixed(0)+'%';var ro=e[1].regs.sort(function(a,b){return _cmpCrono(a, b);});var tend='--';if(ro.length>=4){var h=Math.floor(ro.length/2);var m1=ro.slice(0,h).reduce(function(s,x){return s+x.l;},0)/h;var m2=ro.slice(-3).reduce(function(s,x){return s+x.l;},0)/3;if(m2>m1*1.05)tend='A piorar ↑';else if(m2<m1*0.95)tend='A melhorar ↓';else tend='Estável →';}return[e[0],med+' L/100',taxa,tend,e[1].n+' viagens',e[1].prej.toLocaleString()+' AOA'];}).sort(function(a,b){return parseFloat(b[1])-parseFloat(a[1]);});
         y=separador(doc,y,'RANKING COMPLETO DE MOTORISTAS');
-        doc.autoTable({startY:y,margin:{left:14,right:14},head:[['#','Motorista','Consumo Médio','Taxa Desvio','Tendência','Viagens','Prejuízo']],body:ranking.map(function(r,i){return[i+1].concat(r);}),headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
+        doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['#','Motorista','Consumo Médio','Taxa Desvio','Tendência','Viagens','Prejuízo']],body:ranking.map(function(r,i){return[i+1].concat(r);}),headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
         y=doc.lastAutoTable.finalY+10; assinatura(doc,y);
     }
 
@@ -5719,7 +5737,7 @@ function gerarRelatorioComAssinaturas() {
         var ranking=Object.entries(motoMap).filter(function(e){return e[1].total>=2;}).map(function(e){var med=e[1].n>0?(e[1].soma/e[1].n).toFixed(1):'--';var taxa=((e[1].semDesvio/e[1].total)*100).toFixed(0);return{nome:e[0],semDesvio:e[1].semDesvio,total:e[1].total,med:med,taxa:taxa};}).sort(function(a,b){return b.semDesvio-a.semDesvio||parseFloat(b.taxa)-parseFloat(a.taxa);}).slice(0,15);
         y=separador(doc,y,'MOTORISTAS COM MELHOR DESEMPENHO');
         y=paragrafo(doc,y,'Os motoristas abaixo destacam-se pelo maior número de viagens realizadas sem registo de desvio de consumo confirmado. Este relatório serve como base para reconhecimento formal e pode ser partilhado com a gestão de recursos humanos.');
-        doc.autoTable({startY:y,margin:{left:14,right:14},head:[['#','Motorista','Viagens Sem Desvio','Total Viagens','Taxa de Sucesso','Consumo Médio']],body:ranking.map(function(r,i){return[i+1,r.nome,r.semDesvio,r.total,r.taxa+'%',r.med+' L/100km'];}),headStyles:{fillColor:[5,150,105]},styles:{fontSize:9}});
+        doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['#','Motorista','Viagens Sem Desvio','Total Viagens','Taxa de Sucesso','Consumo Médio']],body:ranking.map(function(r,i){return[i+1,r.nome,r.semDesvio,r.total,r.taxa+'%',r.med+' L/100km'];}),headStyles:{fillColor:[5,150,105]},styles:{fontSize:9}});
         y=doc.lastAutoTable.finalY+10;
         if(ranking.length>0){
             y=separador(doc,y,'DESTAQUE — TOP 5');
@@ -5746,7 +5764,7 @@ function gerarRelatorioComAssinaturas() {
         y=separador(doc,y,'METODOLOGIA');
         y=paragrafo(doc,y,'Score de risco calculado cruzando: consumo médio vs meta (peso 50%), frequência de desvios confirmados (peso 35%), e tendência recente (peso 15%). Score acima de 60 = risco elevado. Entre 30 e 60 = atenção. Abaixo de 30 = normal.');
         y=separador(doc,y,'RANKING COMPLETO');
-        doc.autoTable({startY:y,margin:{left:14,right:14},head:[['#','Motorista','Score','Consumo Médio','Freq. Desvios','Tendência','Viagens','Prejuízo']],body:ranking.map(function(r,i){return[i+1,r.nome,r.score+'/100',r.med+' L/100',r.freq+'%',r.tend,r.n,r.prej.toLocaleString()+' AOA'];}),headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
+        doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['#','Motorista','Score','Consumo Médio','Freq. Desvios','Tendência','Viagens','Prejuízo']],body:ranking.map(function(r,i){return[i+1,r.nome,r.score+'/100',r.med+' L/100',r.freq+'%',r.tend,r.n,r.prej.toLocaleString()+' AOA'];}),headStyles:{fillColor:[15,23,42]},styles:{fontSize:8}});
         y=doc.lastAutoTable.finalY+10; assinatura(doc,y);
     }
 
@@ -5779,7 +5797,7 @@ function gerarRelatorioComAssinaturas() {
             else texto+='CONCLUSÃO: Ocorrências em número reduzido. Manter observação antes de conclusões definitivas.';
             y=paragrafo(doc,y,texto);
             y=separador(doc,y,'REGISTO DAS OCORRÊNCIAS',[220,38,38]);
-            doc.autoTable({startY:y,margin:{left:14,right:14},head:[['Data','Hora','Viatura','Destino','L/100km','Excesso (L)','Prejuízo','Status']],body:regs.map(function(r){return[r.data,r.hora||'--',r.placa,r.destino||'--',r.l100,r.perdaL||'--',(r.perdaAOA||0).toLocaleString()+' AOA',r.status];}),headStyles:{fillColor:[220,38,38]},styles:{fontSize:8}});
+            doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['Data','Hora','Viatura','Destino','L/100km','Excesso (L)','Prejuízo','Status']],body:regs.map(function(r){return[r.data,r.hora||'--',r.placa,r.destino||'--',r.l100,r.perdaL||'--',(r.perdaAOA||0).toLocaleString()+' AOA',r.status];}),headStyles:{fillColor:[220,38,38]},styles:{fontSize:8}});
             y=doc.lastAutoTable.finalY+10;
             if(y<240)assinatura(doc,y);else{doc.addPage();assinatura(doc,20);}
         });
@@ -5854,7 +5872,7 @@ function gerarRelatorioComAssinaturas() {
         for (var p = 1; p <= totalPag; p++) {
             doc.setPage(p); doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
             doc.text('Gerado pelo Fuel Analytics PRO', 14, 290);
-            doc.text('Pág. '+p+' / '+totalPag, 196, 290, {align:'right'});
+            doc.text('Pág. '+p+' / '+totalPag, 179, 290, {align:'right'});
         }
     }
 
@@ -5862,7 +5880,7 @@ function gerarRelatorioComAssinaturas() {
     else {
         var y=cabecalho('Relatório — '+getTipoRelatorioNome(tipo),'Dados filtrados');
         y=painelMetricas(doc,y);
-        doc.autoTable({startY:y,margin:{left:14,right:14},head:[['Data','Hora','Viatura','Motorista','Destino / Motivo','L/100km','Status']],body:dados.map(function(i){
+        doc.autoTable({startY:y,margin:{left:14,right:14,bottom:24},head:[['Data','Hora','Viatura','Motorista','Destino / Motivo','L/100km','Status']],body:dados.map(function(i){
             var sLabel = i.justificado ? 'JUSTIFICADO' : (i.status||'--');
             var dest = i.justificado ? (i.motivoJustificacao||'Justificado')+(i.obsJustificacao?' — '+i.obsJustificacao:'') : (i.destino||'--');
             return[i.data,i.hora||'--',i.placa,i.moto,dest,i.l100||'--',sLabel];
@@ -5873,6 +5891,7 @@ function gerarRelatorioComAssinaturas() {
         assinatura(doc,doc.lastAutoTable.finalY+15);
         rodape(doc);
     }
+    desenharSeloAutor(doc);
     doc.save('Relatorio_'+getTipoRelatorioNome(tipo).replace(/ /g,'_')+'_'+new Date().toISOString().slice(0,10)+'.pdf');
     auditLog.push({ tipo: 'EXPORTACAO_PDF', data: new Date().toISOString(), usuario: usuarioAtual?.nome, perfil: usuarioAtual?.perfil, tipoRelatorio: getTipoRelatorioNome(tipo), registos: dados.length });
     salvarDadosLocal();
