@@ -1683,32 +1683,174 @@
         }
         .inv-top10-btn:hover { background: rgba(255,255,255,0.1); color: white; }
         .inv-top10-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* ===== DASHBOARD CEO: linguagem de linhas finas (só visual; tudo limitado a #tab-ceo) ===== */
+        #tab-ceo.tab-active { animation: none; }
+        #tab-ceo .page-eyebrow { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #tab-ceo .page-period-pill { display: none; }
+
+        /* filtros: sem caixa, só uma linha por baixo */
+        #tab-ceo .ceo-filter-bar { background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 0 0 18px; margin-bottom: 24px; gap: 16px 24px; align-items: flex-end; }
+        #tab-ceo .ceo-filter-bar .filter-group { gap: 6px; }
+        #tab-ceo .ceo-filter-bar .filter-group label { margin: 0; font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #tab-ceo .ceo-filter-bar input, #tab-ceo .ceo-filter-bar select { min-height: 48px; padding: 10px 12px; border-radius: 0; border: 1px solid var(--text-muted); background: var(--bg-card); color: var(--text-primary); font-size: 14px; }
+        #tab-ceo .ceo-filter-bar input:focus, #tab-ceo .ceo-filter-bar select:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: 0; }
+        #tab-ceo .ceo-filter-bar input[type="date"] { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-ceo .btn { border-radius: 0; min-height: 48px; padding: 0 20px; justify-content: center; transition: none; font-weight: 600; box-shadow: none; }
+        #tab-ceo .btn:hover { transform: none; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; }
+        #tab-ceo .btn i { display: none; }
+        #tab-ceo .btn-dark, #tab-ceo .btn-success { background: var(--text-primary); color: var(--bg-card); border: 1px solid var(--text-primary); }
+        #tab-ceo .btn:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+
+        /* cabeçalho do relatório: sem cartão escuro; a frase executiva leva uma barra com a cor do nível */
+        #tab-ceo .ceo-header { background: none; border: 0; border-top: 2px solid var(--text-primary); border-radius: 0; padding: 14px 0 0; margin-bottom: 36px; overflow: visible; }
+        #tab-ceo .ceo-header::before { display: none; }
+        #tab-ceo .ceo-header h2 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 0 0 2px; }
+        #tab-ceo .ceo-header p { font-size: 13px; color: var(--text-secondary); }
+        #tab-ceo .ceo-upd { text-align: right; font-size: 12px; color: var(--text-secondary); }
+        #tab-ceo .ceo-upd b { display: block; margin-top: 2px; font: 500 13px 'JetBrains Mono', monospace; color: var(--text-primary); }
+        #tab-ceo .ceo-status-phrase { margin-top: 18px; padding: 2px 0 2px 16px; background: none; border-radius: 0; border-left: 2px solid var(--text-muted); font-size: 20px; font-weight: 500; line-height: 1.4; letter-spacing: -0.01em; color: var(--text-primary); max-width: 62ch; }
+        #tab-ceo .ceo-status-phrase[data-nivel="critico"] { border-left-color: var(--danger); }
+        #tab-ceo .ceo-status-phrase[data-nivel="atencao"] { border-left-color: var(--warning); }
+        #tab-ceo .ceo-status-phrase[data-nivel="ok"] { border-left-color: var(--success); }
+
+        /* indicadores: faixa com linha de 2px por cima, divisórias de 1px */
+        #tab-ceo .ceo-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--border); border-top: 2px solid var(--text-primary); border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+        #tab-ceo .ceo-kpi-card { background: var(--bg-page); border: 0; border-radius: 0; box-shadow: none; padding: 16px 20px 18px; overflow: visible; transition: none; }
+        #tab-ceo .ceo-kpi-card:first-child { padding-left: 0; }
+        #tab-ceo .ceo-kpi-card:hover { transform: none; box-shadow: none; }
+        #tab-ceo .ceo-kpi-icon { display: none; }
+        #tab-ceo .ceo-kpi-label { font-size: 12px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 8px; }
+        #tab-ceo .ceo-kpi-val { font-size: 30px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 4px; overflow-wrap: anywhere; }
+        #tab-ceo .ceo-kpi-unit { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+        #tab-ceo .ceo-kpi-trend { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        #tab-ceo .ceo-kpi-trend i { display: none; }
+
+        /* secções: sem caixa, linha fina por cima */
+        #tab-ceo .card { background: none; border: 0; border-top: 1px solid var(--text-primary); border-radius: 0; box-shadow: none; padding: 14px 0 0; margin-bottom: 36px; }
+        #tab-ceo .card-title { font-size: 15px; font-weight: 600; }
+        #tab-ceo .card-title i { display: none; }
+        #tab-ceo .ceo-nota { font-size: 12px; color: var(--text-secondary); }
+        #tab-ceo .ceo-charts-row { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 0 40px; margin-bottom: 0; }
+
+        /* litros por marca: barra única + linhas (mesmo padrão do Painel) */
+        #tab-ceo .marca-bar { display: flex; gap: 2px; height: 14px; margin: 16px 0 14px; }
+        #tab-ceo .marca-seg { min-width: 3px; height: 100%; }
+        #tab-ceo .marca-row { display: flex; align-items: center; gap: 12px; min-height: 40px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-primary); }
+        #tab-ceo .marca-row:last-child { border-bottom: 0; }
+        #tab-ceo .marca-sw { width: 10px; height: 10px; flex: 0 0 10px; }
+        #tab-ceo .marca-nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #tab-ceo .marca-pct { min-width: 48px; text-align: right; font-size: 12px; color: var(--text-secondary); }
+        #tab-ceo .marca-n { min-width: 72px; text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+        #tab-ceo .marca-vazio { padding-top: 16px; font-size: 14px; color: var(--text-secondary); }
+
+        /* ranking: linhas em vez de cartões, semáforo em quadrado */
+        #tab-ceo .ceo-leg { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+        #tab-ceo .ceo-leg .semaforo:not(:first-child) { margin-left: 8px; }
+        #tab-ceo .semaforo { border-radius: 0; box-shadow: none; }
+        #tab-ceo .ceo-rank-grid { gap: 0 40px; margin-top: 14px; }
+        #tab-ceo .ceo-rank-half-title { margin: 0; padding-bottom: 8px; border-bottom: 1px solid var(--text-primary); font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: 0.02em; }
+        #tab-ceo .ceo-rank-half-title span { font-weight: 400; color: var(--text-secondary); margin-left: 6px; }
+        #tab-ceo .ceo-motorista-item { background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; padding: 10px 0; margin: 0; min-height: 56px; transition: none; }
+        #tab-ceo .ceo-motorista-item:hover { transform: none; }
+        #tab-ceo .ceo-motorista-num, #tab-ceo .ceo-motorista-num.red, #tab-ceo .ceo-motorista-num.green { width: 16px; height: auto; background: none; border-radius: 0; justify-content: flex-start; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+        #tab-ceo .ceo-motorista-sub { font-size: 12px; color: var(--text-secondary); }
+        #tab-ceo .ceo-motorista-val { font-size: 15px; font-weight: 500; }
+        #tab-ceo .ceo-motorista-val small { font-size: 12px !important; color: var(--text-secondary); }
+        @media (max-width: 1100px) {
+            #tab-ceo .ceo-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #tab-ceo .ceo-kpi-card:nth-child(odd) { padding-left: 0; }
+        }
+        @media (max-width: 900px) {
+            #tab-ceo .ceo-charts-row, #tab-ceo .ceo-rank-grid { grid-template-columns: 1fr; }
+            #tab-ceo .ceo-rank-half + .ceo-rank-half { margin-top: 28px; }
+        }
+        @media (max-width: 768px) {
+            #tab-ceo .ceo-kpi-val { font-size: 24px; }
+            #tab-ceo .ceo-status-phrase { font-size: 18px; }
+            #tab-ceo .ceo-upd { text-align: left; }
+            #tab-ceo .ceo-filter-bar { flex-direction: column; align-items: stretch; }
+            #tab-ceo .ceo-filter-bar input, #tab-ceo .ceo-filter-bar select { width: 100%; }
+            #tab-ceo .ceo-filter-bar > div:last-child { align-self: stretch !important; }
+            #tab-ceo .ceo-filter-bar > div:last-child .btn { flex: 1; }
+        }
+        @media (max-width: 480px) {
+            #tab-ceo .ceo-kpi-card { padding: 14px 10px 14px 0; }
+            #tab-ceo .ceo-kpi-card:nth-child(even) { padding-left: 14px; }
+            #tab-ceo .ceo-kpi-val { font-size: 22px; }
+        }
+
+        /* ===== PORTÃO DE ACESSO E ARRANQUE: mesma linguagem de linhas finas do interior da app ===== */
+        #supaGate, #fuelSplash { position: fixed; inset: 0; background: var(--bg-page); color: var(--text-primary); font-family: 'Karla', sans-serif; }
+        #supaGate { z-index: 2147483647; display: flex; overflow-y: auto; padding: max(24px, env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px)); }
+        #fuelSplash { z-index: 2147483646; padding: 24px; }
+        .gate-box { width: 100%; max-width: 360px; margin: auto; padding-bottom: 10vh; }
+        .gate-marca { margin: 0; font: 600 32px/1.1 'Outfit', sans-serif; letter-spacing: -0.02em; color: var(--text-primary); }
+        .gate-sub { margin: 8px 0 0; padding-bottom: 20px; border-bottom: 2px solid var(--text-primary); font-size: 14px; color: var(--text-secondary); }
+        #supaGate .gate-form { margin: 0; }
+        #supaGate .gate-campo { margin-top: 20px; }
+        #supaGate .gate-campo label { margin: 0 0 6px; font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--text-secondary); }
+        #supaGate .gate-campo input { height: 48px; padding: 0 12px; border: 1px solid var(--text-muted); border-radius: 0; box-shadow: none; background: var(--bg-input); color: var(--text-primary); font-size: 16px; transition: none; }
+        #supaGate .gate-campo input:focus { border-color: var(--text-primary); box-shadow: none; outline: 1px solid var(--text-primary); outline-offset: -1px; }
+        #supaGate .gate-pw { position: relative; }
+        #supaGate .gate-pw input { padding-right: 84px; }
+        #supaGate .gate-ver { position: absolute; top: 0; right: 0; height: 48px; padding: 0 14px; background: none; border: 0; font: 500 13px 'Outfit', sans-serif; color: var(--text-secondary); cursor: pointer; }
+        #supaGate .gate-ver:hover { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
+        #supaGate .gate-ver:focus-visible, #supaGate .gate-btn:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+        #supaGate .gate-btn { width: 100%; min-height: 48px; margin-top: 24px; background: var(--text-primary); color: var(--bg-page); border: 0; border-radius: 0; font: 600 15px 'Outfit', sans-serif; cursor: pointer; }
+        #supaGate .gate-btn:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
+        #supaGate .gate-btn:disabled { opacity: 0.55; cursor: default; }
+        #supaGateErro { margin: 16px 0 0; padding: 2px 0 2px 12px; border-left: 2px solid var(--danger); font-size: 14px; line-height: 1.4; color: var(--danger); }
+        #supaGate .gate-nota { margin: 28px 0 0; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; line-height: 1.4; color: var(--text-secondary); }
     </style>
 </head>
 <body>
 <!-- ===== PORTÃO DE ACESSO SUPABASE (autenticação à nuvem) ===== -->
-<div id="supaGate" style="position:fixed;inset:0;z-index:2147483647;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;">
-  <div style="background:#fff;border-radius:16px;padding:36px 32px;width:340px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.4);">
-    <div style="text-align:center;margin-bottom:8px;font-size:26px;">🔒</div>
-    <h2 style="margin:0 0 4px;font-size:18px;text-align:center;color:#0f172a;">Acesso Seguro</h2>
-    <p style="margin:0 0 20px;font-size:13px;text-align:center;color:#64748b;">Fuel Analytics — autenticação da base de dados</p>
-    <label style="display:block;font-size:12px;color:#475569;margin-bottom:4px;">Email de acesso</label>
-    <input id="supaGateEmail" type="email" autocomplete="off" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;" placeholder="email de acesso">
-    <label style="display:block;font-size:12px;color:#475569;margin-bottom:4px;">Password de acesso</label>
-    <input id="supaGatePassword" type="password" autocomplete="off" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:16px;" placeholder="password">
-    <button id="supaGateBtn" onclick="supaGateEntrar()" style="width:100%;padding:12px;background:#0d9488;color:#fff;border:0;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Aceder</button>
-    <div id="supaGateErro" style="display:none;margin-top:12px;padding:10px;background:#fee2e2;color:#991b1b;border-radius:8px;font-size:12px;"></div>
-    <p style="margin:16px 0 0;font-size:11px;text-align:center;color:#94a3b8;">A password não é guardada. A sessão fica neste dispositivo até fazer «Sair».</p>
-  </div>
+<div id="supaGate">
+  <main class="gate-box">
+    <h1 class="gate-marca">Fuel Analytics</h1>
+    <p class="gate-sub">Controlo de consumo • HMGRANITO</p>
+    <form class="gate-form" onsubmit="supaGateEntrar(); return false;" novalidate>
+      <div class="gate-campo">
+        <label for="supaGateEmail">Email</label>
+        <input id="supaGateEmail" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false">
+      </div>
+      <div class="gate-campo">
+        <label for="supaGatePassword">Password</label>
+        <div class="gate-pw">
+          <input id="supaGatePassword" type="password" autocomplete="current-password">
+          <button type="button" class="gate-ver" onclick="supaGateMostrar(this)" aria-pressed="false">Mostrar</button>
+        </div>
+      </div>
+      <div id="supaGateErro" role="alert" style="display:none;"></div>
+      <button id="supaGateBtn" class="gate-btn" type="submit">Aceder</button>
+    </form>
+    <p class="gate-nota">A sessão fica guardada neste dispositivo até fazer «Sair».</p>
+  </main>
 </div>
-<div id="fuelSplash" style="display:none;position:fixed;inset:0;z-index:2147483646;background:linear-gradient(135deg,#0f172a,#1e293b);color:#cbd5e1;align-items:center;justify-content:center;flex-direction:column;font-family:system-ui,sans-serif;gap:14px;">
-  <div style="font-size:30px;">⛽</div><div style="font-size:14px;">A abrir Fuel Analytics…</div>
+<div id="fuelSplash" style="display:none;align-items:center;justify-content:center;">
+  <div class="gate-box">
+    <p class="gate-marca">Fuel Analytics</p>
+    <p class="gate-sub">A abrir…</p>
+  </div>
 </div>
 <script>
 // Se há sessão guardada neste dispositivo, não mostrar o formulário de login: mostrar o splash enquanto a app arranca.
 (function(){ try { if (localStorage.getItem("fuel_sessao")) {
   document.getElementById("supaGate").style.display = "none";
   document.getElementById("fuelSplash").style.display = "flex"; } } catch(e){} })();
+function supaGateOcultar() {
+    var i = document.getElementById('supaGatePassword'); if (i) i.type = 'password';
+    var v = document.querySelector('#supaGate .gate-ver'); if (v) { v.textContent = 'Mostrar'; v.setAttribute('aria-pressed', 'false'); }
+}
+function supaGateMostrar(btn) {
+    var i = document.getElementById('supaGatePassword');
+    var ver = i.type === 'password';
+    i.type = ver ? 'text' : 'password';
+    btn.textContent = ver ? 'Ocultar' : 'Mostrar';
+    btn.setAttribute('aria-pressed', ver ? 'true' : 'false');
+    i.focus();
+}
 async function supaGateEntrar() {
     var email = document.getElementById('supaGateEmail').value.trim();
     var pw = document.getElementById('supaGatePassword').value;
@@ -1720,7 +1862,7 @@ async function supaGateEntrar() {
     var res = await supaLogin(email, pw);
     if (res.ok) {
         // Autenticado: limpar a password do campo, esconder o portão e arrancar a app
-        document.getElementById('supaGatePassword').value = '';
+        document.getElementById('supaGatePassword').value = ''; supaGateOcultar();
         document.getElementById('supaGate').style.display = 'none';
         if (typeof iniciarAppAutenticada === 'function') iniciarAppAutenticada();
     } else {
@@ -1729,11 +1871,7 @@ async function supaGateEntrar() {
         btn.textContent = 'Aceder'; btn.disabled = false;
     }
 }
-// Permitir Enter para submeter
-document.addEventListener('DOMContentLoaded', function(){
-    var pw = document.getElementById('supaGatePassword');
-    if (pw) pw.addEventListener('keydown', function(e){ if (e.key === 'Enter') supaGateEntrar(); });
-});
+// Enter submete o formulário (onsubmit), por isso não é preciso ouvir o teclado à parte.
 </script>
 
 
@@ -1753,7 +1891,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="sidebar-brand-icon"><i class="fas fa-gas-pump" style="color:white"></i></div>
         <h2>Fuel Analytics</h2>
     </div>
-    <div class="sidebar-sub">Gestão de Combustível • Angola</div>
+    <div class="sidebar-sub">Controlo de consumo • HMGRANITO</div>
 
     <!-- NAV COM SCROLL -->
     <div class="sidebar-nav">
@@ -2340,7 +2478,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     <!-- ==================== CEO DASHBOARD ==================== -->
     <div id="tab-ceo" class="tab-content">
-        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Gestão Executiva</div><h1 class="page-title">Dashboard CEO</h1><p class="page-desc">Visão executiva do combustível da frota</p></div><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>CEO</div></div>
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Gestão executiva</div><h1 class="page-title">Dashboard CEO</h1><p class="page-desc">Visão executiva do consumo da frota</p></div><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>CEO</div></div>
 
         <!-- Filtros CEO -->
         <div class="ceo-filter-bar">
@@ -2365,13 +2503,13 @@ document.addEventListener('DOMContentLoaded', function(){
             <div class="filter-group">
                 <label>Marca</label>
                 <select id="ceo-marca" onchange="atualizarCEO()">
-                    <option value="">Todas as Marcas</option>
+                    <option value="">Todas as marcas</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>Motorista</label>
                 <select id="ceo-motorista" onchange="atualizarCEO()">
-                    <option value="">Todos os Motoristas</option>
+                    <option value="">Todos os motoristas</option>
                 </select>
             </div>
             <div style="display:flex;gap:8px;align-self:flex-end;">
@@ -2384,13 +2522,10 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="ceo-header">
             <div class="ceo-header-top">
                 <div>
-                    <h2><i class="fas fa-briefcase" style="color:var(--accent);margin-right:10px"></i>Relatório Executivo de Combustível</h2>
+                    <h2>Relatório executivo de consumo</h2>
                     <p id="ceo-periodo-label">Período actual</p>
                 </div>
-                <div style="text-align:right;">
-                    <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;">Actualizado em</div>
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:rgba(255,255,255,0.7);" id="ceo-updated"></div>
-                </div>
+                <div class="ceo-upd">Actualizado em<b id="ceo-updated"></b></div>
             </div>
             <div class="ceo-status-phrase" id="ceo-frase"></div>
         </div>
@@ -2398,31 +2533,27 @@ document.addEventListener('DOMContentLoaded', function(){
         <!-- KPIs CEO -->
         <div class="ceo-kpi-grid">
             <div class="ceo-kpi-card">
-                <div class="ceo-kpi-icon orange"><i class="fas fa-coins"></i></div>
-                <div class="ceo-kpi-label">Gasto Total</div>
+                <div class="ceo-kpi-label">Gasto total</div>
                 <div class="ceo-kpi-val" id="ceo-gasto">0</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">AOA</div>
+                <div class="ceo-kpi-unit">AOA</div>
                 <div class="ceo-kpi-trend" id="ceo-gasto-trend"></div>
             </div>
             <div class="ceo-kpi-card">
-                <div class="ceo-kpi-icon blue"><i class="fas fa-droplet"></i></div>
-                <div class="ceo-kpi-label">Litros Consumidos</div>
+                <div class="ceo-kpi-label">Litros consumidos</div>
                 <div class="ceo-kpi-val" id="ceo-litros">0</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Litros</div>
+                <div class="ceo-kpi-unit">Litros</div>
                 <div class="ceo-kpi-trend" id="ceo-litros-trend"></div>
             </div>
             <div class="ceo-kpi-card">
-                <div class="ceo-kpi-icon yellow"><i class="fas fa-gauge-high"></i></div>
-                <div class="ceo-kpi-label">Desvio vs Meta</div>
-                <div class="ceo-kpi-val warning" id="ceo-desvio">0%</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Meta: 55 L/100km</div>
+                <div class="ceo-kpi-label">Desvio vs meta</div>
+                <div class="ceo-kpi-val" id="ceo-desvio">0%</div>
+                <div class="ceo-kpi-unit">Meta: 55 L/100km</div>
                 <div class="ceo-kpi-trend" id="ceo-desvio-trend"></div>
             </div>
             <div class="ceo-kpi-card">
-                <div class="ceo-kpi-icon red"><i class="fas fa-triangle-exclamation"></i></div>
-                <div class="ceo-kpi-label">Prejuízo Estimado</div>
+                <div class="ceo-kpi-label">Prejuízo estimado</div>
                 <div class="ceo-kpi-val danger" id="ceo-prejuizo">0</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">AOA por desvios</div>
+                <div class="ceo-kpi-unit">AOA por desvios</div>
                 <div class="ceo-kpi-trend" id="ceo-prejuizo-trend"></div>
             </div>
         </div>
@@ -2431,34 +2562,34 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="ceo-charts-row">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title"><i class="fas fa-chart-line"></i>Gasto Mensal de Combustível</div>
-                    <span id="ceo-chart-label" style="font-size:12px;color:var(--text-muted);"></span>
+                    <div class="card-title">Gasto mensal de combustível</div>
+                    <span id="ceo-chart-label" class="ceo-nota"></span>
                 </div>
                 <div class="chart-container" style="height:260px"><canvas id="chartCEOTrend"></canvas></div>
             </div>
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-pie"></i>Distribuição por Marca</div>
-                <div class="chart-container" style="height:260px"><canvas id="chartCEOMarca"></canvas></div>
+                <div class="card-title">Litros por marca</div>
+                <div id="ceo-marcas"></div>
             </div>
         </div>
 
         <!-- Ranking Motoristas CEO -->
         <div class="card ceo-rank-section">
             <div class="card-header">
-                <div class="card-title"><i class="fas fa-ranking-star"></i>Ranking de Motoristas — Consumo Médio</div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <span class="semaforo red"></span><span style="font-size:12px;color:var(--text-muted);">Crítico</span>
-                    <span class="semaforo yellow" style="margin-left:8px;"></span><span style="font-size:12px;color:var(--text-muted);">Atenção</span>
-                    <span class="semaforo green" style="margin-left:8px;"></span><span style="font-size:12px;color:var(--text-muted);">OK</span>
+                <div class="card-title">Ranking de motoristas por consumo médio</div>
+                <div class="ceo-leg">
+                    <span class="semaforo red"></span>Crítico
+                    <span class="semaforo yellow"></span>Atenção
+                    <span class="semaforo green"></span>OK
                 </div>
             </div>
             <div class="ceo-rank-grid">
                 <div class="ceo-rank-half">
-                    <div class="ceo-rank-half-title piores"><i class="fas fa-arrow-trend-up"></i> 3 Piores — Maior Custo</div>
+                    <div class="ceo-rank-half-title piores">3 piores<span>maior custo</span></div>
                     <div id="ceo-piores"></div>
                 </div>
                 <div class="ceo-rank-half">
-                    <div class="ceo-rank-half-title melhores"><i class="fas fa-arrow-trend-down"></i> 3 Melhores — Mais Eficientes</div>
+                    <div class="ceo-rank-half-title melhores">3 melhores<span>mais eficientes</span></div>
                     <div id="ceo-melhores"></div>
                 </div>
             </div>
@@ -3698,9 +3829,9 @@ function popularFiltrosCEO() {
     var smoto = document.getElementById('ceo-motorista');
     var marcas = {}, motos = {};
     db.forEach(function(r) { if (r.marca) marcas[r.marca] = true; if (r.moto) motos[r.moto] = true; });
-    smarca.innerHTML = '<option value="">Todas as Marcas</option>';
+    smarca.innerHTML = '<option value="">Todas as marcas</option>';
     Object.keys(marcas).sort().forEach(function(m) { smarca.innerHTML += '<option value="'+m+'">'+m+'</option>'; });
-    smoto.innerHTML = '<option value="">Todos os Motoristas</option>';
+    smoto.innerHTML = '<option value="">Todos os motoristas</option>';
     Object.keys(motos).sort().forEach(function(m) { smoto.innerHTML += '<option value="'+m+'">'+m+'</option>'; });
 }
 
@@ -3770,19 +3901,26 @@ function atualizarCEO() {
     document.getElementById('ceo-litros').textContent = litros.toLocaleString();
     document.getElementById('ceo-desvio').textContent = (desvioPerc > 0 ? '+' : '') + desvioPerc + '%';
     document.getElementById('ceo-prejuizo').textContent = prejuizo.toLocaleString();
+    document.getElementById('ceo-prejuizo').className = 'ceo-kpi-val' + (prejuizo > 0 ? ' danger' : '');
 
     // Frase executiva
-    var frase = '';
+    var frase = '', nivel = '';
     if (dados.length === 0) {
         frase = 'Sem dados para o período seleccionado.';
     } else if (desvioPerc > 20) {
-        frase = '⚠️ Situação crítica — A frota consumiu ' + desvioPerc + '% acima da meta neste período, representando um prejuízo estimado de ' + prejuizo.toLocaleString() + ' AOA. Requer atenção imediata do departamento de transporte.';
+        nivel = 'critico';
+        frase = 'Situação crítica: a frota consumiu ' + desvioPerc + '% acima da meta neste período, com um prejuízo estimado de ' + prejuizo.toLocaleString() + ' AOA. Requer atenção imediata do departamento de transporte.';
     } else if (desvioPerc > 0) {
-        frase = '📊 A frota consumiu ' + desvioPerc + '% acima da meta neste período. O prejuízo estimado por desvios é de ' + prejuizo.toLocaleString() + ' AOA. Situação sob controlo mas recomenda-se monitorização.';
+        nivel = 'atencao';
+        frase = 'A frota consumiu ' + desvioPerc + '% acima da meta neste período. O prejuízo estimado por desvios é de ' + prejuizo.toLocaleString() + ' AOA. Situação sob controlo, mas recomenda-se monitorização.';
     } else if (desvioPerc <= 0) {
-        frase = '✅ Excelente desempenho — A frota está dentro da meta de consumo neste período. Gasto total de ' + gasto.toLocaleString() + ' AOA com ' + litros.toLocaleString() + ' litros abastecidos.';
+        nivel = 'ok';
+        frase = 'Excelente desempenho: a frota está dentro da meta de consumo neste período. Gasto total de ' + gasto.toLocaleString() + ' AOA com ' + litros.toLocaleString() + ' litros abastecidos.';
     }
-    document.getElementById('ceo-frase').textContent = frase;
+    var elFrase = document.getElementById('ceo-frase');
+    elFrase.textContent = frase;
+    elFrase.setAttribute('data-nivel', nivel);
+    document.getElementById('ceo-desvio').className = 'ceo-kpi-val' + (nivel === 'critico' ? ' danger' : nivel === 'atencao' ? ' warning' : '');
 
     // Trends (comparação simples)
     document.getElementById('ceo-gasto-trend').innerHTML = '<i class="fas fa-circle-info"></i> ' + dados.length + ' registos no período';
@@ -3803,6 +3941,7 @@ function atualizarCEO() {
     var mesesLabels = Object.keys(meses).sort();
     var mesesGasto = mesesLabels.map(function(m) { return meses[m].gasto; });
     var colors = getChartColors();
+    var inkCEO = document.documentElement.classList.contains('dark') ? '#f1f5f9' : '#0f172a';
     if (chartCEOTrendInstance) chartCEOTrendInstance.destroy();
     chartCEOTrendInstance = new Chart(document.getElementById('chartCEOTrend'), {
         type: 'bar',
@@ -3812,17 +3951,17 @@ function atualizarCEO() {
                 label: 'Gasto (AOA)',
                 data: mesesGasto,
                 backgroundColor: mesesGasto.map(function(v, i) {
-                    if (i === 0) return 'rgba(234,88,12,0.6)';
-                    return v > mesesGasto[i-1] ? 'rgba(220,38,38,0.7)' : 'rgba(5,150,105,0.7)';
+                    if (i === 0) return inkCEO;
+                    return v > mesesGasto[i-1] ? '#dc2626' : '#059669';
                 }),
-                borderRadius: 6, borderSkipped: false
+                borderRadius: 0, borderSkipped: false
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.raw.toLocaleString() + ' AOA'; } } } },
             scales: {
-                x: { ticks: { color: colors.text, font: { size: 11 } }, grid: { color: colors.grid } },
+                x: { ticks: { color: colors.text, font: { size: 11 } }, grid: { display: false } },
                 y: { ticks: { color: colors.text, font: { family: 'JetBrains Mono', size: 10 }, callback: function(v) { return (v/1000).toFixed(0) + 'k'; } }, grid: { color: colors.grid } }
             }
         }
@@ -3831,18 +3970,24 @@ function atualizarCEO() {
     // Gráfico por marca
     var marcasData = {};
     dados.forEach(function(r) { if (r.marca && r.litros > 0) { marcasData[r.marca] = (marcasData[r.marca] || 0) + r.litros; } });
-    if (chartCEOMarcaInstance) chartCEOMarcaInstance.destroy();
-    chartCEOMarcaInstance = new Chart(document.getElementById('chartCEOMarca'), {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(marcasData),
-            datasets: [{ data: Object.values(marcasData), backgroundColor: ['#ea580c','#0d9488','#2563eb','#d97706','#059669','#7c3aed'], borderWidth: 0, hoverOffset: 6 }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, cutout: '60%',
-            plugins: { legend: { position: 'bottom', labels: { color: colors.text, font: { family: 'Outfit', size: 11 }, padding: 12 } } }
-        }
-    });
+    var marcasArr = Object.keys(marcasData).map(function(k) { return { nome: k, l: marcasData[k] }; }).sort(function(x, y) { return y.l - x.l; });
+    var totalMarcas = marcasArr.reduce(function(t, m) { return t + m.l; }, 0);
+    var palMarca = [inkCEO, '#ea580c', '#475569', '#94a3b8', '#cbd5e1', '#64748b'];
+    function escCEO(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    var marcasHTML = '';
+    if (marcasArr.length === 0 || totalMarcas <= 0) {
+        marcasHTML = '<div class="marca-vazio">Sem litros registados no período.</div>';
+    } else {
+        marcasHTML = '<div class="marca-bar">' + marcasArr.map(function(m, i) {
+            return '<div class="marca-seg" title="' + escCEO(m.nome) + '" style="flex:' + m.l + ' 1 0;background:' + palMarca[i % palMarca.length] + '"></div>';
+        }).join('') + '</div>' + marcasArr.map(function(m, i) {
+            return '<div class="marca-row"><span class="marca-sw" style="background:' + palMarca[i % palMarca.length] + '"></span>' +
+                '<span class="marca-nome">' + escCEO(m.nome) + '</span>' +
+                '<span class="marca-pct">' + (m.l / totalMarcas * 100).toFixed(1) + '%</span>' +
+                '<span class="marca-n">' + Math.round(m.l).toLocaleString() + ' L</span></div>';
+        }).join('');
+    }
+    document.getElementById('ceo-marcas').innerHTML = marcasHTML;
 
     // Ranking motoristas CEO
     var motoristasData = {};
@@ -3884,7 +4029,7 @@ function atualizarCEO() {
     document.getElementById('ceo-piores').innerHTML = pioresHTML;
     document.getElementById('ceo-melhores').innerHTML = melhoresHTML;
 
-    document.getElementById('ceo-chart-label').textContent = mesesLabels.length + ' meses de dados';
+    document.getElementById('ceo-chart-label').textContent = mesesLabels.length + ' meses. Vermelho: subiu face ao mês anterior';
 }
 
 // ===== EXPORTAR CEO PDF =====
@@ -6673,7 +6818,7 @@ function _supaVoltarAoPortao(msg) {
     _supaLimparSessao();
     usuarioAtual = null;
     var g = document.getElementById('supaGate'); if (g) g.style.display = 'flex';
-    var pw = document.getElementById('supaGatePassword'); if (pw) pw.value = '';
+    var pw = document.getElementById('supaGatePassword'); if (pw) pw.value = ''; supaGateOcultar();
     var b = document.getElementById('supaGateBtn'); if (b) { b.textContent = 'Aceder'; b.disabled = false; }
     var e = document.getElementById('supaGateErro'); if (e) { e.textContent = msg; e.style.display = 'block'; }
     var m = document.getElementById('main-content'); if (m) m.style.display = 'none';
