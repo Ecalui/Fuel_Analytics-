@@ -2698,6 +2698,25 @@ async function supaGateEntrar() {
 
         <!-- Sub-tab: Config -->
         <div id="admtab-config" style="display:none">
+            <div class="card" id="card-mfa">
+                <div class="card-title"><i class="fas fa-mobile-screen"></i> Verificação em dois passos (autenticador)</div>
+                <p style="font-size:13px;color:var(--text-secondary);margin:6px 0 14px;">Protege as definições com um código de 6 dígitos da app autenticadora no telemóvel. Estado: <b id="mfa-estado">a verificar…</b></p>
+                <div id="mfa-lista" style="margin-bottom:14px;"></div>
+                <button class="btn btn-primary btn-sm" id="mfa-btn-iniciar" onclick="mfaIniciarInscricao()"><i class="fas fa-plus"></i> Adicionar dispositivo</button>
+
+                <div id="mfa-painel" style="display:none;margin-top:20px;">
+                    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">1. Abra o Google Authenticator, toque em <b>+</b> e escolha <b>Ler código QR</b>.</div>
+                    <img id="mfa-qr" alt="Código QR para a app autenticadora" style="width:200px;height:200px;background:#fff;padding:8px;border:1px solid var(--border);display:block;margin-bottom:10px;">
+                    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">Não consegue ler o QR? Escolha <b>Introduzir chave de configuração</b> e escreva: <code id="mfa-segredo" style="font-family:'JetBrains Mono',monospace;word-break:break-all;color:var(--text-primary);"></code></div>
+                    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">2. Escreva o código de 6 dígitos que a app mostra:</div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                        <input type="text" id="mfa-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000000" style="width:140px;letter-spacing:4px;text-align:center;">
+                        <button class="btn btn-primary btn-sm" id="mfa-btn-confirmar" onclick="mfaConfirmarInscricao()">Confirmar</button>
+                        <button class="btn btn-ghost btn-sm" onclick="mfaCancelarInscricao()">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-title"><i class="fas fa-shield-alt"></i> Políticas de Segurança</div>
                 <div class="admin-grid">
@@ -3540,6 +3559,7 @@ async function switchAdmTab(tab, btn) {
     if (target) target.style.display = 'block';
     if (btn) btn.classList.add('inv-subtab-active');
     if (tab === 'config' && typeof renderPrecosGasoleo === 'function') renderPrecosGasoleo();
+    if (tab === 'config' && typeof mfaListar === 'function') mfaListar();
 }
 
 var _superDesbloqueado = false;
@@ -4519,6 +4539,105 @@ function carregarConfigsMarcasRotas() {
     if (mm) { try { var parsed = JSON.parse(mm); Object.assign(METAS_MARCA, parsed); } catch(e){} }
     var re = localStorage.getItem('fuel_rotas_especiais');
     if (re) { try { var parsed2 = JSON.parse(re); ROTAS_ESPECIAIS.keywords = parsed2.keywords || ROTAS_ESPECIAIS.keywords; ROTAS_ESPECIAIS.fator = parsed2.fator || ROTAS_ESPECIAIS.fator; } catch(e){} }
+}
+
+// ===== MFA: autenticador TOTP (Supabase Auth) =====
+// Inscrição e confirmação de um dispositivo. O login normal não muda (continua email + password).
+var _mfaPendente = null; // { id } do factor em inscrição, ainda por confirmar
+
+function _mfaEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+
+async function _mfaFetch(caminho, metodo, corpo) {
+    if (!(await _supaTokenValido())) throw new Error('Sessão inválida. Entre novamente.');
+    var opc = { method: metodo || 'GET', headers: _supaHeaders() };
+    if (corpo !== undefined) opc.body = JSON.stringify(corpo);
+    var r = await fetch(SUPA_URL + '/auth/v1' + caminho, opc);
+    var d = null;
+    try { d = await r.json(); } catch(e) {}
+    if (!r.ok) throw new Error((d && (d.msg || d.message || d.error_description || d.error)) || ('HTTP ' + r.status));
+    return d;
+}
+
+async function mfaListar() {
+    var est = document.getElementById('mfa-estado');
+    var lista = document.getElementById('mfa-lista');
+    if (!est || !lista) return;
+    try {
+        var u = await _mfaFetch('/user');
+        var fs = (u.factors || []).filter(function(f){ return f.factor_type === 'totp' && f.status === 'verified'; });
+        est.textContent = fs.length ? ('Ativada (' + fs.length + (fs.length === 1 ? ' dispositivo)' : ' dispositivos)')) : 'Não ativada';
+        lista.innerHTML = fs.map(function(f){
+            var dt = f.created_at ? new Date(f.created_at).toLocaleDateString('pt-PT') : '';
+            return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between;gap:12px;"><span>' + _mfaEsc(f.friendly_name || 'Dispositivo') + '</span><span style="color:var(--text-secondary);">' + _mfaEsc(dt) + '</span></div>';
+        }).join('');
+    } catch(e) {
+        est.textContent = 'não foi possível verificar';
+        console.warn('[MFA] listar:', e);
+    }
+}
+
+async function mfaIniciarInscricao() {
+    var btn = document.getElementById('mfa-btn-iniciar');
+    if (btn) btn.disabled = true;
+    try {
+        // limpar inscrições abandonadas (nunca confirmadas) antes de começar uma nova
+        var u = await _mfaFetch('/user');
+        var velhos = (u.factors || []).filter(function(f){ return f.factor_type === 'totp' && f.status !== 'verified'; });
+        for (var i = 0; i < velhos.length; i++) { try { await _mfaFetch('/factors/' + velhos[i].id, 'DELETE'); } catch(e) {} }
+        var agora = new Date();
+        var nome = 'Dispositivo ' + agora.toLocaleDateString('pt-PT') + ' ' + agora.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        var d = await _mfaFetch('/factors', 'POST', { factor_type: 'totp', friendly_name: nome, issuer: 'Fuel Analytics' });
+        if (!d || !d.id || !d.totp) throw new Error('Resposta inesperada do servidor');
+        _mfaPendente = { id: d.id };
+        document.getElementById('mfa-qr').src = d.totp.qr_code;
+        document.getElementById('mfa-segredo').textContent = d.totp.secret;
+        document.getElementById('mfa-codigo').value = '';
+        document.getElementById('mfa-painel').style.display = 'block';
+        document.getElementById('mfa-codigo').focus();
+    } catch(e) {
+        console.error('[MFA] inscrição:', e);
+        showToast('Não foi possível iniciar: ' + e.message, 'error');
+        if (btn) btn.disabled = false;
+    }
+}
+
+function _mfaFecharPainel() {
+    var pn = document.getElementById('mfa-painel'); if (pn) pn.style.display = 'none';
+    var qr = document.getElementById('mfa-qr'); if (qr) qr.removeAttribute('src');
+    var sg = document.getElementById('mfa-segredo'); if (sg) sg.textContent = '';
+    var cd = document.getElementById('mfa-codigo'); if (cd) cd.value = '';
+    var btn = document.getElementById('mfa-btn-iniciar'); if (btn) btn.disabled = false;
+}
+
+async function mfaCancelarInscricao() {
+    var id = _mfaPendente && _mfaPendente.id;
+    _mfaPendente = null;
+    _mfaFecharPainel();
+    if (id) { try { await _mfaFetch('/factors/' + id, 'DELETE'); } catch(e) {} }
+}
+
+async function mfaConfirmarInscricao() {
+    if (!_mfaPendente) return;
+    var cod = (document.getElementById('mfa-codigo').value || '').replace(/\s/g, '');
+    if (!/^\d{6}$/.test(cod)) { showToast('Escreva os 6 dígitos que aparecem na app.', 'warning'); return; }
+    var btn = document.getElementById('mfa-btn-confirmar');
+    if (btn) btn.disabled = true;
+    try {
+        var ch = await _mfaFetch('/factors/' + _mfaPendente.id + '/challenge', 'POST', {});
+        var d = await _mfaFetch('/factors/' + _mfaPendente.id + '/verify', 'POST', { challenge_id: ch.id, code: cod });
+        if (d && d.access_token) _supaGuardarSessao(d); // sessão passa a nível aal2
+        _mfaPendente = null;
+        _mfaFecharPainel();
+        try { registrarAcesso(usuarioAtual?.nome || '--', usuarioAtual?.perfil || '--', 'mfa-ativado', '127.0.0.1', true); } catch(e) {}
+        showToast('Autenticador ativado neste dispositivo.', 'success');
+        mfaListar();
+    } catch(e) {
+        console.warn('[MFA] confirmar:', e);
+        var m = /invalid|code|expired/i.test(e.message) ? 'Código incorreto ou expirado. Espere pelo código seguinte e tente de novo.' : ('Não foi possível confirmar: ' + e.message);
+        showToast(m, 'error');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
 
 // ===== DEFINIÇÕES NA NUVEM (Supabase → tabela "definicoes") =====
