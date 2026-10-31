@@ -3205,7 +3205,7 @@ function renderPrecosGasoleo() {
         if (areaBloq) areaBloq.style.display = 'block';
     }
 }
-function adicionarPrecoGasoleo() {
+async function adicionarPrecoGasoleo() {
     // Dupla verificação de segurança: confirmar admin no momento de gravar
     if (!_ehAdminAtual()) {
         showToast('Apenas administradores podem acrescentar preços.', 'error');
@@ -3219,6 +3219,11 @@ function adicionarPrecoGasoleo() {
     if (!data) { showToast('Indica a data de vigência.', 'warning'); return; }
     if (isNaN(valor) || valor <= 0) { showToast('O preço tem de ser um número positivo.', 'warning'); return; }
 
+    // Trazer a lista da nuvem antes de validar (outro admin pode ter acrescentado um preço entretanto)
+    if (!(await _defPrecosFrescos())) {
+        showToast('Sem ligação à nuvem: não é possível acrescentar preços agora.', 'error');
+        return;
+    }
     // A data tem de ser posterior ao preço mais recente já registado
     _ordenarPrecos();
     var maisRecente = PRECOS_GASOLEO[0];
@@ -3243,6 +3248,8 @@ function adicionarPrecoGasoleo() {
         try { localStorage.setItem('fuel_analytics_audit', JSON.stringify(auditLog)); } catch(e) { console.warn('[localStorage] cheio:', e); }
     } catch(e) {}
 
+    var okNuvem = await _defNuvemGravar('precos_gasoleo', PRECOS_GASOLEO);
+
     // Limpar campos e recalcular tudo (o novo preço afeta cálculos futuros)
     if (dataEl) dataEl.value = '';
     if (valorEl) valorEl.value = '';
@@ -3254,7 +3261,7 @@ function adicionarPrecoGasoleo() {
         }
         if (typeof atualizarTabelas === 'function') atualizarTabelas();
     } catch(e){}
-    showToast('Preço de ' + valor + ' Kz/L adicionado a partir de ' + data + '.', 'success');
+    if (okNuvem) showToast('Preço de ' + valor + ' Kz/L adicionado a partir de ' + data + ' (guardado na nuvem).', 'success');
 }
 const LIMIAR_AOA = 60; // Prejuizo em AOA so e contabilizado a partir deste valor
 
@@ -4378,7 +4385,7 @@ function _executarCalculoMetas() {
 
     showToast('Cálculo concluído! Reveja os valores e guarde.', 'success');
 }
-function salvarMetasMarca() {
+async function salvarMetasMarca() {
     var marcas = Object.keys(METAS_MARCA).filter(function(k){ return k !== '_default'; });
     marcas.forEach(function(marca) {
         var meta  = parseFloat(document.getElementById('meta-meta-' + marca).value);
@@ -4396,7 +4403,8 @@ function salvarMetasMarca() {
     db.forEach(function(r){ placasUnicas[r.placa] = true; });
     Object.keys(placasUnicas).forEach(function(placa){ recalcularViaturaCompleta(placa); });
     atualizarTabelas();
-    showToast('Metas guardadas e frota recalculada!', 'success');
+    var okNuvem = await _defNuvemGravar('metas_marca', METAS_MARCA);
+    if (okNuvem) showToast('Metas guardadas na nuvem e frota recalculada!', 'success');
 }
 function resetarMetasMarca() {
     showConfirm('Repor as metas de fábrica para todas as marcas?', function() {
@@ -4412,7 +4420,7 @@ function resetarMetasMarca() {
         db.forEach(function(r){ pu[r.placa] = true; });
         Object.keys(pu).forEach(function(p){ recalcularViaturaCompleta(p); });
         atualizarTabelas();
-        showToast('Metas repostas e frota recalculada!', 'success');
+        _defNuvemGravar('metas_marca', METAS_MARCA).then(function(ok){ if (ok) showToast('Metas repostas na nuvem e frota recalculada!', 'success'); });
     });
 }
 function popularCamposRotasEspeciais() {
@@ -4421,7 +4429,7 @@ function popularCamposRotasEspeciais() {
     if (kw) kw.value = ROTAS_ESPECIAIS.keywords.join(', ');
     if (ft) ft.value = Math.round(ROTAS_ESPECIAIS.fator * 100);
 }
-function salvarRotasEspeciais() {
+async function salvarRotasEspeciais() {
     var kw = document.getElementById('config-rotas-keywords').value;
     var ft = parseFloat(document.getElementById('config-rotas-fator').value);
     if (!kw || isNaN(ft) || ft < 100 || ft > 200) { showToast('Verifique os valores', 'warning'); return; }
@@ -4433,13 +4441,121 @@ function salvarRotasEspeciais() {
     db.forEach(function(r){ pu[r.placa] = true; });
     Object.keys(pu).forEach(function(p){ recalcularViaturaCompleta(p); });
     atualizarTabelas();
-    showToast('Rotas especiais guardadas e frota recalculada!', 'success');
+    var okNuvem = await _defNuvemGravar('rotas_especiais', { keywords: ROTAS_ESPECIAIS.keywords, fator: ROTAS_ESPECIAIS.fator });
+    if (okNuvem) showToast('Rotas especiais guardadas na nuvem e frota recalculada!', 'success');
 }
 function carregarConfigsMarcasRotas() {
     var mm = localStorage.getItem('fuel_metas_marca');
     if (mm) { try { var parsed = JSON.parse(mm); Object.assign(METAS_MARCA, parsed); } catch(e){} }
     var re = localStorage.getItem('fuel_rotas_especiais');
     if (re) { try { var parsed2 = JSON.parse(re); ROTAS_ESPECIAIS.keywords = parsed2.keywords || ROTAS_ESPECIAIS.keywords; ROTAS_ESPECIAIS.fator = parsed2.fator || ROTAS_ESPECIAIS.fator; } catch(e){} }
+}
+
+// ===== DEFINIÇÕES NA NUVEM (Supabase → tabela "definicoes") =====
+// Metas por marca, rotas especiais e preços do gasóleo são partilhados por todos os dispositivos.
+// O localStorage fica como cópia para funcionar offline. Só admin/owner escrevem (a RLS é que protege).
+var SUPA_TABELA_DEF = 'definicoes';
+var _DEF_CHAVES = ['metas_marca', 'rotas_especiais', 'precos_gasoleo'];
+
+function _defPendentesLer() { try { return JSON.parse(localStorage.getItem('fuel_def_pendentes') || '[]'); } catch(e) { return []; } }
+function _defPendentesGravar(arr) { try { localStorage.setItem('fuel_def_pendentes', JSON.stringify(arr)); } catch(e) {} }
+
+function _defValorLocal(chave) {
+    if (chave === 'metas_marca') return METAS_MARCA;
+    if (chave === 'rotas_especiais') return { keywords: ROTAS_ESPECIAIS.keywords, fator: ROTAS_ESPECIAIS.fator };
+    if (chave === 'precos_gasoleo') return PRECOS_GASOLEO;
+    return null;
+}
+
+// Aplica o valor vindo da nuvem. Devolve true só se algo mudou de facto.
+function _defAplicarLocal(chave, valor) {
+    try {
+        var antes = JSON.stringify(_defValorLocal(chave));
+        if (chave === 'metas_marca' && valor && typeof valor === 'object' && !Array.isArray(valor)) {
+            Object.assign(METAS_MARCA, valor);
+            localStorage.setItem('fuel_metas_marca', JSON.stringify(METAS_MARCA));
+        } else if (chave === 'rotas_especiais' && valor && Array.isArray(valor.keywords) && valor.fator >= 1) {
+            ROTAS_ESPECIAIS.keywords = valor.keywords;
+            ROTAS_ESPECIAIS.fator = valor.fator;
+            localStorage.setItem('fuel_rotas_especiais', JSON.stringify({ keywords: valor.keywords, fator: valor.fator }));
+        } else if (chave === 'precos_gasoleo' && Array.isArray(valor) && valor.length > 0 &&
+                   valor.every(function(p){ return p && typeof p.desde === 'string' && p.preco > 0; })) {
+            PRECOS_GASOLEO = valor;
+            _ordenarPrecos();
+            localStorage.setItem('fuel_precos_gasoleo', JSON.stringify(PRECOS_GASOLEO));
+        } else { return false; }
+        return JSON.stringify(_defValorLocal(chave)) !== antes;
+    } catch(e) { console.warn('[Definições] não aplicou "' + chave + '":', e); return false; }
+}
+
+// Envia uma definição para a nuvem (upsert). Se falhar, fica marcada como pendente e é reenviada no próximo arranque.
+async function _defNuvemGravar(chave, valor) {
+    var pend = _defPendentesLer();
+    try {
+        if (navigator.onLine === false || !(await _supaTokenValido())) throw new Error('sem rede ou sem sessão válida');
+        var r = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_DEF + '?on_conflict=chave', {
+            method: 'POST',
+            headers: _supaHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+            body: JSON.stringify([{ chave: chave, valor: valor }])
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        _defPendentesGravar(pend.filter(function(c){ return c !== chave; }));
+        console.log('[Definições] "' + chave + '" guardada na nuvem.');
+        return true;
+    } catch(e) {
+        console.error('[Definições] falha ao gravar "' + chave + '" na nuvem:', e);
+        if (pend.indexOf(chave) === -1) { pend.push(chave); _defPendentesGravar(pend); }
+        showToast('Guardado só neste dispositivo: não foi possível enviar para a nuvem. Será reenviado no próximo arranque com rede.', 'warning', 8000);
+        return false;
+    }
+}
+
+// Antes de acrescentar um preço: trazer a versão da nuvem (evita sobrepor um preço que outro admin já acrescentou)
+async function _defPrecosFrescos() {
+    try {
+        if (navigator.onLine === false || !(await _supaTokenValido())) return false;
+        var r = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_DEF + '?select=valor&chave=eq.precos_gasoleo', { headers: _supaHeaders() });
+        if (!r.ok) return false;
+        var linhas = await r.json();
+        if (linhas.length) _defAplicarLocal('precos_gasoleo', linhas[0].valor);
+        return true;
+    } catch(e) { return false; }
+}
+
+// Arranque: puxa as definições da nuvem. Se a nuvem ainda não tem uma definição (ou há uma alteração
+// pendente deste dispositivo) e quem entrou é admin/owner, é este dispositivo que a envia.
+async function sincronizarDefinicoes() {
+    if (navigator.onLine === false) return;
+    try {
+        if (!(await _supaTokenValido())) return;
+        var r = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_DEF + '?select=chave,valor', { headers: _supaHeaders() });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var linhas = await r.json();
+        var daNuvem = {};
+        linhas.forEach(function(l){ daNuvem[l.chave] = l.valor; });
+        var pend = _defPendentesLer();
+        var admin = _ehAdminAtual();
+        var mudou = false;
+        for (var i = 0; i < _DEF_CHAVES.length; i++) {
+            var k = _DEF_CHAVES[i];
+            var temNuvem = Object.prototype.hasOwnProperty.call(daNuvem, k);
+            if (admin && (!temNuvem || pend.indexOf(k) !== -1)) {
+                await _defNuvemGravar(k, _defValorLocal(k));
+            } else if (temNuvem) {
+                if (_defAplicarLocal(k, daNuvem[k])) mudou = true;
+            }
+        }
+        if (mudou) {
+            console.log('[Definições] atualizadas a partir da nuvem.');
+            cache = { dashStats: null, investData: null, lastUpdate: null };
+            if (Array.isArray(db) && db.length) {
+                var pu = {};
+                db.forEach(function(x){ if (x && x.placa) pu[x.placa] = true; });
+                Object.keys(pu).forEach(function(p){ recalcularViaturaCompleta(p); });
+                atualizarTabelas();
+            }
+        }
+    } catch(e) { console.warn('[Definições] sincronização falhou (fica com a cópia local):', e); }
 }
 
 // ===== GESTÃO VIATURAS =====
@@ -8119,6 +8235,7 @@ async function iniciarAppAutenticada() {
         aplicarPermissoes();
         showToast(role === 'owner' ? 'Bem-vindo, Criador. Acesso total activo.' : 'Bem-vindo, ' + usuarioAtual.nome + ' (' + rotulos[role] + ')', 'success');
 
+        sincronizarDefinicoes(); // metas, rotas e preços partilhados (nuvem)
         carregarDadosNuvem();
         resetarTimeout();
         // Inicializar período padrão do dashboard (Este Mês)
