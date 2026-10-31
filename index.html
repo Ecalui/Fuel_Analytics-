@@ -266,6 +266,11 @@
         #tab-reg .reg-tipo div span { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
         #tab-reg .reg-tipo div.sel-ok { background: none; border: 2px solid var(--text-primary); color: var(--text-primary); font-weight: 600; padding: 11px; }
         #tab-reg .reg-tipo div.sel-parc { background: none; border: 2px solid var(--accent); color: var(--text-primary); font-weight: 600; padding: 11px; }
+        /* chips de destino (passo 2) */
+        #tab-reg .dest-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+        #tab-reg .dest-chip { min-height: 48px; padding: 10px 14px; border: 1px solid var(--text-muted); border-radius: 0; background: none; color: var(--text-secondary); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        #tab-reg .dest-chip.sel { border: 2px solid var(--text-primary); padding: 9px 13px; color: var(--text-primary); font-weight: 600; }
+        #tab-reg .dest-chip:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
 
         /* botões retos; um único primário, em tinta */
         #tab-reg .btn { border-radius: 0; transition: none; font-weight: 600; }
@@ -2137,8 +2142,9 @@ async function supaGateEntrar() {
                         <div><label>Hora do Abastecimento</label><input type="time" id="f-hora"></div>
                         <div style="grid-column:1/-1">
                             <label>Destino</label>
+                            <div class="dest-chips" id="dest-chips" style="display:none"></div>
                             <input type="text" id="f-destino" list="rotas" placeholder="Ex: Chibia, Namibe..." onchange="this.value=normalizarDestino(this.value)">
-                            <div class="input-help">Ajuda a cruzar consumo com rota</div>
+                            <div class="input-help">Toque num destino frequente ou escreva outro</div>
                         </div>
                         <div style="grid-column:1/-1">
                             <label>Km Atual</label>
@@ -7125,6 +7131,7 @@ function atualizarListasVivas() {
             rotasOrd.forEach(function(d){ htmlRotas += '<option value="' + d.replace(/"/g,'&quot;') + '"></option>'; });
             rotas.innerHTML = htmlRotas;
         }
+        if (typeof regRenderChipsDestino === 'function') regRenderChipsDestino();
     } catch(e) { console.error('[ListasVivas] Erro ao atualizar listas:', e); }
 }
 // ============================================================================
@@ -8622,6 +8629,7 @@ function regIrPasso(n) {
     document.getElementById('reg-sum-2').style.display = (n > 2 && n < 4) ? 'flex' : 'none';
     if (n !== 4) document.getElementById('reg-done').style.display = 'none';
     if (n === 2) {
+        if (typeof regSincChipsDestino === 'function') regSincChipsDestino();
         if (!_regVal('f-data')) document.getElementById('f-data').value = _hojeLocal();
         if (!_regVal('f-hora')) document.getElementById('f-hora').value = _agoraHM();
         if (typeof calcPreco === 'function') calcPreco();
@@ -8930,15 +8938,67 @@ document.addEventListener('keyup', function (e) {
     else if (painel.id === 'reg-p3') { var b = document.getElementById('btnSalvar'); if (b) b.focus(); }
 });
 
+// ===== CHIPS DE DESTINO (passo 2) — os mais frequentes dos registos recentes, calculados =====
+var REG_DEST_CHIPS_MAX = 8, REG_DEST_JANELA_DIAS = 60;
+function regDestinosFrequentes() {
+    if (!Array.isArray(db)) return [];
+    var limite = Date.now() - REG_DEST_JANELA_DIAS * 86400000;
+    function contar(filtro) {
+        var m = {};
+        db.forEach(function (r) {
+            if (!r || !r.destino) return;
+            var d = normalizarDestino(r.destino);
+            if (!d || d === '-') return;
+            var t = Number(r.ts) || Date.parse(r.data) || 0;
+            if (!filtro(t)) return;
+            var o = m[d] || (m[d] = { nome: d, n: 0, ult: 0 });
+            o.n++; if (t > o.ult) o.ult = t;
+        });
+        return Object.keys(m).map(function (k) { return m[k]; });
+    }
+    var lista = contar(function (t) { return t >= limite; });
+    if (lista.length < 3) lista = contar(function () { return true; }); // poucos dados recentes: usa o histórico todo
+    lista.sort(function (a, b) { return b.n - a.n || b.ult - a.ult; });
+    return lista.slice(0, REG_DEST_CHIPS_MAX).map(function (o) { return o.nome; });
+}
+function regRenderChipsDestino() {
+    var box = document.getElementById('dest-chips'); if (!box) return;
+    var nomes = regDestinosFrequentes();
+    box.innerHTML = '';
+    nomes.forEach(function (nome) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'dest-chip'; b.textContent = nome; b.dataset.destino = nome;
+        b.addEventListener('click', function () { regEscolherDestino(nome); });
+        box.appendChild(b);
+    });
+    box.style.display = nomes.length ? 'flex' : 'none';
+    regSincChipsDestino();
+}
+function regEscolherDestino(nome) {
+    var inp = document.getElementById('f-destino'); if (!inp) return;
+    inp.value = (normalizarDestino(inp.value) === nome) ? '' : nome; // novo toque no mesmo chip limpa
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function regSincChipsDestino() {
+    var inp = document.getElementById('f-destino'), v = inp ? normalizarDestino(inp.value) : '';
+    document.querySelectorAll('#dest-chips .dest-chip').forEach(function (b) {
+        var sel = !!v && b.dataset.destino === v;
+        b.classList.toggle('sel', sel); b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+    });
+}
+
 (function regInit() {
     ['f-data', 'f-hora', 'f-placa', 'f-marca', 'f-moto', 'f-destino', 'f-km', 'f-litros'].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) { el.addEventListener('input', regAtualizarVerificacao); el.addEventListener('change', regAtualizarVerificacao); }
     });
+    var dd = document.getElementById('f-destino');
+    if (dd) { dd.addEventListener('input', regSincChipsDestino); dd.addEventListener('change', regSincChipsDestino); }
     var m = document.getElementById('f-moto');
     if (m) m.addEventListener('input', function () { this.style.borderColor = ''; var h = document.getElementById('moto-help'); if (h) h.textContent = ''; });
     var d = document.getElementById('f-data'); if (d && !d.value) d.value = _hojeLocal();
-    try { regAtualizarVerificacao(); atualizarUltimosHoje(); regAtualizarIconeSom(); } catch (e) {}
+    try { regAtualizarVerificacao(); atualizarUltimosHoje(); regAtualizarIconeSom(); regRenderChipsDestino(); } catch (e) {}
 })();
 
 </script>
