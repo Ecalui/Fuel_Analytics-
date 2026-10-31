@@ -2717,6 +2717,21 @@ async function supaGateEntrar() {
                 </div>
             </div>
 
+            <div id="adm-bloqueio" style="display:none;border-top:1px solid var(--text-primary);padding-top:14px;margin-bottom:36px;">
+                <div style="font-size:15px;font-weight:600;">Definições protegidas</div>
+                <p id="adm-bloqueio-texto" style="font-size:13px;color:var(--text-secondary);margin:6px 0 14px;"></p>
+                <div id="adm-bloqueio-form" style="display:none;gap:12px;flex-wrap:wrap;align-items:center;">
+                    <input type="text" id="adm-codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000000" style="width:140px;letter-spacing:4px;text-align:center;" onkeydown="if(event.key==='Enter')admDesbloquear()">
+                    <button class="btn btn-primary btn-sm" id="adm-btn-desbloquear" onclick="admDesbloquear()">Desbloquear</button>
+                </div>
+                <button class="btn btn-ghost btn-sm" id="adm-btn-repetir" style="display:none;" onclick="mfaListar()">Tentar de novo</button>
+            </div>
+
+            <div id="adm-config-protegido" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--text-secondary);margin-bottom:18px;">
+                <span id="adm-barra-texto"></span>
+                <button class="btn btn-ghost btn-sm" onclick="_admBloquear('Definições bloqueadas.')">Bloquear agora</button>
+            </div>
             <div class="card">
                 <div class="card-title"><i class="fas fa-shield-alt"></i> Políticas de Segurança</div>
                 <div class="admin-grid">
@@ -2832,6 +2847,7 @@ async function supaGateEntrar() {
                 </div>
             </div>
 
+            </div><!-- /adm-config-protegido -->
         </div><!-- /admtab-config -->
 
         <!-- Sub-tab: Área Restrita Super Admin (oculto por defeito) -->
@@ -3295,6 +3311,7 @@ function renderPrecosGasoleo() {
     }
 }
 async function adicionarPrecoGasoleo() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     // Dupla verificação de segurança: confirmar admin no momento de gravar
     if (!_ehAdminAtual()) {
         showToast('Apenas administradores podem acrescentar preços.', 'error');
@@ -3534,6 +3551,7 @@ function atualizarEstadoVazioDash() {
 
 // ===== TAB SWITCH =====
 function switchTab(tabId, el) {
+    if (tabId !== 'administracao' && _admDesbloqueado()) _admBloquear();
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('tab-active'); });
     document.getElementById('tab-' + tabId).classList.add('tab-active');
     document.querySelectorAll('.nav-link').forEach(function(l) { l.classList.remove('active'); });
@@ -3567,6 +3585,7 @@ var _superCallback = null;
 
 
 function pedirSenhaSuper() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro as definições com o código do autenticador (Configurações).', 'warning'); switchAdmTab('config', document.getElementById('admtab-btn-config')); return; }
     if (_superDesbloqueado) { switchAdmTab('super', document.getElementById('admtab-btn-super')); return; }
     document.getElementById('super-senha-input').value = '';
     document.getElementById('super-senha-erro').textContent = '';
@@ -4239,6 +4258,7 @@ function exportarAcessosCSV() {
     URL.revokeObjectURL(url); showToast('Registo de acessos exportado com sucesso!', 'success');
 }
 function salvarConfiguracoes() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     CONFIG.admin.expiracaoDias = parseInt(document.getElementById('config-admin-expiracao').value);
     CONFIG.admin.tentativasMax = parseInt(document.getElementById('config-admin-tentativas').value);
     CONFIG.admin.tempoBloqueio = parseInt(document.getElementById('config-admin-bloqueio').value);
@@ -4476,6 +4496,7 @@ function _executarCalculoMetas() {
     showToast('Cálculo concluído! Reveja os valores e guarde.', 'success');
 }
 async function salvarMetasMarca() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     var marcas = Object.keys(METAS_MARCA).filter(function(k){ return k !== '_default'; });
     marcas.forEach(function(marca) {
         var meta  = parseFloat(document.getElementById('meta-meta-' + marca).value);
@@ -4497,6 +4518,7 @@ async function salvarMetasMarca() {
     if (okNuvem) showToast('Metas guardadas na nuvem e frota recalculada!', 'success');
 }
 function resetarMetasMarca() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     showConfirm('Repor as metas de fábrica para todas as marcas?', function() {
         METAS_MARCA['VOLVO']    = { meta: 52, limOK: 55, limCritico: 68, limRoubo: 88 };
         METAS_MARCA['MAN']      = { meta: 54, limOK: 58, limCritico: 72, limRoubo: 92 };
@@ -4520,6 +4542,7 @@ function popularCamposRotasEspeciais() {
     if (ft) ft.value = Math.round(ROTAS_ESPECIAIS.fator * 100);
 }
 async function salvarRotasEspeciais() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     var kw = document.getElementById('config-rotas-keywords').value;
     var ft = parseFloat(document.getElementById('config-rotas-fator').value);
     if (!kw || isNaN(ft) || ft < 100 || ft > 200) { showToast('Verifique os valores', 'warning'); return; }
@@ -4558,21 +4581,134 @@ async function _mfaFetch(caminho, metodo, corpo) {
     return d;
 }
 
-async function mfaListar() {
+var _mfaFatores = null; // null = ainda não verificado (ou falhou); [] = sem autenticador; [..] = dispositivos confirmados
+
+function _mfaRenderLista() {
     var est = document.getElementById('mfa-estado');
     var lista = document.getElementById('mfa-lista');
     if (!est || !lista) return;
+    if (_mfaFatores === null) { est.textContent = 'não foi possível verificar'; lista.innerHTML = ''; return; }
+    var fs = _mfaFatores;
+    est.textContent = fs.length ? ('Ativada (' + fs.length + (fs.length === 1 ? ' dispositivo)' : ' dispositivos)')) : 'Não ativada';
+    var podeRemover = _admDesbloqueado();
+    lista.innerHTML = fs.map(function(f){
+        var dt = f.created_at ? new Date(f.created_at).toLocaleDateString('pt-PT') : '';
+        var rem = podeRemover ? ' <button class="btn btn-ghost btn-sm" style="min-height:32px;" onclick="mfaRemover(\'' + _mfaEsc(f.id) + '\')">Remover</button>' : '';
+        return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span>' + _mfaEsc(f.friendly_name || 'Dispositivo') + '</span><span style="color:var(--text-secondary);">' + _mfaEsc(dt) + rem + '</span></div>';
+    }).join('');
+}
+
+async function mfaListar() {
     try {
         var u = await _mfaFetch('/user');
-        var fs = (u.factors || []).filter(function(f){ return f.factor_type === 'totp' && f.status === 'verified'; });
-        est.textContent = fs.length ? ('Ativada (' + fs.length + (fs.length === 1 ? ' dispositivo)' : ' dispositivos)')) : 'Não ativada';
-        lista.innerHTML = fs.map(function(f){
-            var dt = f.created_at ? new Date(f.created_at).toLocaleDateString('pt-PT') : '';
-            return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between;gap:12px;"><span>' + _mfaEsc(f.friendly_name || 'Dispositivo') + '</span><span style="color:var(--text-secondary);">' + _mfaEsc(dt) + '</span></div>';
-        }).join('');
+        _mfaFatores = (u.factors || []).filter(function(f){ return f.factor_type === 'totp' && f.status === 'verified'; });
     } catch(e) {
-        est.textContent = 'não foi possível verificar';
+        _mfaFatores = null;
         console.warn('[MFA] listar:', e);
+    }
+    _mfaRenderLista();
+    admAtualizarBloqueio();
+}
+
+function mfaRemover(id) {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
+    var unico = _mfaFatores && _mfaFatores.length === 1;
+    showConfirm('Remover este dispositivo?' + (unico ? ' É o único: sem ele, as definições deixam de ter proteção por código.' : ''), async function() {
+        try {
+            await _mfaFetch('/factors/' + id, 'DELETE');
+            try { registrarAcesso(usuarioAtual?.nome || '--', usuarioAtual?.perfil || '--', 'mfa-removido', '127.0.0.1', true); } catch(e) {}
+            showToast('Dispositivo removido.', 'success');
+            await mfaListar();
+            if (_mfaFatores && _mfaFatores.length === 0) _admBloquear();
+        } catch(e) {
+            showToast('Não foi possível remover: ' + e.message, 'error');
+        }
+    });
+}
+
+// ===== DESBLOQUEIO ESPECIAL DAS DEFINIÇÕES =====
+// As definições (Configurações e Área Restrita) só abrem com um código do autenticador, durante 10 minutos.
+// Sai da aba Administração, passa o tempo ou carrega em "Bloquear agora": volta a trancar.
+var ADM_JANELA_MS = 10 * 60 * 1000;
+var _admDesbloqueadoAte = 0;
+var _admTimer = null;
+var _admFalhas = 0;
+var _admBloqueadoAte = 0;
+
+function _admDesbloqueado() { return Date.now() < _admDesbloqueadoAte; }
+
+function _admAbrirJanela() {
+    _admDesbloqueadoAte = Date.now() + ADM_JANELA_MS;
+    clearTimeout(_admTimer);
+    _admTimer = setTimeout(function(){ _admBloquear('Definições bloqueadas outra vez (passaram 10 minutos).'); }, ADM_JANELA_MS);
+}
+
+function _admBloquear(aviso) {
+    var estava = _admDesbloqueado();
+    _admDesbloqueadoAte = 0;
+    clearTimeout(_admTimer); _admTimer = null;
+    _superDesbloqueado = false;
+    var sup = document.getElementById('admtab-super');
+    if (sup && sup.style.display !== 'none') switchAdmTab('acessos', document.getElementById('admtab-btn-acessos'));
+    admAtualizarBloqueio();
+    _mfaRenderLista();
+    if (estava && aviso) showToast(aviso, 'warning');
+}
+
+function admAtualizarBloqueio() {
+    var prot = document.getElementById('adm-config-protegido');
+    var blq = document.getElementById('adm-bloqueio');
+    if (!prot || !blq) return;
+    var aberto = _admDesbloqueado();
+    prot.style.display = aberto ? 'block' : 'none';
+    blq.style.display = aberto ? 'none' : 'block';
+    if (aberto) {
+        var fim = new Date(_admDesbloqueadoAte);
+        document.getElementById('adm-barra-texto').textContent = 'Definições desbloqueadas até às ' + fim.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) + '.';
+        return;
+    }
+    var texto = document.getElementById('adm-bloqueio-texto');
+    var form = document.getElementById('adm-bloqueio-form');
+    var rep = document.getElementById('adm-btn-repetir');
+    form.style.display = 'none'; rep.style.display = 'none';
+    if (_mfaFatores === null) {
+        texto.textContent = 'Não foi possível verificar o autenticador. Por segurança, as definições ficam fechadas.';
+        rep.style.display = 'inline-flex';
+    } else if (_mfaFatores.length === 0) {
+        texto.textContent = 'Ative o autenticador no cartão acima para poder ver e alterar as definições.';
+    } else {
+        texto.textContent = 'Escreva o código de 6 dígitos da app autenticadora para ver e alterar as definições.';
+        form.style.display = 'flex';
+    }
+}
+
+async function admDesbloquear() {
+    if (Date.now() < _admBloqueadoAte) { showToast('Demasiadas tentativas. Espere um minuto.', 'warning'); return; }
+    if (!_mfaFatores || !_mfaFatores.length) { admAtualizarBloqueio(); return; }
+    var inp = document.getElementById('adm-codigo');
+    var cod = (inp.value || '').replace(/\s/g, '');
+    if (!/^\d{6}$/.test(cod)) { showToast('Escreva os 6 dígitos que aparecem na app.', 'warning'); return; }
+    var btn = document.getElementById('adm-btn-desbloquear');
+    btn.disabled = true;
+    try {
+        var f = _mfaFatores[0];
+        var ch = await _mfaFetch('/factors/' + f.id + '/challenge', 'POST', {});
+        var d = await _mfaFetch('/factors/' + f.id + '/verify', 'POST', { challenge_id: ch.id, code: cod });
+        if (d && d.access_token) _supaGuardarSessao(d); // sessão passa a aal2
+        _admFalhas = 0;
+        inp.value = '';
+        _admAbrirJanela();
+        try { registrarAcesso(usuarioAtual?.nome || '--', usuarioAtual?.perfil || '--', 'admin-desbloqueado', '127.0.0.1', true); } catch(e) {}
+        admAtualizarBloqueio();
+        _mfaRenderLista();
+    } catch(e) {
+        console.warn('[MFA] desbloquear:', e);
+        try { registrarAcesso(usuarioAtual?.nome || '--', usuarioAtual?.perfil || '--', 'admin-desbloqueio-falhou', '127.0.0.1', false); } catch(e2) {}
+        _admFalhas++;
+        if (_admFalhas >= 5) { _admBloqueadoAte = Date.now() + 60000; _admFalhas = 0; showToast('5 códigos errados. Espere um minuto.', 'error'); }
+        else showToast(/invalid|code|expired/i.test(e.message) ? 'Código incorreto ou expirado. Espere pelo código seguinte.' : ('Não foi possível validar: ' + e.message), 'error');
+    } finally {
+        btn.disabled = false;
     }
 }
 
@@ -4630,6 +4766,7 @@ async function mfaConfirmarInscricao() {
         _mfaFecharPainel();
         try { registrarAcesso(usuarioAtual?.nome || '--', usuarioAtual?.perfil || '--', 'mfa-ativado', '127.0.0.1', true); } catch(e) {}
         showToast('Autenticador ativado neste dispositivo.', 'success');
+        _admAbrirJanela();
         mfaListar();
     } catch(e) {
         console.warn('[MFA] confirmar:', e);
@@ -7071,6 +7208,7 @@ function _supaGuardarSessao(d) {
 }
 
 function _supaLimparSessao() {
+    _admDesbloqueadoAte = 0;
     try { localStorage.removeItem('fuel_sessao'); } catch(e) {}
     clearTimeout(_supaRefreshTimer);
     _supaAccessToken = null;
