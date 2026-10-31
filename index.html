@@ -2633,11 +2633,11 @@ async function supaGateEntrar() {
                 <div class="card-title"><i class="fas fa-shield-alt"></i> Políticas de Segurança</div>
                 <div class="admin-grid">
                     <div class="admin-card">
-                        <h3>👑 Administradores</h3>
+                        <h3><i class="fas fa-crown"></i> Administradores</h3>
                         <table style="width:100%;"><tr><td>Expiração:</td><td><input type="number" id="config-admin-expiracao" value="90" min="30" max="365" class="signature-input" style="width:80px;"> dias</td></tr><tr><td>Tentativas até bloquear:</td><td><input type="number" id="config-admin-tentativas" value="5" min="3" max="10" class="signature-input" style="width:80px;"></td></tr><tr><td>Tempo de bloqueio:</td><td><input type="number" id="config-admin-bloqueio" value="30" min="5" max="120" class="signature-input" style="width:80px;"> minutos</td></tr></table>
                     </div>
                     <div class="admin-card">
-                        <h3>👥 Perfis Partilhados</h3>
+                        <h3><i class="fas fa-users"></i> Perfis Partilhados</h3>
                         <table style="width:100%;"><tr><td>Expiração:</td><td><input type="number" id="config-partilhado-expiracao" value="180" min="30" max="365" class="signature-input" style="width:80px;"> dias</td></tr><tr><td>Tentativas até bloquear:</td><td><input type="number" id="config-partilhado-tentativas" value="5" min="3" max="10" class="signature-input" style="width:80px;"></td></tr><tr><td>Tempo de bloqueio:</td><td><input type="number" id="config-partilhado-bloqueio" value="15" min="5" max="120" class="signature-input" style="width:80px;"> minutos</td></tr></table>
                     </div>
                 </div>
@@ -2668,7 +2668,7 @@ async function supaGateEntrar() {
                                 <th style="padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--success);">Meta (OK)</th>
                                 <th style="padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--warning);">Limiar ALTO</th>
                                 <th style="padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--danger);">Limiar CRÍTICO</th>
-                                <th style="padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:#18181b;">Limiar ROUBO</th>
+                                <th style="padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-primary);">Limiar ROUBO</th>
                                 <th style="padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);">Registos Usados</th>
                             </tr>
                         </thead>
@@ -2689,7 +2689,7 @@ async function supaGateEntrar() {
                     <div class="card-title"><i class="fas fa-mountain" style="color:#7c3aed"></i> Rotas com Consumo Elevado Esperado</div>
                 </div>
                 <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Quando o <b>Destino</b> contém algum destes termos, o sistema aplica limiares mais altos e usa o prefixo <span class="badge badge-pedreira-critico" style="font-size:10px;">PEDREIRA-*</span> para não confundir com desvios reais da rota normal.</p>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">
                     <div>
                         <label>Palavras-chave (separadas por vírgula)</label>
                         <input type="text" id="config-rotas-keywords" placeholder="pedreira, canteira, mina" style="margin-top:6px;">
@@ -2724,7 +2724,7 @@ async function supaGateEntrar() {
                     </table>
                 </div>
                 <div id="area-add-preco" style="margin-top:18px;display:none;">
-                    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end;">
                         <div>
                             <label>Nova data de vigência</label>
                             <input type="date" id="novo-preco-data" style="margin-top:6px;">
@@ -2744,6 +2744,8 @@ async function supaGateEntrar() {
                 </div>
             </div>
 
+        </div><!-- /admtab-config -->
+
         <!-- Sub-tab: Área Restrita Super Admin (oculto por defeito) -->
         <div id="admtab-super" style="display:none">
             <div class="card" style="border:1px solid rgba(220,38,38,0.3);background:var(--danger-light);">
@@ -2752,14 +2754,14 @@ async function supaGateEntrar() {
                 </div>
                 <div class="admin-grid">
                     <div class="admin-card">
-                        <h3 style="color:var(--danger)">⚠️ Operações Destrutivas</h3>
+                        <h3 style="color:var(--danger)"><i class="fas fa-triangle-exclamation"></i> Operações Destrutivas</h3>
                         <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Estas operações são irreversíveis. Certifique-se que fez backup antes de prosseguir.</p>
                         <div style="display:flex;flex-direction:column;gap:10px;">
                             <button class="btn btn-danger-outline" onclick="limparTudoComSenha()"><i class="fas fa-trash-can"></i> Limpar Todos os Dados</button>
                         </div>
                     </div>
                     <div class="admin-card">
-                        <h3 style="color:var(--info)">🔧 Configurações Avançadas</h3>
+                        <h3 style="color:var(--info)"><i class="fas fa-screwdriver-wrench"></i> Configurações Avançadas</h3>
                         <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Acesso a configurações de sistema de nível avançado.</p>
                         <div style="display:flex;flex-direction:column;gap:10px;">
                             <button class="btn btn-ghost" onclick="exportarAuditLog()"><i class="fas fa-file-export"></i> Exportar Audit Log Completo</button>
@@ -2778,7 +2780,6 @@ async function supaGateEntrar() {
                 </div>
             </div>
         </div>
-    </div>
 
 </div><!-- /tab-administracao -->
 
@@ -4362,7 +4363,7 @@ function _executarCalculoMetas() {
                 '<td style="padding:10px 14px;text-align:center;font-family:JetBrains Mono,monospace;">± ' + r.dp.toFixed(1) + '</td>' +
                 '<td style="padding:10px 14px;text-align:center;"><span style="font-family:JetBrains Mono,monospace;color:var(--success);font-weight:700;">' + r.meta + '</span> → <span style="color:var(--warning);">' + r.limOK + '</span></td>' +
                 '<td style="padding:10px 14px;text-align:center;"><span style="font-family:JetBrains Mono,monospace;color:var(--warning);font-weight:700;">' + r.limOK + '</span> → <span style="color:var(--danger);">' + r.limCritico + '</span></td>' +
-                '<td style="padding:10px 14px;text-align:center;"><span style="font-family:JetBrains Mono,monospace;color:var(--danger);font-weight:700;">' + r.limCritico + '</span> → <span style="color:#18181b;font-weight:900;">' + r.limRoubo + '</span></td>' +
+                '<td style="padding:10px 14px;text-align:center;"><span style="font-family:JetBrains Mono,monospace;color:var(--danger);font-weight:700;">' + r.limCritico + '</span> → <span style="color:var(--text-primary);font-weight:900;">' + r.limRoubo + '</span></td>' +
                 '<td style="padding:10px 14px;text-align:center;font-size:12px;color:var(--text-muted);">' + (r.nRemovidos > 0 ? r.nRemovidos + ' outlier(s)' : '—') + '</td>' +
             '</tr>';
         }
