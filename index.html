@@ -2138,6 +2138,7 @@ async function supaGateEntrar() {
                 <div class="reg-panel" id="reg-p2">
                     <h3>2 · Percurso</h3>
                     <div class="reg-fields">
+                        <div style="grid-column:1/-1"><div class="dest-chips" id="data-chips" style="margin-bottom:0"></div></div>
                         <div><label>Data</label><input type="date" id="f-data" onchange="calcPreco()"></div>
                         <div><label>Hora do Abastecimento</label><input type="time" id="f-hora"></div>
                         <div style="grid-column:1/-1">
@@ -5423,7 +5424,8 @@ function processarSalvar(r) {
     cache = { dashStats: null, investData: null, lastUpdate: null };
     atualizarTabelas(); salvarDadosLocal();
     ['f-placa', 'f-moto', 'f-km', 'f-litros', 'f-valor', 'f-destino', 'f-hora', 'f-marca'].forEach(function(id) { document.getElementById(id).value = ''; });
-    document.getElementById('f-data').valueAsDate = new Date();
+    _regUltimaData = r.data || '';
+    document.getElementById('f-data').value = r.data || _hojeLocal(); // mantém o dia do lote; os chips Ontem/Hoje mudam num toque
     // Reset tipo abastecimento para "Tanque Cheio" por defeito
     var cb = document.getElementById('f-completo');
     if (cb) { cb.checked = true; }
@@ -8633,6 +8635,7 @@ function regIrPasso(n) {
         if (!_regVal('f-data')) document.getElementById('f-data').value = _hojeLocal();
         if (!_regVal('f-hora')) document.getElementById('f-hora').value = _agoraHM();
         if (typeof calcPreco === 'function') calcPreco();
+        if (typeof regRenderChipsData === 'function') regRenderChipsData();
     }
     regAtualizarVerificacao();
     var foco = { 1: 'f-placa', 2: 'f-km', 3: 'f-litros' }[n];
@@ -8988,17 +8991,60 @@ function regSincChipsDestino() {
     });
 }
 
+// ===== CHIPS DE DATA (passo 2) — Ontem / Hoje / Última usada, sempre com a data visível =====
+var _regUltimaData = ''; // só em memória: ao reabrir a app volta ao comportamento normal (hoje)
+var _REG_DIAS_SEM = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+function _isoMaisDias(iso, n) {
+    var p = (iso || '').split('-'); if (p.length !== 3) return '';
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + n);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function _fmtDiaSemDM(iso) {
+    var p = (iso || '').split('-'); if (p.length !== 3) return iso || '';
+    return _REG_DIAS_SEM[new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getDay()] + ' ' + p[2] + '/' + p[1];
+}
+function regRenderChipsData() {
+    var box = document.getElementById('data-chips'); if (!box) return;
+    var hoje = _hojeLocal(), ontem = _isoMaisDias(hoje, -1);
+    var itens = [{ rot: 'Ontem', iso: ontem }, { rot: 'Hoje', iso: hoje }];
+    if (_regUltimaData && _regUltimaData !== hoje && _regUltimaData !== ontem) itens.push({ rot: 'Última', iso: _regUltimaData });
+    box.innerHTML = '';
+    itens.forEach(function (it) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'dest-chip'; b.dataset.iso = it.iso;
+        b.textContent = it.rot + ' · ' + _fmtDiaSemDM(it.iso);
+        b.addEventListener('click', function () { regEscolherData(it.iso); });
+        box.appendChild(b);
+    });
+    regSincChipsData();
+}
+function regEscolherData(iso) {
+    var inp = document.getElementById('f-data'); if (!inp || !iso) return;
+    inp.value = iso;
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function regSincChipsData() {
+    var inp = document.getElementById('f-data'), v = inp ? inp.value : '';
+    document.querySelectorAll('#data-chips .dest-chip').forEach(function (b) {
+        var sel = !!v && b.dataset.iso === v;
+        b.classList.toggle('sel', sel); b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+    });
+}
+
 (function regInit() {
     ['f-data', 'f-hora', 'f-placa', 'f-marca', 'f-moto', 'f-destino', 'f-km', 'f-litros'].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) { el.addEventListener('input', regAtualizarVerificacao); el.addEventListener('change', regAtualizarVerificacao); }
     });
+    var dt = document.getElementById('f-data');
+    if (dt) { dt.addEventListener('input', regSincChipsData); dt.addEventListener('change', regSincChipsData); }
     var dd = document.getElementById('f-destino');
     if (dd) { dd.addEventListener('input', regSincChipsDestino); dd.addEventListener('change', regSincChipsDestino); }
     var m = document.getElementById('f-moto');
     if (m) m.addEventListener('input', function () { this.style.borderColor = ''; var h = document.getElementById('moto-help'); if (h) h.textContent = ''; });
     var d = document.getElementById('f-data'); if (d && !d.value) d.value = _hojeLocal();
-    try { regAtualizarVerificacao(); atualizarUltimosHoje(); regAtualizarIconeSom(); regRenderChipsDestino(); } catch (e) {}
+    try { regAtualizarVerificacao(); atualizarUltimosHoje(); regAtualizarIconeSom(); regRenderChipsDestino(); regRenderChipsData(); } catch (e) {}
 })();
 
 </script>
