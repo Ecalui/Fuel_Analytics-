@@ -1065,6 +1065,45 @@
             #tab-administracao .filter-bar input:not([type="checkbox"]), #tab-administracao .filter-bar select { max-width: none; width: 100% !important; }
         }
 
+        /* ===== MANUTENÇÃO (revisão geral) — linhas finas ===== */
+        #tab-manutencao .mt-kpis { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--text-primary); margin-bottom: 24px; }
+        #tab-manutencao .mt-kpi { padding: 14px 16px; border-right: 1px solid var(--border); }
+        #tab-manutencao .mt-kpi:last-child { border-right: 0; }
+        #tab-manutencao .mt-kpi b { display: block; font-size: 26px; font-weight: 700; line-height: 1.1; }
+        #tab-manutencao .mt-kpi span { font-size: 12px; color: var(--text-secondary); }
+        #tab-manutencao .mt-kpi.venc b { color: var(--danger); }
+        #tab-manutencao .mt-kpi.aprox b { color: var(--warning); }
+        #tab-manutencao .mt-subtabs { display: flex; flex-wrap: wrap; gap: 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+        #tab-manutencao .mt-subtab { background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 0; margin-bottom: -1px; min-height: 44px; font: 500 14px 'Outfit', sans-serif; color: var(--text-secondary); cursor: pointer; }
+        #tab-manutencao .mt-subtab:hover { color: var(--text-primary); }
+        #tab-manutencao .mt-subtab.ativa { color: var(--text-primary); font-weight: 700; border-bottom-color: var(--text-primary); }
+        #tab-manutencao .mt-box { border: 1px solid var(--text-primary); border-radius: 0; padding: 18px; margin-bottom: 24px; background: transparent; }
+        #tab-manutencao .mt-box h3 { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+        #tab-manutencao .mt-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end; }
+        #tab-manutencao .mt-form label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+        #tab-manutencao table.mt-tab { width: 100%; border-collapse: collapse; font-size: 13px; }
+        #tab-manutencao table.mt-tab th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); padding: 8px 10px; border-bottom: 1px solid var(--text-primary); white-space: nowrap; }
+        #tab-manutencao table.mt-tab td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        #tab-manutencao .mt-sub { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        #tab-manutencao .mt-barra { height: 4px; background: var(--border); margin-top: 6px; position: relative; }
+        #tab-manutencao .mt-barra i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--text-primary); }
+        #tab-manutencao .mt-st { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+        #tab-manutencao .mt-st.venc { color: var(--danger); } #tab-manutencao .mt-st.aprox { color: var(--warning); } #tab-manutencao .mt-st.ok { color: var(--success); } #tab-manutencao .mt-st.sem { color: var(--text-muted); }
+        #tab-manutencao .mt-pdfs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        #tab-manutencao .mt-vazio { padding: 24px 0; color: var(--text-secondary); font-size: 13px; }
+        #dash-manut-alerta { display: none; border: 1px solid var(--text-primary); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; cursor: pointer; }
+        #dash-manut-alerta b.v { color: var(--danger); } #dash-manut-alerta b.a { color: var(--warning); }
+        @media (max-width: 768px) {
+            #tab-manutencao .mt-kpis { grid-template-columns: repeat(2, 1fr); }
+            #tab-manutencao .mt-kpi:nth-child(2) { border-right: 0; }
+            #tab-manutencao .mt-kpi:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+            #tab-manutencao table.mt-tab thead { display: none; }
+            #tab-manutencao table.mt-tab, #tab-manutencao table.mt-tab tbody, #tab-manutencao table.mt-tab tr, #tab-manutencao table.mt-tab td { display: block; width: 100%; }
+            #tab-manutencao table.mt-tab tr { border: 1px solid var(--border); margin-bottom: 10px; padding: 6px 0; }
+            #tab-manutencao table.mt-tab td { border: 0; padding: 4px 12px; }
+            #tab-manutencao table.mt-tab td[data-l]::before { content: attr(data-l) ': '; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+        }
+
         /* ===== TABS ===== */
         .tab-content { display: none; }
         .tab-active { display: block; animation: tabEnter 0.35s ease; }
@@ -1977,6 +2016,7 @@ async function supaGateEntrar() {
 
         <div class="nav-section">Auditoria</div>
         <a class="nav-link" id="nav-invest" onclick="switchTab('invest', this)"><i class="fas fa-user-secret"></i>Investigação</a>
+        <a class="nav-link" id="nav-manutencao" onclick="switchTab('manutencao', this)"><i class="fas fa-oil-can"></i>Manutenção <span id="nav-manut-badge" style="display:none;margin-left:auto;font-size:11px;font-weight:700;color:var(--danger)"></span></a>
         <a class="nav-link" id="nav-relatorios" onclick="switchTab('relatorios', this)"><i class="fas fa-file-export"></i>Relatórios</a>
 
         <div class="nav-section">Gestão</div>
@@ -2009,6 +2049,8 @@ async function supaGateEntrar() {
     <!-- ==================== DASHBOARD ==================== -->
     <div id="tab-dash" class="tab-content tab-active">
         <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Principal</div><h1 class="page-title">Painel Geral</h1><p class="page-desc">Visão geral do consumo e alertas da frota</p></div><div class="page-header-actions"><button type="button" class="btn btn-primary dash-cta" id="dash-cta-novo" style="display:none" onclick="irParaNovoLancamento()"><i class="fas fa-plus"></i>Novo Lançamento</button><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Dashboard</div></div></div>
+
+        <div id="dash-manut-alerta" onclick="switchTab('manutencao', document.getElementById('nav-manutencao'))"></div>
 
         <!-- ESTADO VAZIO: aparece só quando a base de dados está confirmada sem registos -->
         <div class="card dash-vazio" id="dash-vazio" style="display:none">
@@ -2426,6 +2468,46 @@ async function supaGateEntrar() {
         </div>
     </div>
 
+    <!-- ==================== MANUTENÇÃO (revisão geral) ==================== -->
+    <div id="tab-manutencao" class="tab-content">
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Auditoria</div><h1 class="page-title">Manutenção — Revisão Geral</h1><p class="page-desc">Troca de óleos e filtros: km desde a última revisão, previsão e atrasos. Alimentado pelos km dos abastecimentos.</p></div></div>
+
+        <div class="mt-kpis">
+            <div class="mt-kpi venc"><b id="mt-k-venc">0</b><span>Vencidas</span></div>
+            <div class="mt-kpi aprox"><b id="mt-k-aprox">0</b><span>A aproximar-se</span></div>
+            <div class="mt-kpi"><b id="mt-k-ok">0</b><span>Em dia</span></div>
+            <div class="mt-kpi"><b id="mt-k-sem">0</b><span>Sem revisão registada</span></div>
+        </div>
+
+        <div class="mt-box" id="mt-box-registar" style="display:none">
+            <h3>Registar revisão</h3>
+            <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px">Use quando o motorista pede a folha de obra. O km indicado é o ponto zero da próxima revisão e <b>não</b> entra nos abastecimentos.</p>
+            <div class="mt-form">
+                <div><label for="mt-placa">Viatura</label><input list="mt-placas" id="mt-placa" placeholder="Matrícula" autocomplete="off"><datalist id="mt-placas"></datalist></div>
+                <div><label for="mt-data">Data</label><input type="date" id="mt-data"></div>
+                <div><label for="mt-km">Km do painel</label><input type="number" id="mt-km" min="1" inputmode="numeric" placeholder="km"></div>
+                <div><button class="btn btn-primary" onclick="manutRegistarRevisao()"><i class="fas fa-save"></i> Registar</button></div>
+            </div>
+        </div>
+
+        <div class="mt-pdfs" id="mt-pdfs">
+            <button class="btn btn-secondary" onclick="manutPDF('previsao')"><i class="fas fa-file-pdf"></i> PDF Previsão</button>
+            <button class="btn btn-secondary" onclick="manutPDF('vencidas')"><i class="fas fa-file-pdf"></i> PDF Vencidas</button>
+            <button class="btn btn-secondary" onclick="manutPDF('historico')"><i class="fas fa-file-pdf"></i> PDF Histórico</button>
+        </div>
+
+        <div class="mt-subtabs" id="mt-subtabs">
+            <button class="mt-subtab ativa" data-f="todas" onclick="manutFiltro('todas')">Todas</button>
+            <button class="mt-subtab" data-f="venc" onclick="manutFiltro('venc')">Vencidas</button>
+            <button class="mt-subtab" data-f="7" onclick="manutFiltro('7')">Próx. 7 dias</button>
+            <button class="mt-subtab" data-f="15" onclick="manutFiltro('15')">Próx. 15 dias</button>
+            <button class="mt-subtab" data-f="30" onclick="manutFiltro('30')">Próx. 30 dias</button>
+            <button class="mt-subtab" data-f="sem" onclick="manutFiltro('sem')">Sem revisão</button>
+            <button class="mt-subtab" data-f="hist" onclick="manutFiltro('hist')">Revisões registadas</button>
+        </div>
+        <div id="mt-lista"></div>
+    </div>
+
     <!-- ==================== RELATÓRIOS ==================== -->
     <div id="tab-relatorios" class="tab-content">
         <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Exportação</div><h1 class="page-title">Centro de Exportação</h1><p class="page-desc">Gere relatórios profissionais para auditoria</p></div><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Relatórios</div></div>
@@ -2814,6 +2896,23 @@ async function supaGateEntrar() {
                 <div style="text-align:right;margin-top:14px;">
                     <button class="btn btn-primary" onclick="salvarRotasEspeciais()"><i class="fas fa-save"></i> Guardar Rotas Especiais</button>
                 </div>
+            </div>
+
+            <!-- ===== PLANO DE MANUTENÇÃO (só admin) ===== -->
+            <div class="card" style="margin-top:20px;" id="card-plano-manut">
+                <div class="card-header"><div class="card-title"><i class="fas fa-oil-can" style="color:var(--accent)"></i> Plano de Manutenção (revisão geral)</div></div>
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Intervalo em km entre revisões, por marca. O aviso dispara à % indicada do intervalo ou quando a previsão cai dentro do horizonte.</p>
+                <div id="plano-manut-marcas" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;"></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:12px;">
+                    <div><label>Nova marca</label><input type="text" id="pm-nova-marca" placeholder="Ex.: HOWO"></div>
+                    <div><label>Intervalo (km)</label><input type="number" id="pm-nova-km" min="1000" placeholder="5000"></div>
+                    <div><label>Aviso a (% do intervalo)</label><input type="number" id="pm-aviso" min="50" max="99"></div>
+                    <div><label>Aviso se previsão ≤ (dias)</label><input type="number" id="pm-horizonte" min="1" max="60"></div>
+                    <div><label>Janela do ritmo (dias)</label><input type="number" id="pm-janela" min="7" max="90"></div>
+                    <div><label>Mín. abastecimentos p/ previsão</label><input type="number" id="pm-minreg" min="2" max="10"></div>
+                    <div><label>Km desatualizado após (dias)</label><input type="number" id="pm-idade" min="1" max="30"></div>
+                </div>
+                <div style="text-align:right;margin-top:14px;"><button class="btn btn-primary" onclick="salvarPlanoManut()"><i class="fas fa-save"></i> Guardar Plano</button></div>
             </div>
 
             <!-- ===== PREÇOS DO GASÓLEO (só admin) ===== -->
@@ -3565,9 +3664,10 @@ function switchTab(tabId, el) {
     if (el) el.classList.add('active');
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('show');
-    if (tabId === 'administracao') { filtrarAcessos(); popularTabelaMetasMarca(); popularCamposRotasEspeciais(); }
+    if (tabId === 'administracao') { filtrarAcessos(); popularTabelaMetasMarca(); popularCamposRotasEspeciais(); popularPlanoManut(); }
     if (tabId === 'admin-gerir-viaturas') popularSelectViaturas();
     if (tabId === 'relatorios') popularSelectsRelatorio();
+    if (tabId === 'manutencao') renderManutencao();
     if (tabId === 'ceo') { popularFiltrosCEO(); atualizarCEO(); }
     atualizarTabelas();
     resetarTimeout();
@@ -3791,14 +3891,14 @@ function aplicarPermissoes() {
 
     // Controlo de abas visiveis para chefia
     if (isChefia) {
-        var abasPermitidas = ['nav-dash', 'nav-reg', 'nav-hist', 'nav-analise', 'nav-relatorios'];
-        var todasAbas = ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ceo'];
+        var abasPermitidas = ['nav-dash', 'nav-reg', 'nav-hist', 'nav-analise', 'nav-manutencao', 'nav-relatorios'];
+        var todasAbas = ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-manutencao','nav-relatorios','nav-ceo'];
         todasAbas.forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = abasPermitidas.indexOf(id) >= 0 ? 'flex' : 'none';
         });
     } else {
-        ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-relatorios','nav-ceo'].forEach(function(id) {
+        ['nav-dash','nav-reg','nav-hist','nav-analise','nav-invest','nav-manutencao','nav-relatorios','nav-ceo'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = 'flex';
         });
@@ -4788,7 +4888,7 @@ async function mfaConfirmarInscricao() {
 // Metas por marca, rotas especiais e preços do gasóleo são partilhados por todos os dispositivos.
 // O localStorage fica como cópia para funcionar offline. Só admin/owner escrevem (a RLS é que protege).
 var SUPA_TABELA_DEF = 'definicoes';
-var _DEF_CHAVES = ['metas_marca', 'rotas_especiais', 'precos_gasoleo'];
+var _DEF_CHAVES = ['metas_marca', 'rotas_especiais', 'precos_gasoleo', 'plano_manutencao'];
 
 function _defPendentesLer() { try { return JSON.parse(localStorage.getItem('fuel_def_pendentes') || '[]'); } catch(e) { return []; } }
 function _defPendentesGravar(arr) { try { localStorage.setItem('fuel_def_pendentes', JSON.stringify(arr)); } catch(e) {} }
@@ -4797,6 +4897,7 @@ function _defValorLocal(chave) {
     if (chave === 'metas_marca') return METAS_MARCA;
     if (chave === 'rotas_especiais') return { keywords: ROTAS_ESPECIAIS.keywords, fator: ROTAS_ESPECIAIS.fator };
     if (chave === 'precos_gasoleo') return PRECOS_GASOLEO;
+    if (chave === 'plano_manutencao') return PLANO_MANUT;
     return null;
 }
 
@@ -4816,6 +4917,9 @@ function _defAplicarLocal(chave, valor) {
             PRECOS_GASOLEO = valor;
             _ordenarPrecos();
             localStorage.setItem('fuel_precos_gasoleo', JSON.stringify(PRECOS_GASOLEO));
+        } else if (chave === 'plano_manutencao' && _mtPlanoValido(valor)) {
+            PLANO_MANUT = valor;
+            localStorage.setItem('fuel_plano_manut', JSON.stringify(PLANO_MANUT));
         } else { return false; }
         return JSON.stringify(_defValorLocal(chave)) !== antes;
     } catch(e) { console.warn('[Definições] não aplicou "' + chave + '":', e); return false; }
@@ -5441,6 +5545,7 @@ function atualizarTabelas() {
     popularSelectMarcaRelatorio();
     if (typeof atualizarUltimosHoje === 'function') atualizarUltimosHoje();
     if (typeof regAtualizarVerificacao === 'function') regAtualizarVerificacao();
+    if (typeof manutRefrescar === 'function') manutRefrescar();
 }
 
 // ===== DASHBOARD STATS =====
@@ -7140,6 +7245,434 @@ function atualizarListasVivas() {
 // ===== FIM LISTAS VIVAS =====================================================
 // ============================================================================
 
+// ============================================================================
+// ===== MANUTENÇÃO — revisão geral (troca de óleos e filtros) ================
+// Alimentada pelos km dos abastecimentos (db) + tabela "revisoes" (ponto zero registado a mão).
+// O km da revisão NÃO é um abastecimento: não entra no db nem no cálculo de L/100km.
+// ============================================================================
+var SUPA_TABELA_REV = 'revisoes';
+var PLANO_MANUT_PADRAO = {
+    intervalos: { SINOTRUK: 5000, SHACKMAN: 5000, IVECO: 5000, FAW: 5000, SCANIA: 5000, MAN: 12000, VOLVO: 15000 },
+    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7
+};
+var PLANO_MANUT = JSON.parse(JSON.stringify(PLANO_MANUT_PADRAO));
+var revisoes = [];
+var _mtFiltro = 'todas';
+var _mtLinhas = [];
+
+(function _mtCarregarLocal() {
+    try {
+        var p = JSON.parse(localStorage.getItem('fuel_plano_manut') || 'null');
+        if (_mtPlanoValido(p)) PLANO_MANUT = p;
+        var r = JSON.parse(localStorage.getItem('fuel_revisoes') || '[]');
+        if (Array.isArray(r)) revisoes = r;
+    } catch (e) {}
+})();
+
+function _mtPlanoValido(p) {
+    return !!p && typeof p === 'object' && p.intervalos && typeof p.intervalos === 'object' &&
+        p.aviso >= 50 && p.aviso <= 99 && p.horizonte >= 1 && p.janela >= 7 && p.minReg >= 2 && p.idadeKm >= 1 &&
+        Object.keys(p.intervalos).every(function(k){ return p.intervalos[k] >= 1000; });
+}
+function _mtGuardarRevisoesLocal() { try { localStorage.setItem('fuel_revisoes', JSON.stringify(revisoes)); } catch (e) {} }
+function _mtEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+function _mtNum(n) { return Number(n).toLocaleString('pt-PT'); }
+function _mtHoje() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function _mtDia(iso) { var p = String(iso).split('-'); return Date.UTC(+p[0], +p[1]-1, +p[2]) / 86400000; }
+function _mtIso(dia) { var d = new Date(dia * 86400000); return d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0') + '-' + String(d.getUTCDate()).padStart(2,'0'); }
+function _mtFmt(iso) { var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; }
+function _mtMarcaNorm(m) {
+    var u = String(m || '').toUpperCase().trim();
+    if (u === 'SHACMAN') u = 'SHACKMAN';
+    return u;
+}
+function _mtIntervalo(marca) { var v = PLANO_MANUT.intervalos[_mtMarcaNorm(marca)]; return v > 0 ? v : 0; }
+
+// ---- cálculo por viatura ----
+function _mtPercentil(arr, p) {
+    var a = arr.slice().sort(function(x, y){ return x - y; });
+    var i = (a.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i);
+    return a[lo] + (a[hi] - a[lo]) * (i - lo);
+}
+function manutCalcular() {
+    var hoje = _mtDia(_mtHoje());
+    var porPlaca = {};
+    db.forEach(function(r) {
+        if (!r || !r.placa || !(Number(r.km) > 0) || !r.data) return;
+        (porPlaca[r.placa] = porPlaca[r.placa] || []).push(r);
+    });
+    var placas = {};
+    Object.keys(porPlaca).forEach(function(p){ placas[p] = true; });
+    revisoes.forEach(function(r){ if (r.placa) placas[r.placa] = true; });
+
+    var linhas = [];
+    Object.keys(placas).sort().forEach(function(placa) {
+        var regs = (porPlaca[placa] || []).slice().sort(function(a, b){ return _cmpCrono(a, b); });
+        var ult = regs.length ? regs[regs.length - 1] : null;
+        var marca = ult ? ult.marca : '';
+        var revs = revisoes.filter(function(r){ return r.placa === placa; })
+                           .sort(function(a, b){ return a.data < b.data ? -1 : a.data > b.data ? 1 : a.km - b.km; });
+        var rev = revs.length ? revs[revs.length - 1] : null;
+        var L = { placa: placa, marca: _mtMarcaNorm(marca), intervalo: _mtIntervalo(marca), rev: rev, nRev: revs.length,
+                  kmAtual: null, dataKm: null, idadeKm: null, kmDesde: null, pct: null, estado: 'sem', motivo: '',
+                  ritmo: null, prevDe: null, prevAte: null, nReg: 0, excesso: 0 };
+        if (ult) { L.kmAtual = Number(ult.km); L.dataKm = ult.data; }
+        if (rev && (!L.dataKm || rev.data >= L.dataKm) && (L.kmAtual == null || rev.km > L.kmAtual)) { L.kmAtual = Number(rev.km); L.dataKm = rev.data; }
+        if (L.dataKm) L.idadeKm = Math.max(0, hoje - _mtDia(L.dataKm));
+        if (!L.intervalo) { L.estado = 'sem'; L.motivo = 'Marca sem plano definido'; linhas.push(L); return; }
+        if (!rev) { L.estado = 'sem'; L.motivo = 'Sem revisão registada'; linhas.push(L); return; }
+        if (L.kmAtual == null) { L.estado = 'sem'; L.motivo = 'Sem km de abastecimento'; linhas.push(L); return; }
+        L.kmDesde = L.kmAtual - Number(rev.km);
+        if (L.kmDesde < 0) { L.estado = 'sem'; L.motivo = 'Km inferior ao da revisão (conferir)'; linhas.push(L); return; }
+        L.pct = L.kmDesde / L.intervalo;
+
+        // ritmo km/dia na janela recente (dias parados contam)
+        var ini = hoje - PLANO_MANUT.janela;
+        var naJanela = regs.filter(function(r){ return _mtDia(r.data) >= ini; });
+        L.nReg = naJanela.length;
+        if (naJanela.length >= PLANO_MANUT.minReg) {
+            var ancora = null;
+            for (var i = 0; i < regs.length; i++) { if (_mtDia(regs[i].data) <= ini) ancora = regs[i]; else break; }
+            if (!ancora) ancora = naJanela[0];
+            var dias = Math.max(1, hoje - _mtDia(ancora.data));
+            var kmGanho = Number(ult.km) - Number(ancora.km);
+            if (kmGanho > 0) {
+                L.ritmo = kmGanho / dias;
+                var seg = [];
+                var base = regs.filter(function(r){ return _mtDia(r.data) >= _mtDia(ancora.data); });
+                for (var j = 1; j < base.length; j++) {
+                    var dd = _mtDia(base[j].data) - _mtDia(base[j-1].data), dk = Number(base[j].km) - Number(base[j-1].km);
+                    if (dd > 0 && dk > 0) seg.push(dk / dd);
+                }
+                var lento = L.ritmo, rapido = L.ritmo;
+                if (seg.length >= 3) { lento = _mtPercentil(seg, 0.25); rapido = _mtPercentil(seg, 0.75); }
+                else if (seg.length >= 1) { lento = Math.min.apply(null, seg); rapido = Math.max.apply(null, seg); }
+                lento = Math.min(lento, L.ritmo); rapido = Math.max(rapido, L.ritmo);
+                var falta = L.intervalo - L.kmDesde;
+                if (falta > 0) {
+                    var base0 = _mtDia(L.dataKm);
+                    L.prevDe = Math.max(hoje, Math.round(base0 + falta / rapido));
+                    L.prevAte = Math.max(hoje, Math.round(base0 + falta / Math.max(lento, 0.1)));
+                }
+            }
+        }
+        if (L.kmDesde > L.intervalo) { L.estado = 'venc'; L.excesso = L.kmDesde - L.intervalo; }
+        else if (L.pct * 100 >= PLANO_MANUT.aviso || (L.prevDe != null && L.prevDe - hoje <= PLANO_MANUT.horizonte)) L.estado = 'aprox';
+        else L.estado = 'ok';
+        linhas.push(L);
+    });
+    var ord = { venc: 0, aprox: 1, ok: 2, sem: 3 };
+    linhas.sort(function(a, b) {
+        if (ord[a.estado] !== ord[b.estado]) return ord[a.estado] - ord[b.estado];
+        var pa = a.prevDe != null ? a.prevDe : 1e9, pb = b.prevDe != null ? b.prevDe : 1e9;
+        if (pa !== pb) return pa - pb;
+        return (b.pct || 0) - (a.pct || 0);
+    });
+    _mtLinhas = linhas;
+    return linhas;
+}
+function _mtEntra(L, dias) { // previsão (o mais cedo) dentro de N dias, ainda não vencida
+    var hoje = _mtDia(_mtHoje());
+    if (L.estado === 'venc' || L.estado === 'sem' || L.prevDe == null) return false;
+    return L.prevDe - hoje <= dias;
+}
+function _mtPrevTexto(L) {
+    if (L.estado === 'venc') return 'Passou ' + _mtNum(L.excesso) + ' km';
+    if (L.estado === 'sem') return '—';
+    if (L.prevDe == null) return 'Previsão indisponível<span class="mt-sub">' + L.nReg + ' abastecimentos na janela (mín. ' + PLANO_MANUT.minReg + ')</span>';
+    var a = _mtFmt(_mtIso(L.prevDe)), b = _mtFmt(_mtIso(L.prevAte));
+    return (a === b ? a : a.slice(0, 5) + ' – ' + b) + '<span class="mt-sub">' + L.nReg + ' abast., últimos ' + PLANO_MANUT.janela + ' dias</span>';
+}
+function _mtRotuloEstado(e) { return { venc: 'Vencida', aprox: 'A aproximar-se', ok: 'Em dia', sem: 'Sem dados' }[e]; }
+
+// ---- interface ----
+function manutFiltro(f) {
+    _mtFiltro = f;
+    document.querySelectorAll('#mt-subtabs .mt-subtab').forEach(function(b){ b.classList.toggle('ativa', b.getAttribute('data-f') === f); });
+    renderManutencao();
+}
+function renderManutencao() {
+    var linhas = manutCalcular();
+    var c = { venc: 0, aprox: 0, ok: 0, sem: 0 };
+    linhas.forEach(function(l){ c[l.estado]++; });
+    ['venc','aprox','ok','sem'].forEach(function(k){ var e = document.getElementById('mt-k-' + k); if (e) e.textContent = c[k]; });
+    _mtAtualizarAvisos(c);
+
+    var box = document.getElementById('mt-box-registar');
+    if (box) box.style.display = _ehAdminAtual() ? 'block' : 'none';
+    var dl = document.getElementById('mt-placas');
+    if (dl && dl.getAttribute('data-n') !== String(linhas.length)) {
+        dl.innerHTML = linhas.map(function(l){ return '<option value="' + _mtEsc(l.placa) + '">'; }).join('');
+        dl.setAttribute('data-n', linhas.length);
+    }
+    var dt = document.getElementById('mt-data'); if (dt && !dt.value) dt.value = _mtHoje();
+
+    var el = document.getElementById('mt-lista');
+    if (!el) return;
+    if (_mtFiltro === 'hist') { el.innerHTML = _mtHtmlHistorico(); return; }
+    var lista = linhas.filter(function(l) {
+        if (_mtFiltro === 'venc') return l.estado === 'venc';
+        if (_mtFiltro === 'sem') return l.estado === 'sem';
+        if (_mtFiltro === '7' || _mtFiltro === '15' || _mtFiltro === '30') return _mtEntra(l, +_mtFiltro);
+        return true;
+    });
+    if (!lista.length) { el.innerHTML = '<div class="mt-vazio">Nenhuma viatura neste filtro.</div>'; return; }
+    var h = '<table class="mt-tab"><thead><tr><th>Viatura</th><th>Última revisão</th><th>Km actual</th><th>Desde a revisão</th><th>Ritmo</th><th>Previsão</th><th>Estado</th></tr></thead><tbody>';
+    lista.forEach(function(l) {
+        var velho = l.idadeKm != null && l.idadeKm > PLANO_MANUT.idadeKm;
+        h += '<tr><td data-l="Viatura"><b>' + _mtEsc(l.placa) + '</b><span class="mt-sub">' + _mtEsc(l.marca || '—') + (l.intervalo ? ' · plano ' + _mtNum(l.intervalo) + ' km' : '') + '</span></td>'
+          + '<td data-l="Última revisão">' + (l.rev ? _mtFmt(l.rev.data) + '<span class="mt-sub">aos ' + _mtNum(l.rev.km) + ' km</span>' : '—') + '</td>'
+          + '<td data-l="Km actual">' + (l.kmAtual != null ? _mtNum(l.kmAtual) + '<span class="mt-sub"' + (velho ? ' style="color:var(--warning)"' : '') + '>' + (l.idadeKm === 0 ? 'de hoje' : 'de há ' + l.idadeKm + ' dia' + (l.idadeKm === 1 ? '' : 's')) + (velho ? ' · desatualizado' : '') + '</span>' : '—') + '</td>'
+          + '<td data-l="Desde a revisão">' + (l.kmDesde != null ? _mtNum(l.kmDesde) + ' / ' + _mtNum(l.intervalo) + ' km<div class="mt-barra"><i style="width:' + Math.min(100, Math.round(l.pct * 100)) + '%"></i></div><span class="mt-sub">' + Math.round(l.pct * 100) + '%</span>' : '<span class="mt-sub">' + _mtEsc(l.motivo) + '</span>') + '</td>'
+          + '<td data-l="Ritmo">' + (l.ritmo != null ? Math.round(l.ritmo) + ' km/dia' : '—') + '</td>'
+          + '<td data-l="Previsão">' + _mtPrevTexto(l) + '</td>'
+          + '<td data-l="Estado"><span class="mt-st ' + l.estado + '">' + _mtRotuloEstado(l.estado) + '</span></td></tr>';
+    });
+    el.innerHTML = h + '</tbody></table>';
+}
+function _mtHtmlHistorico() {
+    if (!revisoes.length) return '<div class="mt-vazio">Ainda não há revisões registadas.</div>';
+    var adm = _ehAdminAtual();
+    var l = revisoes.slice().sort(function(a, b){ return a.data < b.data ? 1 : a.data > b.data ? -1 : 0; });
+    var h = '<table class="mt-tab"><thead><tr><th>Data</th><th>Viatura</th><th>Km</th><th>Registado por</th>' + (adm ? '<th></th>' : '') + '</tr></thead><tbody>';
+    l.forEach(function(r) {
+        h += '<tr><td data-l="Data">' + _mtFmt(r.data) + '</td><td data-l="Viatura"><b>' + _mtEsc(r.placa) + '</b></td><td data-l="Km">' + _mtNum(r.km) + '</td><td data-l="Por">' + _mtEsc(r.criado_por_email ? _nomeDeEmail(r.criado_por_email) : '—') + (r._pend ? '<span class="mt-sub" style="color:var(--warning)">por enviar</span>' : '') + '</td>'
+          + (adm ? '<td><button class="btn btn-secondary" style="padding:4px 10px" onclick="manutApagarRevisao(\'' + _mtEsc(r.id) + '\')">Apagar</button></td>' : '') + '</tr>';
+    });
+    return h + '</tbody></table>';
+}
+function _mtAtualizarAvisos(c) {
+    var b = document.getElementById('nav-manut-badge');
+    var n = c.venc + c.aprox;
+    if (b) { b.style.display = n ? 'inline' : 'none'; b.textContent = n; b.style.color = c.venc ? 'var(--danger)' : 'var(--warning)'; }
+    var d = document.getElementById('dash-manut-alerta');
+    if (d) {
+        if (!n) { d.style.display = 'none'; return; }
+        d.style.display = 'block';
+        d.innerHTML = '<i class="fas fa-oil-can"></i> Revisões: ' + (c.venc ? '<b class="v">' + c.venc + ' vencida' + (c.venc > 1 ? 's' : '') + '</b>' : '') + (c.venc && c.aprox ? ' · ' : '') + (c.aprox ? '<b class="a">' + c.aprox + ' a aproximar-se</b>' : '') + ' — ver Manutenção';
+    }
+}
+// Refresco leve (chamado de atualizarTabelas): só calcula, não desenha a lista se a aba não estiver aberta
+function manutRefrescar() {
+    try {
+        if (!Array.isArray(db)) return;
+        var ativa = document.getElementById('tab-manutencao');
+        if (ativa && ativa.classList.contains('tab-active')) { renderManutencao(); return; }
+        var linhas = manutCalcular(), c = { venc: 0, aprox: 0, ok: 0, sem: 0 };
+        linhas.forEach(function(l){ c[l.estado]++; });
+        _mtAtualizarAvisos(c);
+    } catch (e) { console.warn('[Manutenção] refresco falhou:', e); }
+}
+
+// ---- registar / apagar revisão ----
+function _mtNovoId() { return 'rev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+async function manutRegistarRevisao() {
+    if (!_ehAdminAtual()) { showToast('Sem permissão para registar revisões.', 'error'); return; }
+    var placa = (document.getElementById('mt-placa').value || '').trim();
+    var data = document.getElementById('mt-data').value;
+    var km = Math.round(Number(document.getElementById('mt-km').value));
+    if (!placa) { showToast('Indique a viatura.', 'warning'); return; }
+    if (!data || data > _mtHoje()) { showToast('Data inválida (não pode ser futura).', 'warning'); return; }
+    if (!(km > 0)) { showToast('Indique o km do painel.', 'warning'); return; }
+    var conhecida = db.some(function(r){ return r.placa === placa; }) || revisoes.some(function(r){ return r.placa === placa; });
+    var avisos = [];
+    if (!conhecida) avisos.push('A viatura "' + placa + '" não existe nos abastecimentos.');
+    var regs = db.filter(function(r){ return r.placa === placa && Number(r.km) > 0; }).sort(function(a, b){ return _cmpCrono(a, b); });
+    if (regs.length) {
+        var u = regs[regs.length - 1];
+        if (km > Number(u.km) + 2000) avisos.push('O km (' + _mtNum(km) + ') é muito superior ao último abastecimento (' + _mtNum(u.km) + ' em ' + _mtFmt(u.data) + ').');
+        if (km < Number(u.km) - 500 && u.data <= data) avisos.push('O km (' + _mtNum(km) + ') é inferior ao último abastecimento (' + _mtNum(u.km) + ' em ' + _mtFmt(u.data) + ').');
+    }
+    var minhas = revisoes.filter(function(r){ return r.placa === placa; });
+    minhas.forEach(function(r) {
+        if (Math.abs(_mtDia(r.data) - _mtDia(data)) <= 3) avisos.push('Já existe uma revisão desta viatura a ' + _mtFmt(r.data) + ' (' + _mtNum(r.km) + ' km).');
+        else if (r.data < data && km < Number(r.km)) avisos.push('O km é inferior ao da revisão anterior (' + _mtNum(r.km) + ' em ' + _mtFmt(r.data) + '). Conta-quilómetros trocado ou a zeros?');
+    });
+    var gravar = function() { _mtGravarRevisao({ id: _mtNovoId(), placa: placa, data: data, km: km }); };
+    if (avisos.length) showConfirm(avisos.join('\n') + '\n\nRegistar mesmo assim?', gravar); else gravar();
+}
+async function _mtGravarRevisao(r) {
+    r.criado_por_email = _supaEmail || usuarioAtual?.username || null;
+    var envio = { id: r.id, placa: r.placa, data: r.data, km: r.km };
+    revisoes.push(r);
+    _mtGuardarRevisoesLocal();
+    document.getElementById('mt-km').value = '';
+    document.getElementById('mt-placa').value = '';
+    renderManutencao();
+    try {
+        if (navigator.onLine === false || !(await _supaTokenValido())) throw new Error('sem rede/sessão');
+        var resp = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_REV, { method: 'POST', headers: _supaHeaders({ 'Prefer': 'return=minimal' }), body: JSON.stringify([envio]) });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        showToast('Revisão registada.', 'success');
+    } catch (e) {
+        console.warn('[Manutenção] envio falhou:', e);
+        r._pend = true; _mtGuardarRevisoesLocal(); renderManutencao();
+        showToast('Revisão guardada neste dispositivo; será enviada quando houver rede.', 'warning', 7000);
+    }
+}
+function manutApagarRevisao(id) {
+    if (!_ehAdminAtual()) return;
+    showConfirm('Apagar esta revisão? O ponto zero da viatura volta à revisão anterior.', async function() {
+        var r = revisoes.filter(function(x){ return x.id === id; })[0];
+        revisoes = revisoes.filter(function(x){ return x.id !== id; });
+        _mtGuardarRevisoesLocal(); renderManutencao();
+        if (r && r._pend) return;
+        try {
+            var resp = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_REV + '?id=eq.' + encodeURIComponent(id), { method: 'DELETE', headers: _supaHeaders({ 'Prefer': 'return=minimal' }) });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        } catch (e) {
+            if (r) { revisoes.push(r); _mtGuardarRevisoesLocal(); renderManutencao(); }
+            showToast('Não foi possível apagar na nuvem. Tente de novo com rede.', 'error');
+        }
+    });
+}
+// Arranque: reenvia pendentes e lê a nuvem
+async function carregarRevisoes() {
+    if (navigator.onLine === false) return;
+    try {
+        if (!(await _supaTokenValido())) return;
+        var pend = revisoes.filter(function(r){ return r._pend; });
+        for (var i = 0; i < pend.length; i++) {
+            var p = pend[i];
+            var rs = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_REV + '?on_conflict=id', { method: 'POST', headers: _supaHeaders({ 'Prefer': 'resolution=ignore-duplicates,return=minimal' }), body: JSON.stringify([{ id: p.id, placa: p.placa, data: p.data, km: p.km }]) });
+            if (rs.ok) delete p._pend;
+        }
+        var r = await fetch(SUPA_URL + '/rest/v1/' + SUPA_TABELA_REV + '?select=*&order=data.desc', { headers: _supaHeaders() });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var nuvem = await r.json();
+        var aindaPend = revisoes.filter(function(x){ return x._pend; });
+        revisoes = nuvem.map(function(x){ return { id: x.id, placa: x.placa, data: String(x.data).slice(0, 10), km: Number(x.km), criado_por_email: x.criado_por_email || null }; }).concat(aindaPend);
+        _mtGuardarRevisoesLocal();
+        manutRefrescar();
+    } catch (e) { console.warn('[Manutenção] leitura das revisões falhou (fica a cópia local):', e); }
+}
+
+// ---- plano (admin) ----
+function popularPlanoManut() {
+    var el = document.getElementById('plano-manut-marcas');
+    if (!el) return;
+    el.innerHTML = Object.keys(PLANO_MANUT.intervalos).sort().map(function(m) {
+        return '<div><label>' + _mtEsc(m) + ' (km)</label><input type="number" min="1000" data-pm-marca="' + _mtEsc(m) + '" value="' + PLANO_MANUT.intervalos[m] + '"></div>';
+    }).join('');
+    document.getElementById('pm-aviso').value = PLANO_MANUT.aviso;
+    document.getElementById('pm-horizonte').value = PLANO_MANUT.horizonte;
+    document.getElementById('pm-janela').value = PLANO_MANUT.janela;
+    document.getElementById('pm-minreg').value = PLANO_MANUT.minReg;
+    document.getElementById('pm-idade').value = PLANO_MANUT.idadeKm;
+}
+async function salvarPlanoManut() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
+    var novo = { intervalos: {}, aviso: +document.getElementById('pm-aviso').value, horizonte: +document.getElementById('pm-horizonte').value,
+                 janela: +document.getElementById('pm-janela').value, minReg: +document.getElementById('pm-minreg').value, idadeKm: +document.getElementById('pm-idade').value };
+    document.querySelectorAll('#plano-manut-marcas input[data-pm-marca]').forEach(function(i){ novo.intervalos[i.getAttribute('data-pm-marca')] = +i.value; });
+    var nm = _mtMarcaNorm(document.getElementById('pm-nova-marca').value), nk = +document.getElementById('pm-nova-km').value;
+    if (nm) { if (!(nk >= 1000)) { showToast('Indique o intervalo (mín. 1000 km) da nova marca.', 'warning'); return; } novo.intervalos[nm] = nk; }
+    if (!_mtPlanoValido(novo)) { showToast('Valores inválidos: intervalos ≥ 1000 km, aviso 50–99%, janela ≥ 7 dias, mín. 2 abastecimentos.', 'warning'); return; }
+    PLANO_MANUT = novo;
+    try { localStorage.setItem('fuel_plano_manut', JSON.stringify(PLANO_MANUT)); } catch (e) {}
+    document.getElementById('pm-nova-marca').value = ''; document.getElementById('pm-nova-km').value = '';
+    popularPlanoManut(); manutRefrescar();
+    var ok = await _defNuvemGravar('plano_manutencao', PLANO_MANUT);
+    if (ok) showToast('Plano de manutenção guardado na nuvem.', 'success');
+}
+
+// ---- PDFs ----
+function manutPDF(tipo) {
+    if (!usuarioAtual || usuarioAtual.perfil === 'visualizador') { showToast('Sem permissão para realizar esta acção', 'error'); return; }
+    var lib = window.jspdf;
+    if (!lib) { showToast('Biblioteca jsPDF não carregada.', 'error'); return; }
+    var linhas = manutCalcular();
+    var hoje = _mtDia(_mtHoje());
+    var doc = new lib.jsPDF('p', 'mm', 'a4');
+    var titulos = { previsao: 'Previsão de Revisões', vencidas: 'Viaturas com Revisão Vencida', historico: 'Cumprimento das Revisões' };
+    function cab(sub) {
+        doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 30, 'F');
+        doc.setTextColor(234, 88, 12); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text('Fuel Analytics PRO', 14, 12);
+        doc.setTextColor(255, 255, 255); doc.setFontSize(13); doc.text(titulos[tipo], 14, 22);
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(180, 180, 180);
+        doc.text(sub, 14, 28);
+        doc.text('Gerado em: ' + new Date().toLocaleString('pt-PT') + '   |   Por: ' + (usuarioAtual.nome || ''), 196, 28, { align: 'right' });
+        doc.setTextColor(0, 0, 0); return 38;
+    }
+    function sec(y, t) {
+        if (y > 255) { doc.addPage(); y = 20; }
+        doc.setFillColor(234, 88, 12); doc.rect(14, y, 4, 7, 'F');
+        doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.text(t, 20, y + 5.5);
+        doc.setDrawColor(220, 220, 220); doc.line(14, y + 9, 196, y + 9); doc.setFont('helvetica', 'normal'); return y + 12;
+    }
+    function prev(L) {
+        if (L.prevDe == null) return 'n/d';
+        var a = _mtFmt(_mtIso(L.prevDe)), b = _mtFmt(_mtIso(L.prevAte));
+        return a === b ? a : a.slice(0, 5) + ' a ' + b;
+    }
+    var opt = function(y) { return { startY: y, margin: { left: 14, right: 14, bottom: 24 }, headStyles: { fillColor: [15, 23, 42] }, styles: { fontSize: 8 } }; };
+    var y;
+    if (tipo === 'previsao') {
+        y = cab('Janela do ritmo: ' + PLANO_MANUT.janela + ' dias · Aviso a ' + PLANO_MANUT.aviso + '% do intervalo');
+        var vistos = {};
+        [[7, 'Chegam ao limite nos próximos 7 dias'], [15, 'Entre 8 e 15 dias'], [30, 'Entre 16 e 30 dias']].forEach(function(g, gi) {
+            var min = gi === 0 ? -1 : [0, 7, 15][gi];
+            var l = linhas.filter(function(x){ return !vistos[x.placa] && _mtEntra(x, g[0]) && (x.prevDe - hoje) > min; });
+            l.forEach(function(x){ vistos[x.placa] = true; });
+            y = sec(y, g[1] + ' (' + l.length + ')');
+            if (!l.length) { doc.setFontSize(9); doc.setTextColor(100, 116, 139); doc.text('Nenhuma viatura.', 14, y + 2); doc.setTextColor(0, 0, 0); y += 10; return; }
+            var o = opt(y); o.head = [['Viatura', 'Marca', 'Km actual', 'Desde revisão', 'Limite', 'Ritmo', 'Previsão']];
+            o.body = l.map(function(x){ return [x.placa, x.marca, _mtNum(x.kmAtual) + (x.idadeKm > PLANO_MANUT.idadeKm ? ' (há ' + x.idadeKm + 'd)' : ''), _mtNum(x.kmDesde) + ' (' + Math.round(x.pct * 100) + '%)', _mtNum(x.intervalo), Math.round(x.ritmo) + ' km/d', prev(x)]; });
+            doc.autoTable(o); y = doc.lastAutoTable.finalY + 8;
+        });
+        var vencN = linhas.filter(function(x){ return x.estado === 'venc'; }).length, semP = linhas.filter(function(x){ return x.estado !== 'venc' && x.estado !== 'sem' && x.prevDe == null; });
+        y = sec(y, 'Notas');
+        doc.setFontSize(9); doc.setTextColor(51, 65, 85);
+        var notas = ['Previsão = intervalo restante ÷ ritmo recente de km/dia (dias parados contam). É uma estimativa: o intervalo de datas reflecte o ritmo mais lento e mais rápido recente.',
+                     vencN + ' viatura(s) já vencida(s) — ver relatório de Viaturas vencidas.',
+                     semP.length ? semP.length + ' viatura(s) sem previsão por poucos abastecimentos recentes: ' + semP.map(function(x){ return x.placa; }).join(', ') + '.' : ''].filter(Boolean).join('\n');
+        var tl = doc.splitTextToSize(notas, 182); doc.text(tl, 14, y); doc.setTextColor(0, 0, 0);
+    } else if (tipo === 'vencidas') {
+        var v = linhas.filter(function(x){ return x.estado === 'venc'; }).sort(function(a, b){ return b.excesso - a.excesso; });
+        y = cab(v.length + ' viatura(s) acima do intervalo de revisão');
+        if (!v.length) { doc.setFontSize(10); doc.text('Nenhuma viatura com revisão vencida.', 14, y + 4); }
+        else {
+            var o2 = opt(y); o2.headStyles = { fillColor: [220, 38, 38] };
+            o2.head = [['Viatura', 'Marca', 'Última revisão', 'Km actual', 'Percorridos', 'Limite', 'Excesso']];
+            o2.body = v.map(function(x){ return [x.placa, x.marca, _mtFmt(x.rev.data) + ' · ' + _mtNum(x.rev.km), _mtNum(x.kmAtual) + (x.idadeKm > PLANO_MANUT.idadeKm ? ' (há ' + x.idadeKm + 'd)' : ''), _mtNum(x.kmDesde), _mtNum(x.intervalo), '+' + _mtNum(x.excesso) + ' km (' + Math.round(x.excesso / x.intervalo * 100) + '%)']; });
+            doc.autoTable(o2);
+        }
+    } else {
+        y = cab('Km efectivamente percorridos entre revisões consecutivas vs plano');
+        var rows = [], porMarca = {};
+        var placasR = {}; revisoes.forEach(function(r){ placasR[r.placa] = true; });
+        Object.keys(placasR).sort().forEach(function(p) {
+            var rv = revisoes.filter(function(r){ return r.placa === p; }).sort(function(a, b){ return a.data < b.data ? -1 : 1; });
+            var m = ''; for (var i = db.length - 1; i >= 0; i--) { if (db[i].placa === p) { m = _mtMarcaNorm(db[i].marca); break; } }
+            var inter = _mtIntervalo(m);
+            for (var k = 1; k < rv.length; k++) {
+                var perc = rv[k].km - rv[k-1].km;
+                if (perc <= 0 || !inter) continue;
+                var exc = perc - inter;
+                rows.push([p, m || '—', _mtFmt(rv[k-1].data) + ' → ' + _mtFmt(rv[k].data), _mtNum(perc), _mtNum(inter), exc > 0 ? '+' + _mtNum(exc) + ' (' + Math.round(exc / inter * 100) + '%)' : 'dentro']);
+                var pm = porMarca[m || '—'] = porMarca[m || '—'] || { n: 0, fora: 0, somaExc: 0 };
+                pm.n++; if (exc > 0) { pm.fora++; pm.somaExc += exc; }
+            }
+        });
+        if (!rows.length) { doc.setFontSize(10); doc.text('Ainda não há pares de revisões consecutivas para comparar.', 14, y + 4); }
+        else {
+            y = sec(y, 'Resumo por marca');
+            var o3 = opt(y); o3.head = [['Marca', 'Revisões', 'Fora do plano', '% fora', 'Excesso médio (só as fora)']];
+            o3.body = Object.keys(porMarca).sort().map(function(m){ var q = porMarca[m]; return [m, q.n, q.fora, Math.round(q.fora / q.n * 100) + '%', q.fora ? '+' + _mtNum(Math.round(q.somaExc / q.fora)) + ' km' : '—']; });
+            doc.autoTable(o3); y = doc.lastAutoTable.finalY + 8;
+            y = sec(y, 'Detalhe por revisão');
+            var o4 = opt(y); o4.head = [['Viatura', 'Marca', 'Período', 'Percorridos', 'Plano', 'Excesso']]; o4.body = rows;
+            o4.didParseCell = function(d) { if (d.section === 'body' && d.column.index === 5 && String(d.cell.raw).charAt(0) === '+') { d.cell.styles.textColor = [220, 38, 38]; } };
+            doc.autoTable(o4);
+        }
+    }
+    var total = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= total; i++) { doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150); doc.text('Fuel Analytics PRO — Documento Confidencial', 14, 290); doc.text('Página ' + i + ' de ' + total, 179, 290, { align: 'right' }); }
+    if (typeof desenharSeloAutor === 'function') desenharSeloAutor(doc);
+    doc.save('manutencao-' + tipo + '-' + _mtHoje() + '.pdf');
+}
+// ===== FIM MANUTENÇÃO =======================================================
+
 // ===== CAMADA SUPABASE (aditiva) — sincronização de abastecimentos ==========
 // ===== Não modifica funções originais. localStorage mantém-se como fallback. =
 // ============================================================================
@@ -8573,6 +9106,7 @@ async function iniciarAppAutenticada() {
 
         sincronizarDefinicoes(); // metas, rotas e preços partilhados (nuvem)
         carregarDadosNuvem();
+        carregarRevisoes();
         resetarTimeout();
         // Inicializar período padrão do dashboard (Este Mês)
         setDashPeriod('mes', document.getElementById('dash-btn-mes'));
