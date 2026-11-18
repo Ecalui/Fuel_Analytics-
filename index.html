@@ -2927,6 +2927,7 @@ async function supaGateEntrar() {
                     <div><label>Mín. abastecimentos p/ previsão</label><input type="number" id="pm-minreg" min="2" max="10"></div>
                     <div><label>Km desatualizado após (dias)</label><input type="number" id="pm-idade" min="1" max="30"></div>
                     <div><label>Máx. viaturas em revisão por semana</label><input type="number" id="pm-maxsemana" min="1" max="30"></div>
+                    <div><label>PDF da carga: só viaturas a ≤ (km)</label><input type="number" id="pm-kmpdf" min="50" max="5000"></div>
                 </div>
                 <div style="text-align:right;margin-top:14px;"><button class="btn btn-primary" onclick="salvarPlanoManut()"><i class="fas fa-save"></i> Guardar Plano</button></div>
             </div>
@@ -7273,7 +7274,7 @@ function atualizarListasVivas() {
 var SUPA_TABELA_REV = 'revisoes';
 var PLANO_MANUT_PADRAO = {
     intervalos: { SINOTRUK: 5000, SHACKMAN: 5000, IVECO: 5000, FAW: 5000, SCANIA: 5000, MAN: 12000, VOLVO: 15000 },
-    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3
+    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3, kmPdf: 500
 };
 var PLANO_MANUT = JSON.parse(JSON.stringify(PLANO_MANUT_PADRAO));
 var revisoes = [];
@@ -7290,7 +7291,7 @@ var _mtLinhas = [];
 })();
 
 function _mtPlanoValido(p) {
-    return !!p && typeof p === 'object' && p.intervalos && typeof p.intervalos === 'object' && (p.maxSemana === undefined || p.maxSemana >= 1) &&
+    return !!p && typeof p === 'object' && p.intervalos && typeof p.intervalos === 'object' && (p.maxSemana === undefined || p.maxSemana >= 1) && (p.kmPdf === undefined || p.kmPdf >= 50) &&
         p.aviso >= 50 && p.aviso <= 99 && p.horizonte >= 1 && p.janela >= 7 && p.minReg >= 2 && p.idadeKm >= 1 &&
         Object.keys(p.intervalos).every(function(k){ return p.intervalos[k] >= 1000; });
 }
@@ -7306,6 +7307,7 @@ function _mtMarcaNorm(m) {
     if (u === 'SHACMAN') u = 'SHACKMAN';
     return u;
 }
+function _mtKmPdf() { return PLANO_MANUT.kmPdf >= 50 ? PLANO_MANUT.kmPdf : 500; }
 function _mtMax() { return PLANO_MANUT.maxSemana >= 1 ? PLANO_MANUT.maxSemana : 3; }
 function _mtIntervalo(marca) { var v = PLANO_MANUT.intervalos[_mtMarcaNorm(marca)]; return v > 0 ? v : 0; }
 
@@ -7637,11 +7639,12 @@ function popularPlanoManut() {
     document.getElementById('pm-minreg').value = PLANO_MANUT.minReg;
     document.getElementById('pm-idade').value = PLANO_MANUT.idadeKm;
     document.getElementById('pm-maxsemana').value = _mtMax();
+    document.getElementById('pm-kmpdf').value = _mtKmPdf();
 }
 async function salvarPlanoManut() {
     if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     var novo = { intervalos: {}, aviso: +document.getElementById('pm-aviso').value, horizonte: +document.getElementById('pm-horizonte').value,
-                 janela: +document.getElementById('pm-janela').value, minReg: +document.getElementById('pm-minreg').value, idadeKm: +document.getElementById('pm-idade').value, maxSemana: +document.getElementById('pm-maxsemana').value };
+                 janela: +document.getElementById('pm-janela').value, minReg: +document.getElementById('pm-minreg').value, idadeKm: +document.getElementById('pm-idade').value, maxSemana: +document.getElementById('pm-maxsemana').value, kmPdf: +document.getElementById('pm-kmpdf').value };
     document.querySelectorAll('#plano-manut-marcas input[data-pm-marca]').forEach(function(i){ novo.intervalos[i.getAttribute('data-pm-marca')] = +i.value; });
     var nm = _mtMarcaNorm(document.getElementById('pm-nova-marca').value), nk = +document.getElementById('pm-nova-km').value;
     if (nm) { if (!(nk >= 1000)) { showToast('Indique o intervalo (mín. 1000 km) da nova marca.', 'warning'); return; } novo.intervalos[nm] = nk; }
@@ -7769,8 +7772,9 @@ function manutPDF(tipo) {
             doc.autoTable(o2);
         }
     } else if (tipo === 'carga') {
-        var cg = manutCargaSemanal(linhas), mx = _mtMax();
-        y = cab('Viaturas previstas para revisão geral, por semana · datas estimadas pelo ritmo recente de km/dia');
+        var cg = manutCargaSemanal(linhas), mx = _mtMax(), lim = _mtKmPdf(), fora = 0;
+        cg.semanas.forEach(function(w) { var k = w.itens.filter(function(L){ return (L.intervalo - L.kmDesde) <= lim; }); fora += w.itens.length - k.length; w.itens = k; });
+        y = cab('Só viaturas vencidas ou a ' + _mtNum(lim) + ' km (ou menos) da revisão · datas estimadas pelo ritmo recente');
         if (_mtNota.trim()) {
             doc.setFontSize(9.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.text('Nota:', 14, y);
             doc.setFont('helvetica', 'normal'); doc.setTextColor(51, 65, 85);
@@ -7798,7 +7802,8 @@ function manutPDF(tipo) {
         doc.autoTable(oc);
         var yf = doc.lastAutoTable.finalY + 5;
         doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
-        if (vazias.length) { var tv = doc.splitTextToSize('Sem previsões nas semanas de ' + vazias.join(', ') + '.', 182); doc.text(tv, 14, yf); yf += tv.length * 4 + 1; }
+        if (vazias.length && vazias.length < cg.semanas.length) { var tv = doc.splitTextToSize('Sem previsões nas semanas de ' + vazias.join(', ') + '.', 182); doc.text(tv, 14, yf); yf += tv.length * 4 + 1; }
+        if (fora) { doc.text(fora + ' viatura(s) mais afastadas do limite (acima de ' + _mtNum(lim) + ' km) não constam.', 14, yf); yf += 4.5; }
         if (cg.semPrev) doc.text(cg.semPrev + ' viatura(s) sem previsão por falta de abastecimentos recentes não constam.', 14, yf);
         doc.setTextColor(0, 0, 0);
     } else {
