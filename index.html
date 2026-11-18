@@ -7274,7 +7274,7 @@ function atualizarListasVivas() {
 var SUPA_TABELA_REV = 'revisoes';
 var PLANO_MANUT_PADRAO = {
     intervalos: { SINOTRUK: 5000, SHACKMAN: 5000, IVECO: 5000, FAW: 5000, SCANIA: 5000, MAN: 12000, VOLVO: 15000 },
-    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3, kmPdf: 500
+    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3, kmPdf: 400
 };
 var PLANO_MANUT = JSON.parse(JSON.stringify(PLANO_MANUT_PADRAO));
 var revisoes = [];
@@ -7307,7 +7307,7 @@ function _mtMarcaNorm(m) {
     if (u === 'SHACMAN') u = 'SHACKMAN';
     return u;
 }
-function _mtKmPdf() { return PLANO_MANUT.kmPdf >= 50 ? PLANO_MANUT.kmPdf : 500; }
+function _mtKmPdf() { return PLANO_MANUT.kmPdf >= 50 ? PLANO_MANUT.kmPdf : 400; }
 function _mtMax() { return PLANO_MANUT.maxSemana >= 1 ? PLANO_MANUT.maxSemana : 3; }
 function _mtIntervalo(marca) { var v = PLANO_MANUT.intervalos[_mtMarcaNorm(marca)]; return v > 0 ? v : 0; }
 
@@ -7773,7 +7773,12 @@ function manutPDF(tipo) {
         }
     } else if (tipo === 'carga') {
         var cg = manutCargaSemanal(linhas), mx = _mtMax(), lim = _mtKmPdf(), fora = 0;
-        cg.semanas.forEach(function(w) { var k = w.itens.filter(function(L){ return (L.intervalo - L.kmDesde) <= lim; }); fora += w.itens.length - k.length; w.itens = k; });
+        // Critério pelos km que faltam (não depende de haver previsão de data)
+        var cand = linhas.filter(function(L){ return L.estado !== 'sem' && L.estado !== 'venc' && L.kmDesde < L.intervalo && (L.intervalo - L.kmDesde) <= lim; });
+        var emSemana = {};
+        cg.semanas.forEach(function(w) { w.itens = w.itens.filter(function(L){ return (L.intervalo - L.kmDesde) <= lim; }); w.itens.forEach(function(L){ emSemana[L.placa] = true; }); });
+        var semData = cand.filter(function(L){ return !emSemana[L.placa]; }).sort(function(a, b){ return (a.intervalo - a.kmDesde) - (b.intervalo - b.kmDesde); });
+        fora = linhas.filter(function(L){ return L.estado !== 'sem' && L.estado !== 'venc' && L.kmDesde < L.intervalo && (L.intervalo - L.kmDesde) > lim; }).length;
         y = cab('Só viaturas vencidas ou a ' + _mtNum(lim) + ' km (ou menos) da revisão · datas estimadas pelo ritmo recente');
         if (_mtNota.trim()) {
             doc.setFontSize(9.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.text('Nota:', 14, y);
@@ -7795,7 +7800,11 @@ function manutPDF(tipo) {
                 corpo.push([L.moto || 'Sem motorista', L.placa + ' · ' + L.marca, 'faltam ' + _mtNum(Math.max(0, L.intervalo - L.kmDesde)) + ' km', '~ ' + _mtDiaSem(mid) + (L.prevDe === L.prevAte ? '' : '  (' + _mtDiaSem(L.prevDe) + ' a ' + _mtDiaSem(L.prevAte) + ')')]);
             });
         });
-        if (!corpo.length) corpo.push([{ content: 'Nenhuma viatura prevista nas próximas 6 semanas.', colSpan: 4 }]);
+        if (semData.length) {
+            gh('Sem data prevista (poucos abastecimentos recentes)', semData.length, false, true);
+            semData.forEach(function(L) { corpo.push([L.moto || 'Sem motorista', L.placa + ' · ' + L.marca, 'faltam ' + _mtNum(L.intervalo - L.kmDesde) + ' km', 'n/d']); });
+        }
+        if (!corpo.length) corpo.push([{ content: 'Nenhuma viatura vencida ou a ' + _mtNum(lim) + ' km (ou menos) da revisão.', colSpan: 4 }]);
         var oc = opt(y); oc.head = [['Motorista', 'Viatura', 'Km restantes', 'Previsão']]; oc.body = corpo;
         oc.styles = { fontSize: 8.5, cellPadding: 1.8 };
         oc.columnStyles = { 0: { cellWidth: 52, fontStyle: 'bold' }, 1: { cellWidth: 40 }, 2: { cellWidth: 30 } };
@@ -7804,7 +7813,6 @@ function manutPDF(tipo) {
         doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
         if (vazias.length && vazias.length < cg.semanas.length) { var tv = doc.splitTextToSize('Sem previsões nas semanas de ' + vazias.join(', ') + '.', 182); doc.text(tv, 14, yf); yf += tv.length * 4 + 1; }
         if (fora) { doc.text(fora + ' viatura(s) mais afastadas do limite (acima de ' + _mtNum(lim) + ' km) não constam.', 14, yf); yf += 4.5; }
-        if (cg.semPrev) doc.text(cg.semPrev + ' viatura(s) sem previsão por falta de abastecimentos recentes não constam.', 14, yf);
         doc.setTextColor(0, 0, 0);
     } else {
         y = cab('Km efectivamente percorridos entre revisões consecutivas vs plano');
