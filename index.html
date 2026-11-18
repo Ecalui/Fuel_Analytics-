@@ -7432,6 +7432,7 @@ function _mtHtmlSemanal() {
              + '<div class="mt-sl-k">' + dir.k + '</div><div class="mt-sl-d">' + dir.d + '</div></div>';
     };
     var h = '<div class="mt-form" style="margin-bottom:14px"><div style="grid-column:span 2"><label for="mt-nota">Nota para o PDF (opcional)</label><input type="text" id="mt-nota" maxlength="300" value="' + _mtEsc(_mtNota) + '" oninput="_mtNota = this.value" placeholder="Ex.: prioridade aos camiões da pedreira"></div><div><button class="btn btn-primary" onclick="manutPDF(\'carga\')"><i class="fas fa-file-pdf"></i> PDF da carga semanal</button></div></div>';
+    h += '<p class="mt-sub" style="margin:0 0 10px;border-left:2px solid var(--text-primary);padding-left:10px"><b>PDF:</b> ' + _mtEsc(manutResumoPdfTexto(manutDiagnosticoPdf(_mtLinhas))) + '</p>';
     h += '<p class="mt-sub" style="margin:0 0 14px">Viaturas previstas para atingir o limite em cada semana. A data é uma estimativa (o intervalo mostra o ritmo mais lento e o mais rápido recentes). Acima de ' + max + ' por semana fica assinalado.</p>';
     // já no limite
     h += '<div class="mt-sem"><div class="mt-sem-h"><span><b>Já no limite / vencidas</b></span><span class="mt-sem-n' + (c.agora.length ? ' ex' : '') + '">' + c.agora.length + '</span></div>';
@@ -7702,6 +7703,28 @@ function manutAvisoKm(placa, km, marca) {
 }
 
 var _mtNota = '';
+// Controlo: o que entra e o que fica de fora do PDF da carga, e porquê (para não haver dúvidas sobre listas curtas)
+function manutDiagnosticoPdf(linhas) {
+    var lim = _mtKmPdf(), d = { total: linhas.length, venc: 0, perto: 0, longe: 0, semRev: 0, semPlano: 0, semKm: 0, kmInc: 0 };
+    linhas.forEach(function(L) {
+        if (L.estado === 'sem') {
+            if (/Sem revisão/.test(L.motivo)) d.semRev++; else if (/sem plano/i.test(L.motivo)) d.semPlano++; else if (/Sem km/.test(L.motivo)) d.semKm++; else d.kmInc++;
+        } else if (L.kmDesde >= L.intervalo) d.venc++;
+        else if (L.intervalo - L.kmDesde <= lim) d.perto++;
+        else d.longe++;
+    });
+    return d;
+}
+function manutResumoPdfTexto(d) {
+    var lim = _mtKmPdf();
+    var nao = [];
+    if (d.longe) nao.push(d.longe + ' mais afastadas (acima de ' + _mtNum(lim) + ' km)');
+    if (d.semRev) nao.push(d.semRev + ' sem revisão registada');
+    if (d.semPlano) nao.push(d.semPlano + ' com marca sem plano');
+    if (d.semKm) nao.push(d.semKm + ' sem km');
+    if (d.kmInc) nao.push(d.kmInc + ' com km a conferir');
+    return 'Frota controlada: ' + d.total + ' viaturas. Constam: ' + d.venc + ' vencida(s) e ' + d.perto + ' a ' + _mtNum(lim) + ' km ou menos. Não constam: ' + (nao.length ? nao.join('; ') : 'nenhuma') + '.';
+}
 
 // ---- PDFs ----
 function manutPDF(tipo) {
@@ -7812,7 +7835,7 @@ function manutPDF(tipo) {
         var yf = doc.lastAutoTable.finalY + 5;
         doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
         if (vazias.length && vazias.length < cg.semanas.length) { var tv = doc.splitTextToSize('Sem previsões nas semanas de ' + vazias.join(', ') + '.', 182); doc.text(tv, 14, yf); yf += tv.length * 4 + 1; }
-        if (fora) { doc.text(fora + ' viatura(s) mais afastadas do limite (acima de ' + _mtNum(lim) + ' km) não constam.', 14, yf); yf += 4.5; }
+        var tr = doc.splitTextToSize(manutResumoPdfTexto(manutDiagnosticoPdf(linhas)), 182); doc.text(tr, 14, yf); yf += tr.length * 4 + 1;
         doc.setTextColor(0, 0, 0);
     } else {
         y = cab('Km efectivamente percorridos entre revisões consecutivas vs plano');
