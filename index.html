@@ -4972,14 +4972,14 @@ async function sincronizarDefinicoes() {
         linhas.forEach(function(l){ daNuvem[l.chave] = l.valor; });
         var pend = _defPendentesLer();
         var admin = _ehAdminAtual();
-        var mudou = false;
+        var mudou = false, mudouPlano = false;
         for (var i = 0; i < _DEF_CHAVES.length; i++) {
             var k = _DEF_CHAVES[i];
             var temNuvem = Object.prototype.hasOwnProperty.call(daNuvem, k);
             if (admin && (!temNuvem || pend.indexOf(k) !== -1)) {
                 await _defNuvemGravar(k, _defValorLocal(k));
             } else if (temNuvem) {
-                if (_defAplicarLocal(k, daNuvem[k])) mudou = true;
+                if (_defAplicarLocal(k, daNuvem[k])) { if (k === 'plano_manutencao') mudouPlano = true; else mudou = true; }
             }
         }
         if (mudou) {
@@ -4988,10 +4988,14 @@ async function sincronizarDefinicoes() {
             if (Array.isArray(db) && db.length) {
                 var pu = {};
                 db.forEach(function(x){ if (x && x.placa) pu[x.placa] = true; });
-                Object.keys(pu).forEach(function(p){ recalcularViaturaCompleta(p); });
+                // arranque: recalcula em silêncio (sem a chuva de avisos de km por viatura)
+                _fuelSilenciarAvisos = true;
+                try { Object.keys(pu).forEach(function(p){ recalcularViaturaCompleta(p); }); }
+                finally { _fuelSilenciarAvisos = false; }
                 atualizarTabelas();
             }
         }
+        if (mudouPlano && typeof manutRefrescar === 'function') manutRefrescar();
     } catch(e) { console.warn('[Definições] sincronização falhou (fica com a cópia local):', e); }
 }
 
