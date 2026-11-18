@@ -2494,6 +2494,7 @@ async function supaGateEntrar() {
             <button class="btn btn-secondary" onclick="manutPDF('previsao')"><i class="fas fa-file-pdf"></i> PDF Previsão</button>
             <button class="btn btn-secondary" onclick="manutPDF('vencidas')"><i class="fas fa-file-pdf"></i> PDF Vencidas</button>
             <button class="btn btn-secondary" onclick="manutPDF('historico')"><i class="fas fa-file-pdf"></i> PDF Histórico</button>
+            <button class="btn btn-secondary" onclick="manutCopiarWhatsApp()"><i class="fab fa-whatsapp"></i> Copiar resumo WhatsApp</button>
         </div>
 
         <div style="margin-bottom:12px"><input type="search" id="mt-busca" placeholder="Procurar matrícula, motorista ou marca" oninput="renderManutencao()" style="width:100%;max-width:380px" autocomplete="off"></div>
@@ -2504,6 +2505,7 @@ async function supaGateEntrar() {
             <button class="mt-subtab" data-f="7" onclick="manutFiltro('7')">Próx. 7 dias</button>
             <button class="mt-subtab" data-f="15" onclick="manutFiltro('15')">Próx. 15 dias</button>
             <button class="mt-subtab" data-f="30" onclick="manutFiltro('30')">Próx. 30 dias</button>
+            <button class="mt-subtab" data-f="semana" onclick="manutFiltro('semana')">Carga semanal</button>
             <button class="mt-subtab" data-f="sem" onclick="manutFiltro('sem')">Sem revisão</button>
             <button class="mt-subtab" data-f="hist" onclick="manutFiltro('hist')">Revisões registadas</button>
         </div>
@@ -2913,6 +2915,7 @@ async function supaGateEntrar() {
                     <div><label>Janela do ritmo (dias)</label><input type="number" id="pm-janela" min="7" max="90"></div>
                     <div><label>Mín. abastecimentos p/ previsão</label><input type="number" id="pm-minreg" min="2" max="10"></div>
                     <div><label>Km desatualizado após (dias)</label><input type="number" id="pm-idade" min="1" max="30"></div>
+                    <div><label>Máx. viaturas em revisão por semana</label><input type="number" id="pm-maxsemana" min="1" max="30"></div>
                 </div>
                 <div style="text-align:right;margin-top:14px;"><button class="btn btn-primary" onclick="salvarPlanoManut()"><i class="fas fa-save"></i> Guardar Plano</button></div>
             </div>
@@ -7259,7 +7262,7 @@ function atualizarListasVivas() {
 var SUPA_TABELA_REV = 'revisoes';
 var PLANO_MANUT_PADRAO = {
     intervalos: { SINOTRUK: 5000, SHACKMAN: 5000, IVECO: 5000, FAW: 5000, SCANIA: 5000, MAN: 12000, VOLVO: 15000 },
-    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7
+    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3
 };
 var PLANO_MANUT = JSON.parse(JSON.stringify(PLANO_MANUT_PADRAO));
 var revisoes = [];
@@ -7276,7 +7279,7 @@ var _mtLinhas = [];
 })();
 
 function _mtPlanoValido(p) {
-    return !!p && typeof p === 'object' && p.intervalos && typeof p.intervalos === 'object' &&
+    return !!p && typeof p === 'object' && p.intervalos && typeof p.intervalos === 'object' && (p.maxSemana === undefined || p.maxSemana >= 1) &&
         p.aviso >= 50 && p.aviso <= 99 && p.horizonte >= 1 && p.janela >= 7 && p.minReg >= 2 && p.idadeKm >= 1 &&
         Object.keys(p.intervalos).every(function(k){ return p.intervalos[k] >= 1000; });
 }
@@ -7292,6 +7295,7 @@ function _mtMarcaNorm(m) {
     if (u === 'SHACMAN') u = 'SHACKMAN';
     return u;
 }
+function _mtMax() { return PLANO_MANUT.maxSemana >= 1 ? PLANO_MANUT.maxSemana : 3; }
 function _mtIntervalo(marca) { var v = PLANO_MANUT.intervalos[_mtMarcaNorm(marca)]; return v > 0 ? v : 0; }
 
 // ---- cálculo por viatura ----
@@ -7389,6 +7393,39 @@ function _mtPrevTexto(L) {
     var a = _mtFmt(_mtIso(L.prevDe)), b = _mtFmt(_mtIso(L.prevAte));
     return (a === b ? a : a.slice(0, 5) + ' – ' + b) + '<span class="mt-sub">' + L.nReg + ' abast., últimos ' + PLANO_MANUT.janela + ' dias</span>';
 }
+function _mtSegunda(dia) { var dow = (new Date(dia * 86400000).getUTCDay() + 6) % 7; return dia - dow; } // segunda-feira da semana
+// Quantas viaturas chegam ao limite em cada semana (data prevista = meio do intervalo previsto)
+function manutCargaSemanal(linhas) {
+    var hoje = _mtDia(_mtHoje()), seg0 = _mtSegunda(hoje), N = 6;
+    var semanas = [];
+    for (var i = 0; i < N; i++) semanas.push({ ini: seg0 + i * 7, fim: seg0 + i * 7 + 6, itens: [] });
+    var agora = [], semPrev = 0;
+    linhas.forEach(function(L) {
+        if (L.estado === 'sem') return;
+        if (L.estado === 'venc' || L.kmDesde >= L.intervalo) { agora.push(L); return; }
+        if (L.prevDe == null) { semPrev++; return; }
+        var mid = Math.round((L.prevDe + L.prevAte) / 2);
+        var k = Math.floor((mid - seg0) / 7);
+        if (k >= 0 && k < N) semanas[k].itens.push(L);
+    });
+    return { semanas: semanas, agora: agora, semPrev: semPrev };
+}
+function _mtHtmlSemanal() {
+    var c = manutCargaSemanal(_mtLinhas), max = _mtMax();
+    var nomes = function(arr) { return arr.map(function(L){ return _mtEsc(L.placa) + (L.moto ? ' <span class="mt-sub" style="display:inline">(' + _mtEsc(L.moto) + ')</span>' : ''); }).join(', '); };
+    var h = '<p class="mt-sub" style="margin:0 0 10px">Viaturas previstas para atingir o limite em cada semana (data prevista = meio do intervalo). Acima de ' + max + ' por semana fica a vermelho — limite alterável em Administração.</p>';
+    h += '<table class="mt-tab"><thead><tr><th>Semana</th><th>N.º</th><th>Viaturas</th></tr></thead><tbody>';
+    h += '<tr><td data-l="Semana"><b>Já no limite / vencidas</b></td><td data-l="N.º"><b style="color:' + (c.agora.length ? 'var(--danger)' : 'inherit') + '">' + c.agora.length + '</b></td><td data-l="Viaturas">' + (c.agora.length ? nomes(c.agora) : '—') + '</td></tr>';
+    c.semanas.forEach(function(w, i) {
+        var n = w.itens.length, ex = n > max;
+        h += '<tr><td data-l="Semana"><b>' + (i === 0 ? 'Esta semana' : 'Semana ' + _mtFmt(_mtIso(w.ini)).slice(0, 5)) + '</b><span class="mt-sub">' + _mtFmt(_mtIso(w.ini)).slice(0, 5) + ' a ' + _mtFmt(_mtIso(w.fim)).slice(0, 5) + '</span></td>'
+          + '<td data-l="N.º"><b style="color:' + (ex ? 'var(--danger)' : 'inherit') + '">' + n + '</b>' + (ex ? '<span class="mt-sub" style="color:var(--danger)">acima de ' + max + '</span>' : '') + '</td>'
+          + '<td data-l="Viaturas">' + (n ? nomes(w.itens) : '—') + '</td></tr>';
+    });
+    h += '</tbody></table>';
+    if (c.semPrev) h += '<p class="mt-sub" style="margin-top:10px">' + c.semPrev + ' viatura(s) sem previsão por falta de abastecimentos recentes não entram neste quadro.</p>';
+    return h;
+}
 function _mtRotuloEstado(e) { return { venc: 'Vencida', aprox: 'A aproximar-se', ok: 'Em dia', sem: 'Sem dados' }[e]; }
 
 // ---- interface ----
@@ -7416,6 +7453,7 @@ function renderManutencao() {
     var el = document.getElementById('mt-lista');
     if (!el) return;
     if (_mtFiltro === 'hist') { el.innerHTML = _mtHtmlHistorico(); return; }
+    if (_mtFiltro === 'semana') { el.innerHTML = _mtHtmlSemanal(); return; }
     var q = ((document.getElementById('mt-busca') || {}).value || '').trim().toUpperCase().replace(/[\s-]/g, '');
     var lista = linhas.filter(function(l) {
         if (q && (l.placa + l.moto + l.marca).toUpperCase().replace(/[\s-]/g, '').indexOf(q) < 0) return false;
@@ -7570,11 +7608,12 @@ function popularPlanoManut() {
     document.getElementById('pm-janela').value = PLANO_MANUT.janela;
     document.getElementById('pm-minreg').value = PLANO_MANUT.minReg;
     document.getElementById('pm-idade').value = PLANO_MANUT.idadeKm;
+    document.getElementById('pm-maxsemana').value = _mtMax();
 }
 async function salvarPlanoManut() {
     if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
     var novo = { intervalos: {}, aviso: +document.getElementById('pm-aviso').value, horizonte: +document.getElementById('pm-horizonte').value,
-                 janela: +document.getElementById('pm-janela').value, minReg: +document.getElementById('pm-minreg').value, idadeKm: +document.getElementById('pm-idade').value };
+                 janela: +document.getElementById('pm-janela').value, minReg: +document.getElementById('pm-minreg').value, idadeKm: +document.getElementById('pm-idade').value, maxSemana: +document.getElementById('pm-maxsemana').value };
     document.querySelectorAll('#plano-manut-marcas input[data-pm-marca]').forEach(function(i){ novo.intervalos[i.getAttribute('data-pm-marca')] = +i.value; });
     var nm = _mtMarcaNorm(document.getElementById('pm-nova-marca').value), nk = +document.getElementById('pm-nova-km').value;
     if (nm) { if (!(nk >= 1000)) { showToast('Indique o intervalo (mín. 1000 km) da nova marca.', 'warning'); return; } novo.intervalos[nm] = nk; }
@@ -7585,6 +7624,50 @@ async function salvarPlanoManut() {
     popularPlanoManut(); manutRefrescar();
     var ok = await _defNuvemGravar('plano_manutencao', PLANO_MANUT);
     if (ok) showToast('Plano de manutenção guardado na nuvem.', 'success');
+}
+
+// ---- resumo para WhatsApp ----
+function manutTextoWhatsApp() {
+    var linhas = manutCalcular(), hoje = _mtDia(_mtHoje());
+    var venc = linhas.filter(function(l){ return l.estado === 'venc'; }).sort(function(a, b){ return b.excesso - a.excesso; });
+    var aprox = linhas.filter(function(l){ return l.estado === 'aprox'; });
+    var nome = function(l) { return l.placa + (l.moto ? ' (' + l.moto + ')' : ''); };
+    var t = '*Revisões gerais — ' + _mtFmt(_mtHoje()) + '*\n';
+    t += '\n🔴 *Vencidas (' + venc.length + ')*\n' + (venc.length ? venc.map(function(l){ return '• ' + nome(l) + ' — passou ' + _mtNum(l.excesso) + ' km'; }).join('\n') : '• nenhuma');
+    t += '\n\n🟠 *A aproximar-se (' + aprox.length + ')*\n' + (aprox.length ? aprox.map(function(l) {
+        var falta = Math.max(0, l.intervalo - l.kmDesde);
+        var pv = l.prevDe != null ? ' · ~' + _mtFmt(_mtIso(Math.round((l.prevDe + l.prevAte) / 2))).slice(0, 5) : '';
+        return '• ' + nome(l) + ' — faltam ' + _mtNum(falta) + ' km' + pv;
+    }).join('\n') : '• nenhuma');
+    t += '\n\nPrevisão = estimativa pelo ritmo recente de km/dia.';
+    return t;
+}
+function manutCopiarWhatsApp() {
+    var t = manutTextoWhatsApp();
+    var ok = function() { showToast('Resumo copiado. Cole no WhatsApp.', 'success'); };
+    var fallback = function() {
+        var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy') ? ok() : showToast('Não foi possível copiar.', 'error'); } catch (e) { showToast('Não foi possível copiar.', 'error'); }
+        document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, fallback); else fallback();
+}
+
+// ---- aviso no lançamento de abastecimento ----
+function manutAvisoKm(placa, km, marca) {
+    if (!placa || !(km > 0)) return null;
+    var revs = revisoes.filter(function(r){ return r.placa === placa; }).sort(function(a, b){ return a.data < b.data ? -1 : a.data > b.data ? 1 : a.km - b.km; });
+    if (!revs.length) return null;
+    var rev = revs[revs.length - 1];
+    if (!marca) { for (var i = db.length - 1; i >= 0; i--) { if (db[i].placa === placa) { marca = db[i].marca; break; } } }
+    var iv = _mtIntervalo(marca);
+    if (!iv) return null;
+    var desde = km - Number(rev.km);
+    if (desde < 0) return null;
+    if (desde > iv) return { nivel: 'venc', txt: 'Revisão VENCIDA: já passou ' + _mtNum(desde - iv) + ' km do limite. Avisar o motorista para ir à oficina.' };
+    if (desde / iv * 100 >= PLANO_MANUT.aviso) return { nivel: 'aprox', txt: 'Revisão próxima: faltam ' + _mtNum(iv - desde) + ' km. Avisar o motorista.' };
+    return null;
 }
 
 // ---- PDFs ----
@@ -7632,6 +7715,13 @@ function manutPDF(tipo) {
             doc.autoTable(o); y = doc.lastAutoTable.finalY + 8;
         });
         var vencN = linhas.filter(function(x){ return x.estado === 'venc'; }).length, semP = linhas.filter(function(x){ return x.estado !== 'venc' && x.estado !== 'sem' && x.prevDe == null; });
+        var cs = manutCargaSemanal(linhas);
+        y = sec(y, 'Carga por semana (máx. sugerido: ' + _mtMax() + ')');
+        var o5 = opt(y); o5.head = [['Semana', 'N.º', 'Viaturas']];
+        o5.body = [['Já no limite / vencidas', cs.agora.length, cs.agora.map(function(L){ return L.placa; }).join(', ') || '—']].concat(cs.semanas.map(function(w, i){ return [(i === 0 ? 'Esta semana ' : '') + _mtFmt(_mtIso(w.ini)).slice(0, 5) + ' a ' + _mtFmt(_mtIso(w.fim)).slice(0, 5), w.itens.length, w.itens.map(function(L){ return L.placa; }).join(', ') || '—']; }));
+        o5.columnStyles = { 1: { cellWidth: 14 } };
+        o5.didParseCell = function(d) { if (d.section === 'body' && d.column.index === 1 && Number(d.cell.raw) > _mtMax()) { d.cell.styles.textColor = [220, 38, 38]; d.cell.styles.fontStyle = 'bold'; } };
+        doc.autoTable(o5); y = doc.lastAutoTable.finalY + 8;
         y = sec(y, 'Notas');
         doc.setFontSize(9); doc.setTextColor(51, 65, 85);
         var notas = ['Previsão = intervalo restante ÷ ritmo recente de km/dia (dias parados contam). É uma estimativa: o intervalo de datas reflecte o ritmo mais lento e mais rápido recente.',
@@ -9262,6 +9352,14 @@ function regAtualizarVerificacao() {
     itens.push(c.moto ? ['ok', 'Motorista associado ao registo'] : ['wait', 'Motorista: a aguardar']);
     var ic = { ok: 'fa-circle-check', bad: 'fa-circle-xmark', wait: 'fa-circle' };
     box.innerHTML = itens.map(function (i) { return '<div class="reg-chk ' + i[0] + '"><i class="fas ' + ic[i[0]] + '"></i><span>' + i[1] + '</span></div>'; }).join('');
+    // Aviso de revisão (não bloqueia nada)
+    try {
+        var bm = document.getElementById('reg-v-manut');
+        if (!bm) { bm = document.createElement('div'); bm.id = 'reg-v-manut'; bm.style.cssText = 'display:none;border:1px solid currentColor;padding:8px 12px;margin-top:10px;font-size:13px;font-weight:600'; box.parentNode.insertBefore(bm, box.nextSibling); }
+        var av = (!c.erroKm && typeof manutAvisoKm === 'function') ? manutAvisoKm(c.placa, c.km, c.marca) : null;
+        if (av) { bm.style.display = 'block'; bm.style.color = av.nivel === 'venc' ? 'var(--danger)' : 'var(--warning)'; bm.innerHTML = '<i class="fas fa-oil-can"></i> ' + _mtEsc(av.txt); }
+        else bm.style.display = 'none';
+    } catch (e) {}
     var temErro = itens.some(function (i) { return i[0] === 'bad'; });
     var tudoOk = itens.every(function (i) { return i[0] === 'ok'; });
 
@@ -9344,6 +9442,8 @@ function regPosGravar(r) {
     }
     regJustLimpar();
     var d = document.getElementById('reg-done');
+    var avM = (typeof manutAvisoKm === 'function') ? manutAvisoKm(x.placa, x.km, x.marca) : null;
+    var avMHtml = avM ? '<div style="border:1px solid currentColor;padding:8px 12px;max-width:420px;margin:12px auto 0;font-size:13px;font-weight:600;color:' + (avM.nivel === 'venc' ? 'var(--danger)' : 'var(--warning)') + '"><i class="fas fa-oil-can"></i> ' + _mtEsc(avM.txt) + '</div>' : '';
     var consumo = x.l100 ? Number(x.l100).toFixed(1).replace('.', ',') + ' L/100 km' : '--';
     var sub = justMot ? ('Justificado: ' + justMot + ' · custo contextualizado para auditoria') : parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
     var chk = function (t, c) { c = c || 'ok'; return '<div class="reg-chk ' + c + '" style="justify-content:center"><i class="fas ' + (c === 'ok' ? 'fa-circle-check' : 'fa-circle-xmark') + '"></i><span>' + t + '</span></div>'; };
@@ -9360,7 +9460,7 @@ function regPosGravar(r) {
         '<div style="border-top:1px solid var(--border);padding-top:10px;max-width:380px;margin:0 auto"><div style="font-weight:700;margin-bottom:4px">' + (temPontos ? 'Registo com pontos a rever' : 'Registo pronto para auditoria') + '</div>' +
         chk(kmTxt[0], kmTxt[1]) + chk('Preço oficial da data aplicado') + chk('Ordem cronológica respeitada') + chk('Registado por ' + quem + ' · ' + _agoraHM()) + '</div>' +
         '<div class="reg-msg ' + (alerta ? 'warn' : 'ok') + '" style="margin:14px auto;max-width:420px">' + (alerta ? (justMot ? 'Registo guardado e justificado. Fica como custo contextualizado para auditoria.' : 'Registo guardado e sinalizado para revisão.') : (temPontos ? 'Registo guardado. Reveja o km no histórico.' : 'Dados limpos tornam a auditoria fiável. Obrigado pelo rigor' + (nHoje > 0 && x.data === _hojeLocal() ? ' — já são ' + nHoje + (nHoje === 1 ? ' registo' : ' registos') + ' hoje.' : '.'))) + '</div>' +
-        '<div class="reg-acoes" style="justify-content:center"><button class="btn btn-primary" onclick="regNovo()">Novo lançamento</button>' + btnAnular + '</div>';
+        avMHtml + '<div class="reg-acoes" style="justify-content:center"><button class="btn btn-primary" onclick="regNovo()">Novo lançamento</button>' + btnAnular + '</div>';
     regIrPasso(4);
     d.style.display = 'block';
     [1, 2, 3].forEach(function (i) { var dt = document.getElementById('reg-dot-' + i); if (dt) { dt.classList.add('estalo'); dt.style.animationDelay = (i * 0.09) + 's'; } });
