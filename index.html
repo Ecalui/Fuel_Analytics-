@@ -1091,10 +1091,21 @@
         #tab-manutencao .mt-st.venc { color: var(--danger); } #tab-manutencao .mt-st.aprox { color: var(--warning); } #tab-manutencao .mt-st.ok { color: var(--success); } #tab-manutencao .mt-st.sem { color: var(--text-muted); }
         #tab-manutencao .mt-pdfs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
         #tab-manutencao .mt-vazio { padding: 24px 0; color: var(--text-secondary); font-size: 13px; }
+        #tab-manutencao .mt-sem { border: 1px solid var(--text-primary); margin-bottom: 14px; }
+        #tab-manutencao .mt-sem-h { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 14px; border-bottom: 1px solid var(--text-primary); font-size: 14px; }
+        #tab-manutencao .mt-sem-n { font-size: 20px; font-weight: 700; }
+        #tab-manutencao .mt-sem-n.ex { color: var(--danger); }
+        #tab-manutencao .mt-sem-n small { font-size: 11px; font-weight: 500; }
+        #tab-manutencao .mt-sl { display: grid; grid-template-columns: 1.4fr 1fr 1.6fr; gap: 12px; padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 13px; align-items: start; }
+        #tab-manutencao .mt-sl:last-child { border-bottom: 0; }
+        #tab-manutencao .mt-sl-k { color: var(--text-secondary); }
+        #tab-manutencao .mt-sl-vazio { padding: 9px 14px; font-size: 13px; color: var(--text-muted); }
         #dash-manut-alerta { display: none; border: 1px solid var(--text-primary); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; cursor: pointer; }
         #dash-manut-alerta b.v { color: var(--danger); } #dash-manut-alerta b.a { color: var(--warning); }
         @media (max-width: 768px) {
             #tab-manutencao .mt-kpis { grid-template-columns: repeat(2, 1fr); }
+            #tab-manutencao .mt-sl { grid-template-columns: 1fr 1fr; }
+            #tab-manutencao .mt-sl-d { grid-column: 1 / -1; }
             #tab-manutencao .mt-kpi:nth-child(2) { border-right: 0; }
             #tab-manutencao .mt-kpi:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
             #tab-manutencao table.mt-tab thead { display: none; }
@@ -7410,20 +7421,36 @@ function manutCargaSemanal(linhas) {
     });
     return { semanas: semanas, agora: agora, semPrev: semPrev };
 }
+var _MT_DS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+function _mtDiaSem(dia) { return _MT_DS[new Date(dia * 86400000).getUTCDay()] + ' ' + _mtFmt(_mtIso(dia)).slice(0, 5); }
 function _mtHtmlSemanal() {
     var c = manutCargaSemanal(_mtLinhas), max = _mtMax();
-    var nomes = function(arr) { return arr.map(function(L){ return _mtEsc(L.placa) + (L.moto ? ' <span class="mt-sub" style="display:inline">(' + _mtEsc(L.moto) + ')</span>' : ''); }).join(', '); };
-    var h = '<p class="mt-sub" style="margin:0 0 10px">Viaturas previstas para atingir o limite em cada semana (data prevista = meio do intervalo). Acima de ' + max + ' por semana fica a vermelho — limite alterável em Administração.</p>';
-    h += '<table class="mt-tab"><thead><tr><th>Semana</th><th>N.º</th><th>Viaturas</th></tr></thead><tbody>';
-    h += '<tr><td data-l="Semana"><b>Já no limite / vencidas</b></td><td data-l="N.º"><b style="color:' + (c.agora.length ? 'var(--danger)' : 'inherit') + '">' + c.agora.length + '</b></td><td data-l="Viaturas">' + (c.agora.length ? nomes(c.agora) : '—') + '</td></tr>';
+    var linha = function(L, dir) {
+        return '<div class="mt-sl"><div class="mt-sl-v"><b>' + _mtEsc(L.placa) + '</b>' + (L.moto ? '<span class="mt-sub">' + _mtEsc(L.moto) + '</span>' : '') + '</div>'
+             + '<div class="mt-sl-k">' + dir.k + '</div><div class="mt-sl-d">' + dir.d + '</div></div>';
+    };
+    var h = '<p class="mt-sub" style="margin:0 0 14px">Viaturas previstas para atingir o limite em cada semana. A data é uma estimativa (o intervalo mostra o ritmo mais lento e o mais rápido recentes). Acima de ' + max + ' por semana fica assinalado.</p>';
+    // já no limite
+    h += '<div class="mt-sem"><div class="mt-sem-h"><span><b>Já no limite / vencidas</b></span><span class="mt-sem-n' + (c.agora.length ? ' ex' : '') + '">' + c.agora.length + '</span></div>';
+    if (!c.agora.length) h += '<div class="mt-sl-vazio">Nenhuma.</div>';
+    c.agora.slice().sort(function(a, b){ return b.excesso - a.excesso; }).forEach(function(L) {
+        h += linha(L, { k: L.excesso > 0 ? '<span style="color:var(--danger);font-weight:700">passou ' + _mtNum(L.excesso) + ' km</span>' : '<b>no limite</b>', d: 'ir à oficina já' });
+    });
+    h += '</div>';
     c.semanas.forEach(function(w, i) {
         var n = w.itens.length, ex = n > max;
-        h += '<tr><td data-l="Semana"><b>' + (i === 0 ? 'Esta semana' : 'Semana ' + _mtFmt(_mtIso(w.ini)).slice(0, 5)) + '</b><span class="mt-sub">' + _mtFmt(_mtIso(w.ini)).slice(0, 5) + ' a ' + _mtFmt(_mtIso(w.fim)).slice(0, 5) + '</span></td>'
-          + '<td data-l="N.º"><b style="color:' + (ex ? 'var(--danger)' : 'inherit') + '">' + n + '</b>' + (ex ? '<span class="mt-sub" style="color:var(--danger)">acima de ' + max + '</span>' : '') + '</td>'
-          + '<td data-l="Viaturas">' + (n ? nomes(w.itens) : '—') + '</td></tr>';
+        w.itens.sort(function(a, b){ return (a.prevDe + a.prevAte) - (b.prevDe + b.prevAte); });
+        h += '<div class="mt-sem"><div class="mt-sem-h"><span><b>' + (i === 0 ? 'Esta semana' : 'Semana de ' + _mtFmt(_mtIso(w.ini)).slice(0, 5)) + '</b> <span class="mt-sub" style="display:inline">· ' + _mtFmt(_mtIso(w.ini)).slice(0, 5) + ' a ' + _mtFmt(_mtIso(w.fim)).slice(0, 5) + '</span></span>'
+           + '<span class="mt-sem-n' + (ex ? ' ex' : '') + '">' + n + (ex ? ' <small>acima de ' + max + '</small>' : '') + '</span></div>';
+        if (!n) h += '<div class="mt-sl-vazio">Nenhuma.</div>';
+        w.itens.forEach(function(L) {
+            var mid = Math.round((L.prevDe + L.prevAte) / 2);
+            var faixa = L.prevDe === L.prevAte ? '' : '<span class="mt-sub">entre ' + _mtDiaSem(L.prevDe) + ' e ' + _mtDiaSem(L.prevAte) + '</span>';
+            h += linha(L, { k: 'faltam ' + _mtNum(Math.max(0, L.intervalo - L.kmDesde)) + ' km', d: '<b>~ ' + _mtDiaSem(mid) + '</b>' + faixa });
+        });
+        h += '</div>';
     });
-    h += '</tbody></table>';
-    if (c.semPrev) h += '<p class="mt-sub" style="margin-top:10px">' + c.semPrev + ' viatura(s) sem previsão por falta de abastecimentos recentes não entram neste quadro.</p>';
+    if (c.semPrev) h += '<p class="mt-sub" style="margin-top:12px">' + c.semPrev + ' viatura(s) sem previsão por falta de abastecimentos recentes não entram neste quadro.</p>';
     return h;
 }
 function _mtRotuloEstado(e) { return { venc: 'Vencida', aprox: 'A aproximar-se', ok: 'Em dia', sem: 'Sem dados' }[e]; }
