@@ -2496,6 +2496,8 @@ async function supaGateEntrar() {
             <button class="btn btn-secondary" onclick="manutPDF('historico')"><i class="fas fa-file-pdf"></i> PDF Histórico</button>
         </div>
 
+        <div style="margin-bottom:12px"><input type="search" id="mt-busca" placeholder="Procurar matrícula, motorista ou marca" oninput="renderManutencao()" style="width:100%;max-width:380px" autocomplete="off"></div>
+
         <div class="mt-subtabs" id="mt-subtabs">
             <button class="mt-subtab ativa" data-f="todas" onclick="manutFiltro('todas')">Todas</button>
             <button class="mt-subtab" data-f="venc" onclick="manutFiltro('venc')">Vencidas</button>
@@ -7317,7 +7319,7 @@ function manutCalcular() {
         var revs = revisoes.filter(function(r){ return r.placa === placa; })
                            .sort(function(a, b){ return a.data < b.data ? -1 : a.data > b.data ? 1 : a.km - b.km; });
         var rev = revs.length ? revs[revs.length - 1] : null;
-        var L = { placa: placa, marca: _mtMarcaNorm(marca), intervalo: _mtIntervalo(marca), rev: rev, nRev: revs.length,
+        var L = { placa: placa, moto: ult ? (ult.moto || '') : '', marca: _mtMarcaNorm(marca), intervalo: _mtIntervalo(marca), rev: rev, nRev: revs.length,
                   kmAtual: null, dataKm: null, idadeKm: null, kmDesde: null, pct: null, estado: 'sem', motivo: '',
                   ritmo: null, prevDe: null, prevAte: null, nReg: 0, excesso: 0 };
         if (ult) { L.kmAtual = Number(ult.km); L.dataKm = ult.data; }
@@ -7414,20 +7416,23 @@ function renderManutencao() {
     var el = document.getElementById('mt-lista');
     if (!el) return;
     if (_mtFiltro === 'hist') { el.innerHTML = _mtHtmlHistorico(); return; }
+    var q = ((document.getElementById('mt-busca') || {}).value || '').trim().toUpperCase().replace(/[\s-]/g, '');
     var lista = linhas.filter(function(l) {
+        if (q && (l.placa + l.moto + l.marca).toUpperCase().replace(/[\s-]/g, '').indexOf(q) < 0) return false;
         if (_mtFiltro === 'venc') return l.estado === 'venc';
         if (_mtFiltro === 'sem') return l.estado === 'sem';
         if (_mtFiltro === '7' || _mtFiltro === '15' || _mtFiltro === '30') return _mtEntra(l, +_mtFiltro);
         return true;
     });
-    if (!lista.length) { el.innerHTML = '<div class="mt-vazio">Nenhuma viatura neste filtro.</div>'; return; }
-    var h = '<table class="mt-tab"><thead><tr><th>Viatura</th><th>Última revisão</th><th>Km actual</th><th>Desde a revisão</th><th>Ritmo</th><th>Previsão</th><th>Estado</th></tr></thead><tbody>';
+    if (!lista.length) { el.innerHTML = '<div class="mt-vazio">Nenhuma viatura ' + (q ? 'encontrada para esta pesquisa' : 'neste filtro') + '.</div>'; return; }
+    var cont = '<div class="mt-sub" style="margin:0 0 8px">' + lista.length + ' de ' + linhas.length + ' viaturas</div>';
+    var h = cont + '<table class="mt-tab"><thead><tr><th>Viatura</th><th>Última revisão</th><th>Km actual</th><th>Desde a revisão</th><th>Ritmo</th><th>Previsão</th><th>Estado</th></tr></thead><tbody>';
     lista.forEach(function(l) {
         var velho = l.idadeKm != null && l.idadeKm > PLANO_MANUT.idadeKm;
-        h += '<tr><td data-l="Viatura"><b>' + _mtEsc(l.placa) + '</b><span class="mt-sub">' + _mtEsc(l.marca || '—') + (l.intervalo ? ' · plano ' + _mtNum(l.intervalo) + ' km' : '') + '</span></td>'
+        h += '<tr><td data-l="Viatura"><b>' + _mtEsc(l.placa) + '</b>' + (l.moto ? '<span class="mt-sub" style="color:var(--text-primary)">' + _mtEsc(l.moto) + '</span>' : '') + '<span class="mt-sub">' + _mtEsc(l.marca || '—') + (l.intervalo ? ' · plano ' + _mtNum(l.intervalo) + ' km' : '') + '</span></td>'
           + '<td data-l="Última revisão">' + (l.rev ? _mtFmt(l.rev.data) + '<span class="mt-sub">aos ' + _mtNum(l.rev.km) + ' km</span>' : '—') + '</td>'
           + '<td data-l="Km actual">' + (l.kmAtual != null ? _mtNum(l.kmAtual) + '<span class="mt-sub"' + (velho ? ' style="color:var(--warning)"' : '') + '>' + (l.idadeKm === 0 ? 'de hoje' : 'de há ' + l.idadeKm + ' dia' + (l.idadeKm === 1 ? '' : 's')) + (velho ? ' · desatualizado' : '') + '</span>' : '—') + '</td>'
-          + '<td data-l="Desde a revisão">' + (l.kmDesde != null ? _mtNum(l.kmDesde) + ' / ' + _mtNum(l.intervalo) + ' km<div class="mt-barra"><i style="width:' + Math.min(100, Math.round(l.pct * 100)) + '%"></i></div><span class="mt-sub">' + Math.round(l.pct * 100) + '%</span>' : '<span class="mt-sub">' + _mtEsc(l.motivo) + '</span>') + '</td>'
+          + '<td data-l="Desde a revisão">' + (l.kmDesde != null ? _mtNum(l.kmDesde) + ' / ' + _mtNum(l.intervalo) + ' km<div class="mt-barra"><i style="width:' + Math.min(100, Math.round(l.pct * 100)) + '%"></i></div><span class="mt-sub" style="font-weight:700;color:' + (l.kmDesde > l.intervalo ? 'var(--danger)' : 'var(--text-primary)') + '">' + (l.kmDesde > l.intervalo ? 'passou ' + _mtNum(l.kmDesde - l.intervalo) + ' km' : l.kmDesde === l.intervalo ? 'no limite' : 'faltam ' + _mtNum(l.intervalo - l.kmDesde) + ' km') + ' · ' + Math.round(l.pct * 100) + '%</span>' : '<span class="mt-sub">' + _mtEsc(l.motivo) + '</span>') + '</td>'
           + '<td data-l="Ritmo">' + (l.ritmo != null ? Math.round(l.ritmo) + ' km/dia' : '—') + '</td>'
           + '<td data-l="Previsão">' + _mtPrevTexto(l) + '</td>'
           + '<td data-l="Estado"><span class="mt-st ' + l.estado + '">' + _mtRotuloEstado(l.estado) + '</span></td></tr>';
@@ -7437,7 +7442,9 @@ function renderManutencao() {
 function _mtHtmlHistorico() {
     if (!revisoes.length) return '<div class="mt-vazio">Ainda não há revisões registadas.</div>';
     var adm = _ehAdminAtual();
-    var l = revisoes.slice().sort(function(a, b){ return a.data < b.data ? 1 : a.data > b.data ? -1 : 0; });
+    var qh = ((document.getElementById('mt-busca') || {}).value || '').trim().toUpperCase().replace(/[\s-]/g, '');
+    var l = revisoes.filter(function(r){ return !qh || String(r.placa).toUpperCase().replace(/[\s-]/g, '').indexOf(qh) >= 0; }).sort(function(a, b){ return a.data < b.data ? 1 : a.data > b.data ? -1 : 0; });
+    if (!l.length) return '<div class="mt-vazio">Nenhuma revisão encontrada.</div>';
     var h = '<table class="mt-tab"><thead><tr><th>Data</th><th>Viatura</th><th>Km</th><th>Registado por</th>' + (adm ? '<th></th>' : '') + '</tr></thead><tbody>';
     l.forEach(function(r) {
         h += '<tr><td data-l="Data">' + _mtFmt(r.data) + '</td><td data-l="Viatura"><b>' + _mtEsc(r.placa) + '</b></td><td data-l="Km">' + _mtNum(r.km) + '</td><td data-l="Por">' + _mtEsc(r.criado_por_email ? _nomeDeEmail(r.criado_por_email) : '—') + (r._pend ? '<span class="mt-sub" style="color:var(--warning)">por enviar</span>' : '') + '</td>'
@@ -7620,8 +7627,8 @@ function manutPDF(tipo) {
             l.forEach(function(x){ vistos[x.placa] = true; });
             y = sec(y, g[1] + ' (' + l.length + ')');
             if (!l.length) { doc.setFontSize(9); doc.setTextColor(100, 116, 139); doc.text('Nenhuma viatura.', 14, y + 2); doc.setTextColor(0, 0, 0); y += 10; return; }
-            var o = opt(y); o.head = [['Viatura', 'Marca', 'Km actual', 'Desde revisão', 'Limite', 'Ritmo', 'Previsão']];
-            o.body = l.map(function(x){ return [x.placa, x.marca, _mtNum(x.kmAtual) + (x.idadeKm > PLANO_MANUT.idadeKm ? ' (há ' + x.idadeKm + 'd)' : ''), _mtNum(x.kmDesde) + ' (' + Math.round(x.pct * 100) + '%)', _mtNum(x.intervalo), Math.round(x.ritmo) + ' km/d', prev(x)]; });
+            var o = opt(y); o.head = [['Viatura', 'Motorista', 'Km actual', 'Desde revisão', 'Faltam', 'Ritmo', 'Previsão']];
+            o.body = l.map(function(x){ return [x.placa + ' (' + x.marca + ')', x.moto || '—', _mtNum(x.kmAtual) + (x.idadeKm > PLANO_MANUT.idadeKm ? ' (há ' + x.idadeKm + 'd)' : ''), _mtNum(x.kmDesde) + ' (' + Math.round(x.pct * 100) + '%)', _mtNum(Math.max(0, x.intervalo - x.kmDesde)) + ' km', Math.round(x.ritmo) + ' km/d', prev(x)]; });
             doc.autoTable(o); y = doc.lastAutoTable.finalY + 8;
         });
         var vencN = linhas.filter(function(x){ return x.estado === 'venc'; }).length, semP = linhas.filter(function(x){ return x.estado !== 'venc' && x.estado !== 'sem' && x.prevDe == null; });
@@ -7637,8 +7644,8 @@ function manutPDF(tipo) {
         if (!v.length) { doc.setFontSize(10); doc.text('Nenhuma viatura com revisão vencida.', 14, y + 4); }
         else {
             var o2 = opt(y); o2.headStyles = { fillColor: [220, 38, 38] };
-            o2.head = [['Viatura', 'Marca', 'Última revisão', 'Km actual', 'Percorridos', 'Limite', 'Excesso']];
-            o2.body = v.map(function(x){ return [x.placa, x.marca, _mtFmt(x.rev.data) + ' · ' + _mtNum(x.rev.km), _mtNum(x.kmAtual) + (x.idadeKm > PLANO_MANUT.idadeKm ? ' (há ' + x.idadeKm + 'd)' : ''), _mtNum(x.kmDesde), _mtNum(x.intervalo), '+' + _mtNum(x.excesso) + ' km (' + Math.round(x.excesso / x.intervalo * 100) + '%)']; });
+            o2.head = [['Viatura', 'Motorista', 'Última revisão', 'Km actual', 'Percorridos', 'Limite', 'Excesso']];
+            o2.body = v.map(function(x){ return [x.placa + ' (' + x.marca + ')', x.moto || '—', _mtFmt(x.rev.data) + ' · ' + _mtNum(x.rev.km), _mtNum(x.kmAtual) + (x.idadeKm > PLANO_MANUT.idadeKm ? ' (há ' + x.idadeKm + 'd)' : ''), _mtNum(x.kmDesde), _mtNum(x.intervalo), '+' + _mtNum(x.excesso) + ' km (' + Math.round(x.excesso / x.intervalo * 100) + '%)']; });
             doc.autoTable(o2);
         }
     } else {
