@@ -7274,7 +7274,7 @@ function atualizarListasVivas() {
 var SUPA_TABELA_REV = 'revisoes';
 var PLANO_MANUT_PADRAO = {
     intervalos: { SINOTRUK: 5000, SHACKMAN: 5000, IVECO: 5000, FAW: 5000, SCANIA: 5000, MAN: 12000, VOLVO: 15000 },
-    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3, kmPdf: 400
+    aviso: 85, horizonte: 10, janela: 30, minReg: 3, idadeKm: 7, maxSemana: 3, kmPdf: 300
 };
 var PLANO_MANUT = JSON.parse(JSON.stringify(PLANO_MANUT_PADRAO));
 var revisoes = [];
@@ -7307,7 +7307,7 @@ function _mtMarcaNorm(m) {
     if (u === 'SHACMAN') u = 'SHACKMAN';
     return u;
 }
-function _mtKmPdf() { return PLANO_MANUT.kmPdf >= 50 ? PLANO_MANUT.kmPdf : 400; }
+function _mtKmPdf() { var k = PLANO_MANUT.kmPdf; if (!(k >= 50) || k === 400) return 300; return k; } // 400 = antigo valor por defeito, passa a 300
 function _mtMax() { return PLANO_MANUT.maxSemana >= 1 ? PLANO_MANUT.maxSemana : 3; }
 function _mtIntervalo(marca) { var v = PLANO_MANUT.intervalos[_mtMarcaNorm(marca)]; return v > 0 ? v : 0; }
 
@@ -7830,7 +7830,7 @@ function manutPDF(tipo) {
         if (!corpo.length) corpo.push([{ content: 'Nenhuma viatura vencida ou a ' + _mtNum(lim) + ' km (ou menos) da revisão.', colSpan: 4 }]);
         var oc = opt(y); oc.head = [['Motorista', 'Viatura', 'Km restantes', 'Previsão']]; oc.body = corpo;
         oc.styles = { fontSize: 8.5, cellPadding: 1.8 };
-        oc.columnStyles = { 0: { cellWidth: 52, fontStyle: 'bold' }, 1: { cellWidth: 40 }, 2: { cellWidth: 30 } };
+        oc.columnStyles = { 0: { cellWidth: 52, fontStyle: "bold" }, 1: { cellWidth: 40, fontStyle: "bold" }, 2: { cellWidth: 30 } };
         doc.autoTable(oc);
         var yf = doc.lastAutoTable.finalY + 5;
         doc.setFontSize(8.5); doc.setTextColor(100, 116, 139);
