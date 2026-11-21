@@ -350,7 +350,7 @@
         #tab-reg .badge-alto::before, #tab-reg .badge-pedreira-alto::before { background: var(--warning); }
         #tab-reg .badge-critico, #tab-reg .badge-roubo, #tab-reg .badge-pedreira-critico, #tab-reg .badge-pedreira-roubo { color: var(--danger); }
         #tab-reg .badge-critico::before, #tab-reg .badge-roubo::before, #tab-reg .badge-pedreira-critico::before, #tab-reg .badge-pedreira-roubo::before { background: var(--danger); }
-        #tab-reg .badge-parcial, #tab-reg .badge-editado, #tab-reg .badge-justificado, #tab-reg .badge-primeiro, #tab-reg .badge-pedreira-ok { color: var(--text-primary); }
+        #tab-reg .badge-incompleto, #tab-reg .badge-parcial, #tab-reg .badge-editado, #tab-reg .badge-justificado, #tab-reg .badge-primeiro, #tab-reg .badge-pedreira-ok { color: var(--text-primary); }
         #tab-reg .empty-state { padding: 28px 0; }
         #tab-reg .empty-state i { display: none; }
 
@@ -1100,6 +1100,7 @@
         #tab-manutencao .mt-sl:last-child { border-bottom: 0; }
         #tab-manutencao .mt-sl-k { color: var(--text-secondary); }
         #tab-manutencao .mt-sl-vazio { padding: 9px 14px; font-size: 13px; color: var(--text-muted); }
+        #dash-ontem-aviso { display: none; border: 1px solid var(--text-primary); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         #dash-manut-alerta { display: none; border: 1px solid var(--text-primary); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; cursor: pointer; }
         #dash-manut-alerta b.v { color: var(--danger); } #dash-manut-alerta b.a { color: var(--warning); }
         @media (max-width: 768px) {
@@ -1237,6 +1238,11 @@
         .badge-parcial { background: rgba(37,99,235,0.12); color: #1d4ed8; border: 1px solid rgba(37,99,235,0.25); }
         .row-parcial { background: rgba(37,99,235,0.04) !important; }
         .row-parcial td { color: #1d4ed8 !important; }
+        /* INCOMPLETO — consumo abaixo do mínimo plausível (faltam abastecimentos) */
+        .badge-incompleto { background: rgba(100,116,139,0.14); color: #475569; border: 1px solid rgba(100,116,139,0.3); }
+        .dark .badge-incompleto { background: rgba(148,163,184,0.18); color: #cbd5e1; }
+        .row-incompleto { background: rgba(100,116,139,0.05) !important; }
+        .row-incompleto td { color: #64748b !important; }
         .badge-pedreira-critico { background: rgba(124,58,237,0.10);  color: #6d28d9; border: 1px solid rgba(124,58,237,0.2); }
         .badge-pedreira-roubo   { background: rgba(124,58,237,0.18);  color: #4c1d95; border: 1px solid rgba(124,58,237,0.3); font-weight:900; }
         .dark .badge-pedreira-ok      { background: rgba(120,113,108,0.2); color: #a8a29e; }
@@ -2059,7 +2065,9 @@ async function supaGateEntrar() {
 
     <!-- ==================== DASHBOARD ==================== -->
     <div id="tab-dash" class="tab-content tab-active">
-        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Principal</div><h1 class="page-title">Painel Geral</h1><p class="page-desc">Visão geral do consumo e alertas da frota</p></div><div class="page-header-actions"><button type="button" class="btn btn-primary dash-cta" id="dash-cta-novo" style="display:none" onclick="irParaNovoLancamento()"><i class="fas fa-plus"></i>Novo Lançamento</button><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Dashboard</div></div></div>
+        <div class="page-header"><div class="page-header-left"><div class="page-eyebrow">Principal</div><h1 class="page-title">Painel Geral</h1><p class="page-desc">Visão geral do consumo e alertas da frota</p></div><div class="page-header-actions"><button type="button" class="btn btn-secondary" id="dash-btn-ontem" style="display:none" onclick="gerarRelatorioOntem()"><i class="fas fa-share-nodes"></i> Relatório de ontem</button><button type="button" class="btn btn-primary dash-cta" id="dash-cta-novo" style="display:none" onclick="irParaNovoLancamento()"><i class="fas fa-plus"></i>Novo Lançamento</button><div class="page-period-pill"><i class="fas fa-calendar-alt"></i>Dashboard</div></div></div>
+
+        <div id="dash-ontem-aviso"></div>
 
         <div id="dash-manut-alerta" onclick="switchTab('manutencao', document.getElementById('nav-manutencao'))"></div>
 
@@ -2554,6 +2562,7 @@ async function supaGateEntrar() {
                         <label><input type="checkbox" id="status-ok"> OK</label>
                         <label><input type="checkbox" id="status-primeiro"> PRIMEIRO</label>
                         <label><input type="checkbox" id="status-parcial" checked> PARCIAL</label>
+                        <label><input type="checkbox" id="status-incompleto" checked> INCOMPLETO</label>
                     </div>
                 </div>
                 <div class="filter-group">
@@ -2913,7 +2922,15 @@ async function supaGateEntrar() {
                 </div>
             </div>
 
-            <!-- ===== PLANO DE MANUTENÇÃO (só admin) ===== -->
+            <!-- ===== CONSUMO MÍNIMO (só admin) ===== -->
+            <div class="card" style="margin-top:20px;" id="card-limite-consumo">
+                <div class="card-header"><div class="card-title"><i class="fas fa-gauge-simple" style="color:var(--accent)"></i> Consumo Mínimo Plausível (INCOMPLETO)</div></div>
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Abaixo deste valor (L/100 km) o consumo não é real — faltam abastecimentos feitos noutra base ou em viagem longa. O registo continua visível como <b>INCOMPLETO</b>, mas não entra em médias, rankings, metas nem prejuízo.</p>
+                <div style="max-width:220px;"><label>Consumo mínimo (L/100 km)</label><input type="number" id="cfg-limite-consumo" min="0" max="100" step="1"></div>
+                <div style="text-align:right;margin-top:14px;"><button class="btn btn-primary" onclick="salvarLimiteConsumo()"><i class="fas fa-save"></i> Guardar</button></div>
+            </div>
+
+            <!-- ===== PLANO DE MANUTENÇÃO (só admin) =====
             <div class="card" style="margin-top:20px;" id="card-plano-manut">
                 <div class="card-header"><div class="card-title"><i class="fas fa-oil-can" style="color:var(--accent)"></i> Plano de Manutenção (revisão geral)</div></div>
                 <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Intervalo em km entre revisões, por marca. O aviso dispara à % indicada do intervalo ou quando a previsão cai dentro do horizonte.</p>
@@ -3537,6 +3554,13 @@ function getLimiares(marca, destino) {
     return { meta: cfg.meta, limOK: cfg.limOK, limCritico: cfg.limCritico, limRoubo: cfg.limRoubo, especial: false };
 }
 
+// ===== REGRA DO CONSUMO MÍNIMO (INCOMPLETO) =====
+// Abaixo deste valor (L/100km) o consumo não é real (faltam abastecimentos feitos noutra base / viagem longa).
+// O registo continua visível com o estado INCOMPLETO, mas fica fora de médias, rankings, metas e prejuízo.
+var LIMITE_CONSUMO_MIN = 39;
+(function(){ try { var v = Number(JSON.parse(localStorage.getItem('fuel_limite_consumo_min') || 'null')); if (v >= 0 && v <= 100 && localStorage.getItem('fuel_limite_consumo_min') !== null) LIMITE_CONSUMO_MIN = v; } catch(e) {} })();
+function _l100Txt(r) { return r.l100 ? r.l100 : (r.status === 'INCOMPLETO' && r.l100Bruto ? '(' + r.l100Bruto + ')' : '--'); }
+
 // Classifica o consumo tendo em conta marca e rota
 function classificarConsumo(l100, marca, destino) {
     var lim = getLimiares(marca, destino);
@@ -3567,6 +3591,7 @@ function getBadgeClass(r) {
         'OK':              'badge-ok',
         'PRIMEIRO':        'badge-primeiro',
         'PARCIAL':         'badge-parcial',
+        'INCOMPLETO':      'badge-incompleto',
         'PEDREIRA-OK':     'badge-pedreira-ok',
         'PEDREIRA-ALTO':   'badge-pedreira-alto',
         'PEDREIRA-CRITICO':'badge-pedreira-critico',
@@ -3585,6 +3610,7 @@ function getRowClass(r) {
     if (s === 'CRITICO') return 'row-critico';
     if (s === 'PRIMEIRO') return 'row-primeiro';
     if (s === 'PARCIAL') return 'row-parcial';
+    if (s === 'INCOMPLETO') return 'row-incompleto';
     if (s.indexOf('PEDREIRA') === 0) return 'row-pedreira';
     return '';
 }
@@ -3681,7 +3707,7 @@ function switchTab(tabId, el) {
     if (el) el.classList.add('active');
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('show');
-    if (tabId === 'administracao') { filtrarAcessos(); popularTabelaMetasMarca(); popularCamposRotasEspeciais(); popularPlanoManut(); }
+    if (tabId === 'administracao') { filtrarAcessos(); popularTabelaMetasMarca(); popularCamposRotasEspeciais(); popularPlanoManut(); popularLimiteConsumo(); }
     if (tabId === 'admin-gerir-viaturas') popularSelectViaturas();
     if (tabId === 'relatorios') popularSelectsRelatorio();
     if (tabId === 'manutencao') renderManutencao();
@@ -4905,7 +4931,7 @@ async function mfaConfirmarInscricao() {
 // Metas por marca, rotas especiais e preços do gasóleo são partilhados por todos os dispositivos.
 // O localStorage fica como cópia para funcionar offline. Só admin/owner escrevem (a RLS é que protege).
 var SUPA_TABELA_DEF = 'definicoes';
-var _DEF_CHAVES = ['metas_marca', 'rotas_especiais', 'precos_gasoleo', 'plano_manutencao'];
+var _DEF_CHAVES = ['metas_marca', 'rotas_especiais', 'precos_gasoleo', 'plano_manutencao', 'limite_consumo_min'];
 
 function _defPendentesLer() { try { return JSON.parse(localStorage.getItem('fuel_def_pendentes') || '[]'); } catch(e) { return []; } }
 function _defPendentesGravar(arr) { try { localStorage.setItem('fuel_def_pendentes', JSON.stringify(arr)); } catch(e) {} }
@@ -4915,6 +4941,7 @@ function _defValorLocal(chave) {
     if (chave === 'rotas_especiais') return { keywords: ROTAS_ESPECIAIS.keywords, fator: ROTAS_ESPECIAIS.fator };
     if (chave === 'precos_gasoleo') return PRECOS_GASOLEO;
     if (chave === 'plano_manutencao') return PLANO_MANUT;
+    if (chave === 'limite_consumo_min') return { min: LIMITE_CONSUMO_MIN };
     return null;
 }
 
@@ -4937,6 +4964,9 @@ function _defAplicarLocal(chave, valor) {
         } else if (chave === 'plano_manutencao' && _mtPlanoValido(valor)) {
             PLANO_MANUT = valor;
             localStorage.setItem('fuel_plano_manut', JSON.stringify(PLANO_MANUT));
+        } else if (chave === 'limite_consumo_min' && valor && Number(valor.min) >= 0 && Number(valor.min) <= 100) {
+            LIMITE_CONSUMO_MIN = Number(valor.min);
+            localStorage.setItem('fuel_limite_consumo_min', JSON.stringify(LIMITE_CONSUMO_MIN));
         } else { return false; }
         return JSON.stringify(_defValorLocal(chave)) !== antes;
     } catch(e) { console.warn('[Definições] não aplicou "' + chave + '":', e); return false; }
@@ -5430,6 +5460,7 @@ function recalcularViaturaCompleta(placa) {
         // Limpar flags de cascata anteriores
         delete atual.kmCascataErro;
         delete atual.kmCascataAviso;
+        delete atual.l100Bruto;
 
         if (i === 0) {
             atual.dist = 0; atual.l100 = null; atual.status = 'PRIMEIRO';
@@ -5490,6 +5521,11 @@ function recalcularViaturaCompleta(placa) {
                     atual.rotaEspecial = classif.especial;
                     atual.dist = distTotal; atual.l100 = l100; atual.status = status;
                     atual.perdaL = perdaL; atual.perdaAOA = perdaAOA;
+                    // Regra do consumo mínimo: abaixo do limite não é consumo real → INCOMPLETO (fora de médias, rankings e prejuízo)
+                    if (Number(l100) < LIMITE_CONSUMO_MIN) {
+                        atual.l100Bruto = l100; atual.l100 = null; atual.status = 'INCOMPLETO';
+                        atual.perdaL = 0; atual.perdaAOA = 0; atual.perdaLOriginal = 0; atual.rotaEspecial = false;
+                    }
                     // Anotar se foi reconciliado
                     if (atual._reconciliado) {
                         atual.obsReconciliado = 'Consumo calculado com ' + (atual._litrosAcumulados||0).toFixed(0) + 'L acumulados de abastecimento(s) parcial(is) anterior(es)';
@@ -5567,6 +5603,7 @@ function atualizarTabelas() {
     if (typeof atualizarUltimosHoje === 'function') atualizarUltimosHoje();
     if (typeof regAtualizarVerificacao === 'function') regAtualizarVerificacao();
     if (typeof manutRefrescar === 'function') manutRefrescar();
+    if (typeof ontemRefrescar === 'function') ontemRefrescar();
 }
 
 // ===== DASHBOARD STATS =====
@@ -5770,17 +5807,17 @@ function atualizarDashCharts() {
             c.fillText(txt, x, el.y - 2); c.restore();
         }}]
     });
-    var sc = {OK:0,ALTO:0,CRITICO:0,ROUBO:0,PRIMEIRO:0,'PEDREIRA-OK':0,'PEDREIRA-ALTO':0,'PEDREIRA-CRITICO':0,'PEDREIRA-ROUBO':0};
+    var sc = {OK:0,ALTO:0,CRITICO:0,ROUBO:0,PRIMEIRO:0,INCOMPLETO:0,'PEDREIRA-OK':0,'PEDREIRA-ALTO':0,'PEDREIRA-CRITICO':0,'PEDREIRA-ROUBO':0};
     dbFilt.forEach(function(r){ if(r.status && sc[r.status]!==undefined) sc[r.status]++; });
     // Remover categorias com 0 para não poluir o gráfico
     var scFiltrado = {}, labelsFiltrados = [], valoresFiltrados = [], coresFiltradas = [];
     var corMap = {
-        'OK':'#059669','ALTO':'#d97706','CRITICO':'#dc2626','ROUBO':'#18181b','PRIMEIRO':'#ea580c',
+        'OK':'#059669','ALTO':'#d97706','CRITICO':'#dc2626','ROUBO':'#18181b','PRIMEIRO':'#ea580c','INCOMPLETO':'#94a3b8',
         'PEDREIRA-OK':'#78716c','PEDREIRA-ALTO':'#b45309','PEDREIRA-CRITICO':'#6d28d9','PEDREIRA-ROUBO':'#4c1d95'
     };
     Object.keys(sc).forEach(function(k){ if(sc[k]>0){ labelsFiltrados.push(k); valoresFiltrados.push(sc[k]); coresFiltradas.push(corMap[k]||'#94a3b8'); } });
     var nomesEstado = {
-        'OK':'Normal','ALTO':'Alto','CRITICO':'Crítico','ROUBO':'Roubo','PRIMEIRO':'Primeiro registo',
+        'OK':'Normal','ALTO':'Alto','CRITICO':'Crítico','ROUBO':'Roubo','PRIMEIRO':'Primeiro registo','INCOMPLETO':'Incompleto (< ' + LIMITE_CONSUMO_MIN + ' L/100km)',
         'PEDREIRA-OK':'Pedreira · Normal','PEDREIRA-ALTO':'Pedreira · Alto','PEDREIRA-CRITICO':'Pedreira · Crítico','PEDREIRA-ROUBO':'Pedreira · Roubo'
     };
     var totalEstados = valoresFiltrados.reduce(function(s, v){ return s + v; }, 0);
@@ -5900,7 +5937,7 @@ function atualizarGeral() {
             (a.kmCascataErro ? ' <i class="fas fa-circle-xmark" style="color:var(--danger);font-size:11px;" title="' + a.kmCascataErro + '"></i>' : '') +
             (a.kmCascataAviso ? ' <i class="fas fa-triangle-exclamation" style="color:var(--warning);font-size:11px;" title="' + a.kmCascataAviso + '"></i>' : '') +
             '</td>' +
-            '<td style="font-family:JetBrains Mono,monospace">'+(a.l100||'--')+
+            '<td style="font-family:JetBrains Mono,monospace">'+_l100Txt(a)+
             (a.obsReconciliado ? ' <i class="fas fa-arrows-rotate" style="color:var(--info);font-size:10px;" title="'+a.obsReconciliado+'"></i>' : '')+
             (a.status==='PARCIAL' ? ' <i class="fas fa-hourglass-half" style="color:#1d4ed8;font-size:10px;" title="Abastecimento parcial — consumo será calculado no próximo registo completo"></i>' : '')+
             '</td>' +
@@ -6105,7 +6142,7 @@ function atualizarAnalise() {
         html += '<tr class="'+rc+'">'+
             '<td>'+a.data+'</td><td style="font-family:JetBrains Mono,monospace;font-size:12px;">'+(a.hora||'--')+'</td><td><b>'+a.placa+'</b></td><td>'+(a.marca||'')+'</td><td>'+a.moto+'</td><td style="font-size:12px;color:var(--info);">'+(a.destino||'--')+'</td>'+
             '<td style="font-family:JetBrains Mono,monospace">'+a.km.toLocaleString()+'</td><td style="font-family:JetBrains Mono,monospace">'+(a.dist||'--')+'</td><td style="font-family:JetBrains Mono,monospace">'+a.litros+'</td>'+
-            '<td style="font-family:JetBrains Mono,monospace;font-weight:700">'+(a.l100||'--')+'</td><td><span class="badge '+bc+'">'+getStatusLabel(a)+'</span></td></tr>';
+            '<td style="font-family:JetBrains Mono,monospace;font-weight:700">'+_l100Txt(a)+'</td><td><span class="badge '+bc+'">'+getStatusLabel(a)+'</span></td></tr>';
     });
     tbody.innerHTML = html || '<tr><td colspan="11"><div class="empty-state"><p>Sem registos.</p></div></td></tr>';
 }
@@ -6124,6 +6161,7 @@ function getDadosFiltrados() {
     var sO = document.getElementById('status-ok')?.checked ?? false;
     var sP = document.getElementById('status-primeiro')?.checked ?? false;
     var sParcial = document.getElementById('status-parcial')?.checked ?? true;
+    var sIncompleto = document.getElementById('status-incompleto')?.checked ?? true;
     var cMin = document.getElementById('consumo-min')?.value;
     var cMax = document.getElementById('consumo-max')?.value;
     var pMin = document.getElementById('prejuizo-min')?.value;
@@ -6139,8 +6177,9 @@ function getDadosFiltrados() {
         if (!sO && (item.status==='OK' || item.status==='PEDREIRA-OK')) return false;
         if (!sP && item.status==='PRIMEIRO') return false;
         if (!sParcial && item.status==='PARCIAL') return false;
+        if (!sIncompleto && item.status==='INCOMPLETO') return false;
         // Filtros de consumo não se aplicam a PARCIAL (não tem l100)
-        if (item.status !== 'PARCIAL') {
+        if (item.status !== 'PARCIAL' && item.status !== 'INCOMPLETO') {
             if (cMin && item.l100 && Number(item.l100)<Number(cMin)) return false;
             if (cMax && item.l100 && Number(item.l100)>Number(cMax)) return false;
         }
@@ -6171,7 +6210,7 @@ function previewPDF() {
     if (dados.length===0) { showToast('Nenhum dado encontrado com os filtros seleccionados.', 'warning'); return; }
     var html = '<h2>Relatório — ' + getTipoRelatorioNome(currentReportType) + '</h2><p>Total: ' + dados.length + ' registos</p>';
     html += '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:12px;"><thead><tr style="background:#f1f5f9;"><th>Data</th><th>Hora</th><th>Viatura</th><th>Motorista</th><th>Destino</th><th>L/100km</th><th>Status</th></tr></thead><tbody>';
-    dados.slice(0, 50).forEach(function(i) { html += '<tr><td>'+i.data+'</td><td>'+(i.hora||'--')+'</td><td>'+i.placa+'</td><td>'+i.moto+'</td><td>'+(i.destino||'--')+'</td><td>'+(i.l100||'--')+'</td><td>'+i.status+'</td></tr>'; });
+    dados.slice(0, 50).forEach(function(i) { html += '<tr><td>'+i.data+'</td><td>'+(i.hora||'--')+'</td><td>'+i.placa+'</td><td>'+i.moto+'</td><td>'+(i.destino||'--')+'</td><td>'+_l100Txt(i)+'</td><td>'+i.status+'</td></tr>'; });
     html += '</tbody></table>';
     document.getElementById('previewContent').innerHTML = html;
     document.getElementById('previewModal').style.display = 'flex';
@@ -6274,7 +6313,7 @@ function gerarRelatorioComAssinaturas() {
         var desvio = media > 0 ? (((media - META) / META) * 100) : 0;
 
         // Melhor e pior (excluindo PRIMEIRO)
-        var comCValid = comC.filter(function(r){ return r.status !== 'PRIMEIRO'; });
+        var comCValid = comC.filter(function(r){ return r.status !== 'PRIMEIRO' && r.status !== 'INCOMPLETO'; });
         var melhor = comCValid.length > 0 ? comCValid.reduce(function(a,b){ return Number(a.l100) < Number(b.l100) ? a : b; }) : null;
         var pior   = comCValid.length > 0 ? comCValid.reduce(function(a,b){ return Number(a.l100) > Number(b.l100) ? a : b; }) : null;
 
@@ -6454,7 +6493,7 @@ function gerarRelatorioComAssinaturas() {
         var y=cabecalho('Relatório de Melhores Motoristas','Reconhecimento — maior número de viagens sem desvio');
         y=painelMetricas(doc,y);
         var motoMap={};
-        dados.filter(function(r){return r.status!=='PRIMEIRO';}).forEach(function(r){if(!motoMap[r.moto])motoMap[r.moto]={semDesvio:0,total:0,soma:0,n:0};motoMap[r.moto].total++;if((r.status==='OK')&&!r.justificado)motoMap[r.moto].semDesvio++;if(Number(r.l100)>0){motoMap[r.moto].soma+=Number(r.l100);motoMap[r.moto].n++;}});
+        dados.filter(function(r){return r.status!=='PRIMEIRO'&&r.status!=='INCOMPLETO';}).forEach(function(r){if(!motoMap[r.moto])motoMap[r.moto]={semDesvio:0,total:0,soma:0,n:0};motoMap[r.moto].total++;if((r.status==='OK')&&!r.justificado)motoMap[r.moto].semDesvio++;if(Number(r.l100)>0){motoMap[r.moto].soma+=Number(r.l100);motoMap[r.moto].n++;}});
         var ranking=Object.entries(motoMap).filter(function(e){return e[1].total>=2;}).map(function(e){var med=e[1].n>0?(e[1].soma/e[1].n).toFixed(1):'--';var taxa=((e[1].semDesvio/e[1].total)*100).toFixed(0);return{nome:e[0],semDesvio:e[1].semDesvio,total:e[1].total,med:med,taxa:taxa};}).sort(function(a,b){return b.semDesvio-a.semDesvio||parseFloat(b.taxa)-parseFloat(a.taxa);}).slice(0,15);
         y=separador(doc,y,'MOTORISTAS COM MELHOR DESEMPENHO');
         y=paragrafo(doc,y,'Os motoristas abaixo destacam-se pelo maior número de viagens realizadas sem registo de desvio de consumo confirmado. Este relatório serve como base para reconhecimento formal e pode ser partilhado com a gestão de recursos humanos.');
@@ -6543,7 +6582,7 @@ function gerarRelatorioComAssinaturas() {
         var rowsSimples = dados.map(function(r) {
             var statusLabel = r.justificado ? 'JUSTIFICADO' : (r.status || '--');
             var motivoCell = r.justificado ? (r.motivoJustificacao || 'Justificado') + (r.obsJustificacao ? ' — ' + r.obsJustificacao : '') : (r.destino||'--');
-            var l100Cell = r.status === 'PARCIAL' ? 'Parcial' : (r.l100||'--');
+            var l100Cell = r.status === 'PARCIAL' ? 'Parcial' : _l100Txt(r);
             return [r.data, r.hora||'--', r.placa, r.marca||'--', r.moto, motivoCell, l100Cell, statusLabel];
         });
         doc.autoTable({
@@ -7627,6 +7666,22 @@ async function carregarRevisoes() {
     } catch (e) { console.warn('[Manutenção] leitura das revisões falhou (fica a cópia local):', e); }
 }
 
+// ---- consumo mínimo (admin) ----
+function popularLimiteConsumo() { var el = document.getElementById('cfg-limite-consumo'); if (el) el.value = LIMITE_CONSUMO_MIN; }
+async function salvarLimiteConsumo() {
+    if (!_admDesbloqueado()) { showToast('Desbloqueie primeiro com o código do autenticador.', 'warning'); return; }
+    var v = Number(document.getElementById('cfg-limite-consumo').value);
+    if (!(v >= 0 && v <= 100)) { showToast('Indique um valor entre 0 e 100.', 'warning'); return; }
+    LIMITE_CONSUMO_MIN = v;
+    try { localStorage.setItem('fuel_limite_consumo_min', JSON.stringify(v)); } catch (e) {}
+    var pu = {}; db.forEach(function(x){ if (x && x.placa) pu[x.placa] = true; });
+    _fuelSilenciarAvisos = true;
+    try { Object.keys(pu).forEach(function(p){ recalcularViaturaCompleta(p); }); } finally { _fuelSilenciarAvisos = false; }
+    atualizarTabelas(); salvarDadosLocal();
+    var ok = await _defNuvemGravar('limite_consumo_min', { min: v });
+    if (ok) showToast('Consumo mínimo guardado na nuvem e frota recalculada.', 'success');
+}
+
 // ---- plano (admin) ----
 function popularPlanoManut() {
     var el = document.getElementById('plano-manut-marcas');
@@ -7674,6 +7729,115 @@ function manutTextoWhatsApp() {
     t += '\n\nPrevisão = estimativa pelo ritmo recente de km/dia.';
     return t;
 }
+
+// ===== RELATÓRIO DE ONTEM (botão único: PDF simples + partilha nativa) =====
+function _ontemISO() { var d = new Date(); d.setDate(d.getDate() - 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function _ontemPodeVer() { return !!usuarioAtual && (_ehAdminAtual() || usuarioAtual.perfil === 'relatorista'); }
+function _ontemResumo() {
+    var dia = _ontemISO();
+    var regs = (Array.isArray(db) ? db : []).filter(function(r){ return r.data === dia; });
+    // mesma regra do resto da app: INCOMPLETO/PARCIAL/PRIMEIRO não têm l100, logo ficam fora da média
+    var comC = regs.filter(function(r){ return Number(r.l100) > 0; });
+    var media = comC.length ? comC.reduce(function(s, r){ return s + Number(r.l100); }, 0) / comC.length : 0;
+    return { dia: dia, regs: regs, comC: comC, media: media,
+             incompletos: regs.filter(function(r){ return r.status === 'INCOMPLETO'; }).length,
+             litros: regs.reduce(function(s, r){ return s + (r.litros || 0); }, 0),
+             valor: regs.reduce(function(s, r){ return s + (r.valor || 0); }, 0) };
+}
+function _ontemNomeAssinatura() {
+    var v = '';
+    try { v = (localStorage.getItem('fuel_ass_resp') || '').trim(); } catch (e) {}
+    if (!v) { var el = document.getElementById('assinatura-responsavel'); v = el ? el.value.trim() : ''; }
+    if (!v) v = (usuarioAtual && usuarioAtual.nome) || (typeof _supaEmail !== 'undefined' && _supaEmail ? _nomeDeEmail(_supaEmail) : '');
+    return v;
+}
+function ontemRefrescar() {
+    try {
+        var btn = document.getElementById('dash-btn-ontem'), av = document.getElementById('dash-ontem-aviso');
+        var pode = _ontemPodeVer();
+        if (btn) btn.style.display = pode ? '' : 'none';
+        if (!av) return;
+        var res = _ontemResumo();
+        if (!pode || new Date().getHours() < 17 || !res.regs.length) { av.style.display = 'none'; return; }
+        av.style.display = 'flex';
+        av.innerHTML = '<span><i class="fas fa-file-pdf"></i> Relatório de ontem: <b>' + res.regs.length + ' registo' + (res.regs.length > 1 ? 's' : '') + '</b>, média <b>' + (res.media ? res.media.toFixed(1).replace('.', ',') + ' L/100km' : 'n/d') + '</b>.</span>'
+            + '<button type="button" class="btn btn-primary" onclick="gerarRelatorioOntem()"><i class="fas fa-share-nodes"></i> Partilhar</button>';
+    } catch (e) { console.warn('[Relatório de ontem] aviso falhou:', e); }
+}
+async function gerarRelatorioOntem() {
+    if (!_ontemPodeVer()) { showToast('Sem permissão para realizar esta acção', 'error'); return; }
+    var lib = window.jspdf;
+    if (!lib) { showToast('Biblioteca jsPDF não carregada.', 'error'); return; }
+    var res = _ontemResumo();
+    if (!res.regs.length) { showToast('Ontem não há registos para reportar.', 'warning'); return; }
+    var nomeAss = _ontemNomeAssinatura();
+    var partes = res.dia.split('-'), diaTxt = partes[2] + '/' + partes[1] + '/' + partes[0];
+    var doc = new lib.jsPDF('p', 'mm', 'a4');
+    doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(234, 88, 12); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text('Fuel Analytics PRO', 14, 12);
+    doc.setTextColor(255, 255, 255); doc.setFontSize(13); doc.text('Relatório de ontem — ' + diaTxt, 14, 22);
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(180, 180, 180);
+    doc.text('Gerado em: ' + new Date().toLocaleString('pt-PT'), 196, 28, { align: 'right' });
+    var kpis = [
+        { l: 'REGISTOS', v: String(res.regs.length) },
+        { l: 'MÉDIA L/100KM', v: res.media ? res.media.toFixed(1) : 'n/d' },
+        { l: 'LITROS', v: Math.round(res.litros).toLocaleString('pt-PT') },
+        { l: 'VALOR (AOA)', v: Math.round(res.valor).toLocaleString('pt-PT') }
+    ];
+    var w = 182 / kpis.length;
+    kpis.forEach(function(k, i) {
+        var x = 14 + i * w;
+        doc.setFillColor(248, 250, 252); doc.roundedRect(x, 36, w - 3, 18, 2, 2, 'F');
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139); doc.text(k.l, x + 4, 41);
+        doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.text(k.v, x + 4, 49);
+    });
+    var linhas = res.regs.slice().sort(function(a, b){ return (a.hora || '').localeCompare(b.hora || '') || a.placa.localeCompare(b.placa); }).map(function(r) {
+        var c = r.status === 'PARCIAL' ? 'Parcial' : (r.l100 ? r.l100 : (r.status === 'INCOMPLETO' && r.l100Bruto ? '(' + r.l100Bruto + ')' : '--'));
+        return [r.hora || '--', r.placa, r.moto, r.destino || '--', (r.km || 0).toLocaleString('pt-PT'), r.litros, c, r.status || 'OK'];
+    });
+    doc.autoTable({ startY: 60, margin: { left: 14, right: 14, bottom: 24 },
+        head: [['Hora', 'Viatura', 'Motorista', 'Destino', 'KM', 'Litros', 'L/100km', 'Estado']], body: linhas,
+        headStyles: { fillColor: [15, 23, 42] }, styles: { fontSize: 8 },
+        didParseCell: function(d) {
+            if (d.section !== 'body') return;
+            var st = d.row.raw[7];
+            if (st === 'ROUBO' || st === 'CRITICO' || st === 'PEDREIRA-ROUBO' || st === 'PEDREIRA-CRITICO') d.cell.styles.textColor = [220, 38, 38];
+            else if (st === 'INCOMPLETO') d.cell.styles.textColor = [100, 116, 139];
+        } });
+    var y = doc.lastAutoTable.finalY + 6;
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
+    var nota = 'A média considera apenas registos com consumo calculado (' + res.comC.length + ' de ' + res.regs.length + ').';
+    if (res.incompletos) nota += ' ' + res.incompletos + ' registo(s) INCOMPLETO(S) (abaixo de ' + LIMITE_CONSUMO_MIN + ' L/100km, faltam abastecimentos) não entram na média.';
+    var nl = doc.splitTextToSize(nota, 182); doc.text(nl, 14, y); y += nl.length * 4 + 6;
+    if (nomeAss) {
+        if (y > 250) { doc.addPage(); y = 20; }
+        doc.setDrawColor(200, 200, 200); doc.line(110, y + 10, 196, y + 10);
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.text(nomeAss, 153, y + 15, { align: 'center' });
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
+        doc.text('Responsável · ' + diaTxt, 153, y + 20, { align: 'center' });
+    }
+    var tot = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= tot; i++) { doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150); doc.text('Fuel Analytics PRO — Documento Confidencial', 14, 290); doc.text('Página ' + i + ' de ' + tot, 196, 290, { align: 'right' }); }
+    var nome = 'Relatorio_' + res.dia + '.pdf';
+    var blob = doc.output('blob');
+    try {
+        var f = new File([blob], nome, { type: 'application/pdf' });
+        if (navigator.canShare && navigator.canShare({ files: [f] })) {
+            await navigator.share({ files: [f], title: 'Relatório de ontem — ' + diaTxt });
+            return;
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return; // utilizador fechou a janela de partilha
+        console.warn('[Relatório de ontem] partilha nativa falhou, a descarregar:', e);
+    }
+    doc.save(nome);
+    showToast('Este dispositivo não partilha ficheiros directamente: o PDF foi descarregado.', 'info', 6000);
+}
+// guarda o nome da assinatura para os próximos relatórios
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'assinatura-responsavel') { try { localStorage.setItem('fuel_ass_resp', e.target.value.trim()); } catch (x) {} }
+});
+
 function manutCopiarWhatsApp() {
     var t = manutTextoWhatsApp();
     var ok = function() { showToast('Resumo copiado. Cole no WhatsApp.', 'success'); };
@@ -9426,6 +9590,7 @@ function _regContexto() {
     if (c.completo && c.dist > 0 && c.litros > 0) {
         c.l100 = (c.litros * 100) / c.dist;
         c.cls = classificarConsumo(c.l100.toFixed(2), c.marca, c.destino);
+        c.incompleto = c.l100 < LIMITE_CONSUMO_MIN;
     }
     return c;
 }
@@ -9467,7 +9632,7 @@ function regAtualizarVerificacao() {
     var msg = document.getElementById('reg-v-msg'), cor = 'var(--text-muted)';
     if (c.l100 !== null && c.cls) {
         var lim = c.cls.lim, st = c.cls.status, max = Math.max(lim.limRoubo * 1.2, c.l100 * 1.05);
-        if (/OK$/.test(st)) cor = 'var(--success)'; else if (/ALTO$/.test(st)) cor = 'var(--warning)'; else cor = 'var(--danger)';
+        if (c.incompleto) cor = 'var(--text-muted)'; else if (/OK$/.test(st)) cor = 'var(--success)'; else if (/ALTO$/.test(st)) cor = 'var(--warning)'; else cor = 'var(--danger)';
         num.style.color = cor;
         num.innerHTML = c.l100.toFixed(1).replace('.', ',') + ' <span style="font-size:14px">L/100 km</span>';
         var kids = meter.children;
@@ -9483,13 +9648,14 @@ function regAtualizarVerificacao() {
     var cls = 'wait', txt = 'Preencha os campos para ver a verificação.';
     if (temErro) { cls = 'bad'; txt = 'Corrija os pontos assinalados antes de guardar.'; }
     else if (c.km && c.litros && !c.completo) { cls = 'warn'; txt = 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo.'; }
+    else if (c.l100 !== null && c.cls && c.incompleto) { cls = 'warn'; txt = 'Consumo abaixo de ' + LIMITE_CONSUMO_MIN + ' L/100 km: faltam abastecimentos intermédios. Fica como INCOMPLETO, fora das médias.'; }
     else if (c.l100 !== null && c.cls) {
         var s = c.cls.status;
         if (/OK$/.test(s)) { cls = 'ok'; txt = 'Tudo coerente. Registo pronto para auditoria.'; }
         else if (/ALTO$/.test(s)) { cls = 'warn'; txt = 'Consumo acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
         else { cls = 'bad'; txt = 'Consumo muito acima da meta (' + s + '): o registo será guardado e sinalizado para revisão.'; }
     } else if (c.km && c.litros && tudoOk && !c.prev) { cls = 'ok'; txt = 'Primeiro registo desta viatura: serve de base para os próximos cálculos.'; }
-    var alertaPrev = (c.l100 !== null && c.cls && !/OK$/.test(c.cls.status));
+    var alertaPrev = (c.l100 !== null && c.cls && !c.incompleto && !/OK$/.test(c.cls.status));
     var podeJust = !!alertaPrev && typeof _ehAdminAtual === 'function' && _ehAdminAtual();
     regJustSincronizar(podeJust);
     if (podeJust && _regJust.motivo) txt = 'Consumo acima da meta (' + c.cls.status + '): será guardado já justificado — ' + _regJust.motivo + '.';
@@ -9530,8 +9696,8 @@ function regPosGravar(r) {
     regSetTipo(true);
     window._regAvisoFrota = null;
     var x = db.find(function (d) { return d.id === r.id; }) || r;
-    var st = x.status || '', parcial = (st === 'PARCIAL'), primeiro = (st === 'PRIMEIRO');
-    var ok = /OK$/.test(st) || parcial || primeiro;
+    var st = x.status || '', parcial = (st === 'PARCIAL'), primeiro = (st === 'PRIMEIRO'), incompleto = (st === 'INCOMPLETO');
+    var ok = /OK$/.test(st) || parcial || primeiro || incompleto;
     var alerta = !ok;
     var justMot = '';
     if (alerta && st !== 'ERRO' && _regJust.motivo && typeof _ehAdminAtual === 'function' && _ehAdminAtual()) {
@@ -9543,8 +9709,8 @@ function regPosGravar(r) {
     var d = document.getElementById('reg-done');
     var avM = (typeof manutAvisoKm === 'function') ? manutAvisoKm(x.placa, x.km, x.marca) : null;
     var avMHtml = avM ? '<div style="border:1px solid currentColor;padding:8px 12px;max-width:420px;margin:12px auto 0;font-size:13px;font-weight:600;color:' + (avM.nivel === 'venc' ? 'var(--danger)' : 'var(--warning)') + '"><i class="fas fa-oil-can"></i> ' + _mtEsc(avM.txt) + '</div>' : '';
-    var consumo = x.l100 ? Number(x.l100).toFixed(1).replace('.', ',') + ' L/100 km' : '--';
-    var sub = justMot ? ('Justificado: ' + justMot + ' · custo contextualizado para auditoria') : parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
+    var consumo = x.l100 ? Number(x.l100).toFixed(1).replace('.', ',') + ' L/100 km' : (incompleto && x.l100Bruto ? '(' + Number(x.l100Bruto).toFixed(1).replace('.', ',') + ') L/100 km' : '--');
+    var sub = incompleto ? ('Abaixo de ' + LIMITE_CONSUMO_MIN + ' L/100 km: faltam abastecimentos intermédios. Não entra nas médias nem nos rankings') : justMot ? ('Justificado: ' + justMot + ' · custo contextualizado para auditoria') : parcial ? 'Abastecimento parcial: o consumo será calculado no próximo abastecimento completo' : (primeiro ? 'Primeiro registo desta viatura: base para os próximos cálculos' : (ok ? 'Consumo dentro da meta' : 'Consumo acima da meta: registo sinalizado para revisão'));
     var chk = function (t, c) { c = c || 'ok'; return '<div class="reg-chk ' + c + '" style="justify-content:center"><i class="fas ' + (c === 'ok' ? 'fa-circle-check' : 'fa-circle-xmark') + '"></i><span>' + t + '</span></div>'; };
     var kmTxt = x.kmCascataErro ? ['Km inconsistente com o registo anterior: reveja no histórico', 'bad'] : (primeiro ? ['Primeiro registo desta viatura: base para os próximos cálculos', 'ok'] : ['Km coerente com o registo anterior', 'ok']);
     var temPontos = !!x.kmCascataErro;
